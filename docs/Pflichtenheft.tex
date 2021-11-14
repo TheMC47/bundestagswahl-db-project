@@ -1,0 +1,100 @@
+\documentclass[a4paper]{article}
+
+% Define page margine
+\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{fullpage}
+\usepackage{amsmath,amssymb,amsthm,enumitem}
+
+% Enable use of figures
+\usepackage[pdftex]{graphicx}
+
+% Set line spacing
+\usepackage{setspace}
+\linespread{1.2}
+
+% Allow for hyphenation
+\usepackage{hyphenat}
+\hyphenation{over-view}
+
+% Include url package
+\usepackage{url}
+
+\title{Electronic German Voting System}
+
+\author{Authors: Maisa Ben Salah, Yecine Megdiche}
+
+\begin{document}
+
+\maketitle
+\section{Objectives}
+\subsection{Must-Meet Criteria}
+The system must:
+\begin{itemize}
+\item manage votes electronically. This includes:
+        \begin{itemize}
+      \item Providing an interface to receive single or batched votes.
+      \item Storing a single vote submitted by a voter or batched votes submitted by election officials.
+      \end{itemize}
+  \item store all the data relevant to the 2017 and 2021 elections. This includes:
+    \begin{itemize}
+      \item All cast votes
+      \item All parties and candidates participating in the elections
+      \item The result aggregates for the previous election on the region and state level
+    \end{itemize}
+  \item calculate and display election results for a given year. The seat distribution in the parliament is calculated according to the Sainte-Lag\"ue method and takes into consideration:
+        \begin{itemize}
+          \item Electoral Threshold (Sperrklausel)
+          \item Leveling and Overhang Seats (Ausgleichs- und \"Uberhangsmandate)
+          \item Minority Parties (Minderheitsparteien)
+        \end{itemize}
+  \item produce and display statistics regarding voting trends on the region, state, and country level.
+  \item display comparative statistics between two elections regarding the seat distribution and voting trends between years on the region, state and country level.
+  \item show party and candidacy information on the region, state, and country level.
+  \item grant restricted permissions to election officials to add and modify party and candidacy information.
+  \item allow exclusively eligible people to vote only once per election.
+  \item protect the privacy of the data pertaining to the voters and their votes.
+
+\end{itemize}
+
+\subsection{Should-Meet Criteria}
+The system should:
+\begin{itemize}
+    \item scale to fit different screen sizes of mobile devices.
+    \item provide interactive election results.
+\end{itemize}
+
+\subsection{Can-Have Criteria}
+The system can:
+\begin{itemize}
+  \item include in the detailed view of the candidates their photos.
+  \item display a dotted graphical visualization of the election results showing the exact numbers of the seats distribution for each party in the parliament.
+  \item provide an interactive map to filter statistics and information.
+\end{itemize}
+
+\section{Technical Details}
+
+\begin{itemize}
+  \item \texttt{PostgreSQL} will be used as a \texttt{DBMS}. On top of that,
+        \texttt{sqitch} will be used to manage schema migrations.
+  \item \texttt{PostgREST} will be used to generate a \textit{REST API}, that
+        relies on \textit{JSON} as a request-response format.
+  \item If needed, \texttt{NginX} might be used as a reverse proxy or a web
+        server.
+  \item The fronted will be created in \texttt{TypeScript} using the
+        \texttt{React} framework. \texttt{Bootstrap} will be used as a
+        \textit{CSS} framework.
+  \item The whole system will be containerized using \texttt{Docker}.
+
+\end{itemize}
+
+\section{Glossary}
+
+\begin{itemize}
+  \item \textbf{Direct seats:} seats that are won through first votes.
+  \item \textbf{List seats:} seats that are won through second votes.
+  \item \textbf{Overhang seats:} seats that result from a party winning more direct seats than the number of seats that it is entitled to from its share of the second votes.
+  \item \textbf{Leveling seats:} seats that are given to compensate for overhang seats.
+  \item \textbf{Electoral Threshold:} the condition for a party to receive leveling, consisting in a party winning 5\% of the total second votes or getting 3 direct seats.
+\end{itemize}
+
+\end{document}
