@@ -1,0 +1,136 @@
+\documentclass[a4paper]{article}
+
+% Define page margine
+\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{fullpage}
+\usepackage{amsmath,amssymb,amsthm,enumitem}
+
+% Enable use of figures
+\usepackage[pdftex]{graphicx}
+
+% Set line spacing
+\usepackage{setspace}
+\linespread{1.2}
+
+% Allow for hyphenation
+\usepackage{hyphenat}
+\hyphenation{over-view}
+
+% Include url package
+\usepackage{url}
+
+
+
+\title{
+Electronic German Voting System  \\
+}
+
+\author{
+%TODO Insert your name
+Authors: Maisa Ben Salah, Yecine Megdiche
+}
+
+\begin{document}
+
+\maketitle
+\section{User Interfaces}
+The designed system includes three main views: the voting view, the results view, and the election officials view.
+\subsection{Voting View}
+This view should allow voters to submit their votes into the system.
+\begin{itemize}
+    \item \textbf{Features:}
+    \begin{itemize}
+        \item Voters should be able to enter their votes through a unique voter key.
+    \end{itemize}
+    \item \textbf{Constraints:}
+        \begin{itemize}
+        \item Voters should not be able to submit their votes twice.
+        \item Votes should not allow tracing the identity back to the voter.
+    \end{itemize}
+\end{itemize}
+\subsection{Results View}
+This view allows to access, visualize, and compare the results of the 2017 and 2021 elections.
+\begin{itemize}
+    \item \textbf{Seat distribution results:}
+    \begin{itemize}
+        \item It includes the overall distribution of seats in the parliament (Sitzveteilung des Bundestags) for a given year.
+        \item It  allows the comparison of the distribution of seats in the parliament between the years.
+    \end{itemize}
+    \item \textbf{Vote distribution results:}
+    The system allows showing the resulting voting percentages for the different political parties on three different granularity: country-, state (Bundesland)-, and region (Wahlkreis)-wide results:
+        \begin{itemize}
+        \item It includes the resulting voting percentages for the different political parties for a given year.
+        \item It allows the comparison of resulting voting percentages for the different political parties between the years.
+        \item It shows the list of the parliament representatives.
+    \end{itemize}
+    \item \textbf{Information of the candidates and the members of the parliament:}
+    It shows a detailed view including the personal information, candidate details (direct candidate, list candidate), and their corresponding results.
+\end{itemize}
+
+\subsection{Election Officials View}
+This view allows election officials to add and modify details regarding the candidatures to the parliament.
+
+\begin{itemize}
+    \item \textbf{Political parties' data:} Election officials are able to add and modify data related to political parties.
+    \item \textbf{Candidates' data:} Election officials are able to add and modify data related to single candidates.
+    \item \textbf{Securing write-access:} Adding and modifying data is restricted to election officials (e.g. by using a key)
+\end{itemize}
+
+\section{System Requirements}
+This section gives an overview of the various features and aspects that need to be fulfilled by our designed system.
+\subsection{Functional Requirements}
+In the following subsection, we specify the desired functionality of the future system in terms of a set of functional requirements.
+
+\begin{enumerate}[leftmargin=*,labelindent=16pt,label=\bfseries FR\arabic*. \hspace{0.1cm}]
+
+% TODO sentence format: The system does OR the system should do OR the system must do
+
+  \item \textbf{Store elections' relevant data:} The system should store the data relevant to the 2017 and 2021 elections.
+
+  \item \textbf{Cast single votes electronically:} The system should allow casting first and second votes for an eligible voter electronically once for each election.
+
+  \item \textbf{Load vote batches:} The system should be able to bulk-load votes at once from an election center.
+
+  \item \textbf{Calculate seat distribution in the parliament:} The system should be able to calculate the distribution of the seats based on the cast votes using the Sainte-Lagu\"{e} Method, while respecting rules such as the electoral threshold (Sperrklausel), overhang seats (Überhangsmandate), and minority parties (Minderheitsparteien).
+
+  \item \textbf{Show the distribution of the seats in the parliament for a given year:} The system displays the distribution of the seats in the parliament for a given year.
+
+
+  \item \textbf{Show the voting trends for a given year:} The user should be able to set a filter to display the overall second vote trends, or according to a given state, or region, and a specific year.
+
+
+  \item \textbf{Compare election results:} The system should allow comparing the seats distribution and voting trends over parties between years and on the country-, state- and region-wide levels.
+
+  \item \textbf{Store and display political parties' and candidates' data:} The system should store information regarding political parties and candidates. It should only be possible for election officials to add and modify these data.
+
+  \item \textbf{Provide documentation:} The system must provide the relevant documentation.
+
+\end{enumerate}
+
+\subsection{Nonfunctional Requirements}
+\begin{enumerate}[leftmargin=*,labelindent=16pt,label=\bfseries NFR\arabic*. \hspace{0.1cm}]
+\item \textbf{Usability}: The user should be able to apply and remove a filter for the results in at most three actions.
+
+\item \textbf{Security}: The system should be be secured. In particular, all external data sources (e.g. voting terminals) must be secured through an authentication mechanism.
+
+\item \textbf{Scalability}: The system should be able to handle a real-time interaction with large numbers of users exceeding tens of millions. Interactions include requests to view results and cast votes.
+
+\item \textbf{Recoverability}: The system should not lose any data, through providing backups and recovery mechanisms.
+
+\item \textbf{Performance}: The system should provide a response to all requests within five seconds.
+
+\item \textbf{Capacity}: The system should be able to store and process all votes for each supported election.
+
+\end{enumerate}
+
+
+\section{Acceptance Criteria}
+\begin{enumerate}[leftmargin=*,labelindent=16pt,label=\bfseries AC\arabic*. \hspace{0.1cm}]
+\item \textbf{Feature completeness:} All functional requirements should be fulfilled.
+\item \textbf{Quality:} All nonfunctional requirements should be fulfilled.
+\item \textbf{Stress test}: The system should pass an appropriate stress test.
+\item \textbf{Deliverables}: Source code, tests, and documentation should be delivered.
+
+\end{enumerate}
+
+\end{document}
