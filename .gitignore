@@ -1,0 +1,13 @@
+.DS_Store
+.idea
+*.log
+tmp/
+/docs/.auctex-auto
+
+# latexmk
+*.aux
+*.fls
+*.dvi
+*.log
+*.fdb_latexmk
+*.synctex.gz
