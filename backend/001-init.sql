@@ -40,13 +40,13 @@ CREATE TABLE parteien (
   id SERIAL,
   name VARCHAR UNIQUE NOT NULL,
   kurzbezeichnung VARCHAR,
-  zusatzbezeichnung VARCHAR,
   PRIMARY KEY (id)
 );
 CREATE TABLE parteiKandidaturen (
   id SERIAL,
   partei INT NOT NULL,
   wahl INT NOT NULL,
+  zusatzbezeichnung VARCHAR,
   PRIMARY KEY (id),
   FOREIGN KEY (partei) REFERENCES parteien(id) ON
                                  UPDATE CASCADE ON
