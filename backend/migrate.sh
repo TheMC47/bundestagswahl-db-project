@@ -25,7 +25,7 @@ for f in $(find ./*.sql | sort); do
     then
         AT_LEAST_ONCE=1
         echo Applying "${f}"
-        docker-compose exec db psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" < "${f}"
+        docker-compose exec -T db psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" < "${f}"
     fi
 done
 
