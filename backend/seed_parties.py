@@ -1,5 +1,6 @@
-from connection import Transaction
 import csv
+
+from connection import Transaction
 
 
 def seed_parties() -> dict[str, int]:
@@ -20,10 +21,12 @@ def seed_parties() -> dict[str, int]:
         # Candidacies
         candidacies = [
             (
-                party_dict[p[0]]if p[0] in party_dict else party_dict[p[1]],
+                party_dict[p[0]] if p[0] in party_dict else party_dict[p[1]],
                 p[3],
                 p[2],
-            ) for p in data]
+            )
+            for p in data
+        ]
         db.insert_into(
             "parteikandidaturen",
             candidacies,
