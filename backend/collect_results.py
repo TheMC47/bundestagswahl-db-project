@@ -7,7 +7,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 def seed_candidates():
     db = Transaction()
-    df_candidates = pd.read_csv("kandidaturen.csv")
+    df_candidates = pd.read_csv("kandidaturen.csv", sep=";")
 
     candidates = df_candidates[
         [
