@@ -19,13 +19,13 @@ CREATE TABLE wahlkreise (
                         DELETE CASCADE,
   UNIQUE(name, bundesland)
 );
-CREATE TABLE wahlkreisergebnisse (
+CREATE TABLE wahlkreiswahldaten (
   id INT NOT NULL,
+  wahlberechtigte INT NOT NULL,
+  waehlende INT NOT NULL,
   wahlkreis INT NOT NULL,
   wahl INT NOT NULL,
-  gueltig_erste_stimme INT NOT NULL,
   ungueltig_erste_stimme INT NOT NULL,
-  gueltig_zweite_stimme INT NOT NULL,
   ungueltig_zweite_stimme INT NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (wahlkreis) REFERENCES wahlkreise(id) ON
@@ -59,11 +59,7 @@ CREATE TABLE landeslisten (
   id SERIAL,
   partei INT NOT NULL,
   bundesland INT NOT NULL,
-  wahl INT NOT NULL,
   PRIMARY KEY (id),
-  FOREIGN KEY (wahl) REFERENCES wahlen(id) ON
-                          UPDATE CASCADE ON
-                          DELETE CASCADE,
   FOREIGN KEY (partei) REFERENCES parteiKandidaturen(id) ON
                           UPDATE CASCADE ON
                           DELETE CASCADE,
@@ -87,19 +83,16 @@ CREATE TABLE direktkandidaten (
   id SERIAL,
   kandidat INT,
   wahlkreis INT NOT NULL,
-  wahl INT NOT NULL,
   partei INT,
+  PRIMARY KEY (id),
   FOREIGN KEY (kandidat) REFERENCES kandidaten(id) ON
                              UPDATE CASCADE ON
                              DELETE CASCADE,
   FOREIGN KEY (wahlkreis) REFERENCES wahlkreise(id) ON
                              UPDATE CASCADE ON
                              DELETE CASCADE,
-  FOREIGN KEY (wahl) REFERENCES wahlen(id) ON
-                             UPDATE CASCADE ON
-                             DELETE CASCADE,
   FOREIGN KEY (partei) REFERENCES parteiKandidaturen(id),
-  UNIQUE (partei, wahlkreis, wahl)
+  UNIQUE (partei, wahlkreis)
 );
 CREATE TABLE listenkandidaten (
   id SERIAL,
@@ -131,20 +124,16 @@ CREATE TABLE waehler (
 CREATE TABLE erststimmen (
   id SERIAL,
   direktkandidat INT,
-  wahlkreis INT NOT NULL,
   is_valid Bool DEFAULT TRUE,
   PRIMARY KEY (id),
   FOREIGN KEY (direktkandidat) REFERENCES direktkandidaten(id) ON
-                         UPDATE CASCADE ON
-                         DELETE CASCADE,
-  FOREIGN KEY (wahlkreis) REFERENCES wahlkreise(id) ON
                          UPDATE CASCADE ON
                          DELETE CASCADE
 );
 CREATE TABLE zweitstimmen (
   id SERIAL,
   landesliste INT NOT NULL,
-  wahlkreis INT NOT NULL,
+  wahlkreis INT NOT NULL,       -- A check constraint on wahlkreis.bundesland == landesliste.bundesland?
   is_valid Bool DEFAULT TRUE,
   PRIMARY KEY (id),
   FOREIGN KEY (landesliste) REFERENCES landeslisten(id) ON
@@ -157,36 +146,20 @@ CREATE TABLE zweitstimmen (
 CREATE TABLE erststimmeErgebnisse (
   id SERIAL,
   direktkandidat INT NOT NULL,
-  wahlkreis INT NOT NULL,
-  wahl INT NOT NULL,
   anzahl_stimmen INT,
   PRIMARY KEY (id),
   FOREIGN KEY (direktkandidat) REFERENCES direktkandidaten(id) ON
                           UPDATE CASCADE ON
                           DELETE CASCADE,
-  FOREIGN KEY (wahlkreis) REFERENCES wahlkreise(id) ON
-                          UPDATE CASCADE ON
-                          DELETE CASCADE,
-  FOREIGN KEY (wahl) REFERENCES wahlen(id) ON
-                          UPDATE CASCADE ON
-                          DELETE CASCADE,
-  UNIQUE(direktkandidat, wahlkreis, wahl)
+  UNIQUE(direktkandidat)
 );
 CREATE TABLE zweitstimmeErgebnisse (
   id SERIAL,
   landesliste INT NOT NULL,
-  wahlkreis INT NOT NULL,
-  wahl INT NOT NULL,
   anzahl_stimmen INT,
   PRIMARY KEY (id),
   FOREIGN KEY (landesliste) REFERENCES landeslisten(id) ON
                           UPDATE CASCADE ON
                           DELETE CASCADE,
-  FOREIGN KEY (wahlkreis) REFERENCES wahlkreise(id) ON
-                          UPDATE CASCADE ON
-                          DELETE CASCADE,
-  FOREIGN KEY (wahl) REFERENCES wahlen(id) ON
-                          UPDATE CASCADE ON
-                          DELETE CASCADE,
-  UNIQUE(landesliste, wahlkreis, wahl)
+  UNIQUE(landesliste)
 );
