@@ -11,3 +11,8 @@ tmp/
 *.log
 *.fdb_latexmk
 *.synctex.gz
+
+#python
+_pycache__/
+*.py[cod]
+*$py.class
