@@ -39,7 +39,7 @@ class Transaction:
         if type(attr) is str:
             if attr == "":
                 return "NULL"
-            return f"'{attr}'"
+            return "'" + attr.replace("'", "''") + "'"
         return str(attr)
 
     def __normalize_tuple(self, tup: tuple) -> str:
