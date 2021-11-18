@@ -35,8 +35,11 @@ class Transaction:
         self.run_query(f"SELECT * FROM {table}")
         return self.__cursor.fetchall()
 
+    def fetchall(self):
+        return self.__cursor.fetchall()
+
     def __normalize_val(self, attr) -> str:
-        if type(attr) is str:
+        if isinstance(attr, str):
             if attr == "":
                 return "NULL"
             return "'" + attr.replace("'", "''") + "'"
@@ -60,11 +63,13 @@ class Transaction:
         attrs: list[str] = None,
     ):
         values: str
-        if type(val) is tuple:  # multiple imports
+        if isinstance(val, tuple):  # multiple imports
             val = [val]
         values = ",".join([self.__normalize_tuple(x) for x in val])
         attr_str: str = self.__normalize_attrs(attrs)
-        self.run_query(f"INSERT INTO {table}{attr_str} VALUES {values} RETURNING *;")
+        self.run_query(
+            f"INSERT INTO {table}{attr_str} VALUES {values} RETURNING *;"
+        )
         return self.__cursor.fetchall()
 
     def rollback(self):
