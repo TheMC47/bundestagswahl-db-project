@@ -35,3 +35,5 @@ def seed_parties() -> dict[str, int]:
         db.commit()
         db.close()
         return party_dict
+
+
