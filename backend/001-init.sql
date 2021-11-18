@@ -84,11 +84,12 @@ CREATE TABLE kandidaten (
   CHECK (geschlecht in ('m', 'w', 'd'))
 );
 CREATE TABLE direktkandidaten (
-  id INT NOT NULL,
+  id SERIAL,
+  kandidat INT,
   wahlkreis INT NOT NULL,
   wahl INT NOT NULL,
   partei INT,
-  FOREIGN KEY (id) REFERENCES kandidaten(id) ON
+  FOREIGN KEY (kandidat) REFERENCES kandidaten(id) ON
                              UPDATE CASCADE ON
                              DELETE CASCADE,
   FOREIGN KEY (wahlkreis) REFERENCES wahlkreise(id) ON
@@ -98,14 +99,14 @@ CREATE TABLE direktkandidaten (
                              UPDATE CASCADE ON
                              DELETE CASCADE,
   FOREIGN KEY (partei) REFERENCES parteiKandidaturen(id),
-  PRIMARY KEY (id),
   UNIQUE (partei, wahlkreis, wahl)
 );
 CREATE TABLE listenkandidaten (
-  id INT NOT NULL,
+  id SERIAL,
+  kandidat INT,
   landesliste INT NOT NULL,
   listennummer INT NOT NULL,
-  FOREIGN KEY (id) REFERENCES kandidaten(id) ON
+  FOREIGN KEY (kandidat) REFERENCES kandidaten(id) ON
                              UPDATE CASCADE ON
                              DELETE CASCADE,
   FOREIGN KEY (landesliste) REFERENCES landeslisten(id) ON
