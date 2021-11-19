@@ -69,10 +69,10 @@ CREATE TABLE landeslisten (
 );
 CREATE TABLE kandidaten (
   id SERIAL,
-  name VARCHAR NOT NULL,
-  vorname VARCHAR NOT NULL,
+  Nachname VARCHAR NOT NULL,
+  vornamen VARCHAR NOT NULL,
   titel VARCHAR,
-  namenzusatz VARCHAR,
+  namenszusatz VARCHAR,
   beruf VARCHAR,
   geburtsjahr numeric,
   geschlecht CHAR(1) NOT NULL,

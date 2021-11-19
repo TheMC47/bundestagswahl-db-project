@@ -1,94 +1,134 @@
 import pandas as pd
 
 from connection import Transaction
+import csv
 
 
-def seed_candidates() -> dict[(str, str), int]:
+def seed_landeslisten(parties: dict[str, int], bundeslaender: dict[str, int]) -> dict[(str, str), int]:
     db = Transaction()
     df_candidates = pd.read_csv("kandidaturen.csv", sep=";")
 
-    candidates = df_candidates[
+    print(df_candidates.columns)
+
+    # Landeslisten
+
+    df_landeslisten = df_candidates[(df_candidates["Kennzeichen"] == "Landesliste")][
+        ["Gruppenname", "Gebietsnummer"]].drop_duplicates()
+    df_landeslisten["Gruppenname"] = df_landeslisten["Gruppenname"].apply(
+        lambda party_name: parties.get(party_name, 2))
+    df_landeslisten["Gebietsnummer"] = df_landeslisten["Gebietsnummer"].apply(
+        lambda bund_name: bundeslaender.get(bund_name, 3))
+
+    landeslisten = df_landeslisten.apply(tuple, axis=1)
+
+    print(landeslisten)
+
+    landeslisten_db = db.insert_into(
+        "landeslisten",
+        landeslisten,
         [
-            "Nachname",
-            "Vornamen",
-            "Titel",
-            "Namenszusatz",
-            "Beruf",
-            "Geburtsjahr",
-            "Geschlecht",
-        ]
+            "partei",
+            "bundesland"
+        ],
+    )
+
+    landeslisten_dict = {
+        (landeslist[1], landeslist[2]): landeslist[0] for landeslist in landeslisten_db
+    }
+
+    return landeslisten_dict
+
+
+def seed_candidates(parties: dict[str, int], bundeslaender: dict[str, int], landeslisten_dict: dict[(str, str), int]) -> \
+        dict[(str, str), int]:
+    db = Transaction()
+    df_candidates = pd.read_csv("kandidaturen.csv", sep=";")
+
+    print(df_candidates.columns)
+
+    # Candidates
+    candidates_attr = [
+        "Nachname",
+        "Vornamen",
+        "Titel",
+        "Namenszusatz",
+        "Beruf",
+        "Geburtsjahr",
+        "Geschlecht"]
+
+    directcandidate_attr = ["kandidat", "wahlkreis", "partei"]
+    listenkandidat_attr = ["kandidat", "landesliste", "listennummer"]
+
+    candidates_groups = df_candidates.groupby(candidates_attr)
+    for id, (name, group) in enumerate(candidates_groups):
+        for row_index, row in group.iterrows():
+            candidate = tuple(x for x in ([id] + [row[i] for i in candidates_attr]))
+            db.insert_into("kandidaten", candidate, ["id"] + candidates_attr)
+            if row["Kennzeichen"] == "Landesliste":
+                listen_candidate = (
+                    id, landeslisten_dict.get((parties.get(row["Gruppenname"], 2), 3)),
+                    row["VerknListenplatz"])
+                db.insert_into("listenkandidaten", listen_candidate, listenkandidat_attr)
+
+            else:
+                direct_candidate = (id, row["Gebietsnummer"], parties.get(row["Gruppenname"], 2))
+                db.insert_into("direktkandidaten", direct_candidate, directcandidate_attr)
+
+    db.commit()
+    db.close()
+
+
+def seed_wahldaten(wahlkreise: dict[(str, int):int]):
+    db = Transaction()
+    df = pd.read_csv('kerg1.csv',
+                     sep=";")
+    df = df[(df["gehoertZu"] != 99)]
+
+    df["wahlkreis"] = df.apply(
+        lambda row: wahlkreise.get((row.Gebiet, row.gehoertZu)), axis=1)
+
+    wahldaten_attr = [
+        "wahlberechtigte",
+        "waehlende",
+        "wahlkreis",
+        "wahl",
+        "ungueltig_erste_stimme",
+        "ungueltig_zweite_stimme",
     ]
 
-    candidates["Titel"] = candidates["Titel"].fillna("")
+    df_2021 = df[["Wahlberechtigte2021", "Waehlende2021", "wahlkreis", "UngultigErst2021", "UngultigZwei2021"]]
+    df_2021["wahl"] = 2
+    df_2017 = df[["Wahlberechtigte2017", "Waehlende2017", "wahlkreis", "UngultigErst2017", "UngultigZwei2017"]]
+    df_2017["wahl"] = 1
 
-    candidates["Namenszusatz"] = candidates["Namenszusatz"].fillna("")
+    tuples_2021 = df_2021.apply(tuple, axis=1)
+    tuples_2017 = df_2017.apply(tuple, axis=1)
 
-    candidates["Geschlecht"] = candidates["Geschlecht"].apply(lambda x: x[0])
-
-    candidates_tuples = candidates.apply(tuple, axis=1)
-
-    db.insert_into(
-        "kandidaten",
-        candidates_tuples,
-        [
-            "name",
-            "vorname",
-            "titel",
-            "namenzusatz",
-            "beruf",
-            "geburtsjahr",
-            "geschlecht",
-        ],
-    )
+    db.insert_into("wahlkreiswahldaten", tuples_2021, wahldaten_attr)
+    db.insert_into("wahlkreiswahldaten", tuples_2017, wahldaten_attr)
 
     db.commit()
     db.close()
 
-'''
-def seed_direct_candidates(candidates: dict[(str, str), int], parties: dict[str:int]):
+
+def seed_parteiKandidaturen():
+    pass
+
+
+def seed_erststimmenErgebnisse(direct_candidates: dict[(str, str, str)]):
     db = Transaction()
 
-    df_candidates = pd.read_csv("kandidaturen.csv")
+    df_results = pd.read_csv('kerg.csv', sep=";")
+    df_results["Anzahl"] = df_results["Anzahl"].fillna(0.0).astype(int)
 
-    df_direct_candidates = df_candidates[(df_candidates["KandidaturWahlkreisNr"].notnull())][["Nachname",
-                                                                                              "Vornamen",
-                                                                                              "KandidaturWahlkreisNr",
-                                                                                              "WahlkreisKandidaturGruppenname"]]
+    df_results["VorpAnzahl"] = df_results["VorpAnzahl"].fillna(0.0).astype(int)
 
-    df_direct_candidates["kandidat"] = df_direct_candidates.apply(
-        lambda row: candidates.get((row.Nachname, row.Vornamen)), axis=1)
+    df_results_wahlkreise = df_results[
+        ((df_results["Gebietsart"] == "Wahlkreis") & (df_results["Gruppenart"] == "Partei"))]
 
-    df_direct_candidates["WahlkreisKandidaturGruppenname"] = df_direct_candidates[
-        "WahlkreisKandidaturGruppenname"].fillna("")
+    df_results_erststimmeErgebnis = df_results_wahlkreise[(df_results_wahlkreise["Stimme"] == 1)]
 
-    df_direct_candidates["Partei"] = df_direct_candidates.apply(
-        lambda row: parties.get(row.WahlkreisKandidaturGruppenname), axis=1)
-
-    df_direct_candidates["kandidat"] = df_direct_candidates.apply(
-        lambda row: candidates.get((row.Nachname, row.Vornamen)), axis=1)
-
-    df_direct_candidates["Wahl"] = 2
-
-    df_direct_candidates = df_direct_candidates[
-        "kandidat", "KandidaturWahlkreisNr", "Wahl", "WahlkreisKandidaturGruppenname"]
-
-    candidates_tuples = df_direct_candidates.apply(tuple, axis=1)
-
-    db.insert_into(
-        "direktkandidaten",
-        candidates_tuples,
-        [
-            "kandidat",
-            "wahlkreis",
-            "wahl",
-            "partei",
-        ],
-    )
-
-    db.commit()
-    db.close()
-
-'''
+    df_results_erststimmeErgebnis2021 = df_results_erststimmeErgebnis[["Gebietsnummer", "Gruppenname", "Anzahl"]]
 
 
-seed_candidates()
+seed_candidates({}, {})
