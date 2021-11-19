@@ -3,8 +3,7 @@ import csv
 from connection import Transaction
 
 
-def seed_parties():
-    db = Transaction()
+def seed_parties(db: Transaction):
     with open("parteien.csv", newline="") as f:
         parties_csv = csv.reader(f, delimiter=",")
         data = list(parties_csv)
@@ -43,7 +42,4 @@ def seed_parties():
         party_candidacy_dict = {
             (party1_dict.get(p[1]), p[2]): p[0] for p in parties_candidates_db
         }
-
-        # db.commit()
-        # db.close()
         return party_dict, party_candidacy_dict
