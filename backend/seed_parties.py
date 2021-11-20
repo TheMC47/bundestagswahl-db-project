@@ -1,45 +1,85 @@
 import csv
 
+from dataclasses import dataclass
+
 from connection import Transaction
 
+@dataclass
+class PartyCSV:
+    abbrv: str
+    name: str
+    additional_txt: str
+    vote_id: int
 
-def seed_parties(db: Transaction):
+    @property
+    def abbrv_or_name(self):
+        return self.abbrv if self.abbrv else self.name
+
+
+@dataclass
+class PartyDB:
+    pk: int
+    name: str
+    abbrv: str
+
+    @property
+    def abbrv_or_name(self):
+        return self.abbrv if self.abbrv else self.name
+
+
+@dataclass
+class CandidacyDB:
+    pk: int
+    party_pk: int
+    vote_id: int
+    additional_txt: str
+
+
+def seed_parties(db: Transaction = None):
+
+    if db is None:
+        db = Transaction()
+
     with open("parteien.csv", newline="") as f:
         parties_csv = csv.reader(f, delimiter=",")
-        data = list(parties_csv)
+
+        data = [PartyCSV(*x) for x in list(parties_csv)]
         # Parties
-        parties = list({(p[1], p[0]) for p in data})
-        print(parties)
+        parties_raw = list({(p.name, p.abbrv) for p in data})
 
         parties_db = db.insert_into(
             "parteien",
-            parties,
+            parties_raw,
             ["name", "kurzbezeichnung"],
+            PartyDB,
         )
 
-        party_dict = {
-            p[2] if p[2] is not None else p[1]: p[0] for p in parties_db
-        }
-        party1_dict = {
-            p[0]: p[2] if p[2] is not None else p[1] for p in parties_db
-        }
+        party_name_to_pk = {p.abbrv_or_name: p.pk for p in parties_db}
+
+        pk_to_name = {p.pk: p.abbrv_or_name for p in parties_db}
+
+        print([p for p in data if not p.abbrv_or_name])
+
         # Candidacies
-        candidacies = [
+        candidacies_raw = [
             (
-                party_dict[p[0]] if p[0] in party_dict else party_dict[p[1]],
-                p[3],
-                p[2],
+                party_name_to_pk[p.abbrv_or_name],
+                p.vote_id,
+                p.additional_txt,
             )
             for p in data
         ]
 
         parties_candidates_db = db.insert_into(
             "parteikandidaturen",
-            candidacies,
+            candidacies_raw,
             ["partei", "wahl", "zusatzbezeichnung"],
+            CandidacyDB,
         )
 
-        party_candidacy_dict = {
-            (party1_dict.get(p[1]), p[2]): p[0] for p in parties_candidates_db
+        party_name_to_candidacy_pk = {
+            (pk_to_name[c.party_pk], c.vote_id): c.pk
+            for c in parties_candidates_db
         }
-        return party_dict, party_candidacy_dict
+
+        return party_name_to_pk, party_name_to_candidacy_pk
