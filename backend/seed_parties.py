@@ -58,8 +58,6 @@ def seed_parties(db: Transaction = None):
 
         pk_to_name = {p.pk: p.abbrv_or_name for p in parties_db}
 
-        print([p for p in data if not p.abbrv_or_name])
-
         # Candidacies
         candidacies_raw = [
             (
