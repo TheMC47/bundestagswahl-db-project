@@ -49,24 +49,24 @@ def seed_wahldaten(year: int, kerg_df=None, db: Transaction = None):
     )
 
 
-def seed_landeslisten_2021(db: Transaction, parties_candidates: dict[(str, int), int], bundeslaender: dict[str, int]) -> \
-        dict[
-            (int, int), int]:
+def seed_landeslisten_2021(
+    db: Transaction,
+    party_name_to_candidacy_pk: dict[(str, int), int],
+) -> dict[(int, int), int]:
     df_candidates = pd.read_csv("kandidaturen.csv", sep=";")
     wahl_2021_nr = 1
 
-    print(df_candidates.columns)
-
     # Landeslisten
 
-    df_landeslisten = df_candidates[(df_candidates["Kennzeichen"] == "Landesliste")][
-        ["Gruppenname", "GebietLandAbk"]].drop_duplicates()
-    df_landeslisten["Gruppenname"] = df_landeslisten["Gruppenname"].apply(
-        lambda party_name: parties_candidates.get((party_name, wahl_2021_nr)))
-    df_landeslisten["GebietLandAbk"] = df_landeslisten["GebietLandAbk"].apply(
-        lambda abk: bundeslaender.get(abk))
+    df_landeslisten = df_candidates[
+        (df_candidates["Kennzeichen"] == "Landesliste")
+    ][["Gruppenname", "Gebietsnummer"]].drop_duplicates()
 
-    df_landeslisten = df_landeslisten[df_landeslisten["GebietLandAbk"].notna() & df_landeslisten["Gruppenname"].notna()]
+    df_landeslisten["Gruppenname"] = df_landeslisten["Gruppenname"].apply(
+        lambda party_name: party_name_to_candidacy_pk[
+            (party_name, wahl_2021_nr)
+        ]
+    )
 
     landeslisten = df_landeslisten.apply(tuple, axis=1)
 
@@ -75,14 +75,16 @@ def seed_landeslisten_2021(db: Transaction, parties_candidates: dict[(str, int),
     landeslisten_db = db.insert_into(
         "landeslisten",
         landeslisten,
-        [
-            "partei",
-            "bundesland"
-        ],
+        ["partei", "bundesland"],
+        Landesliste,
     )
 
     landeslisten_dict = {
-        (landeslist[1], landeslist[2]): landeslist[0] for landeslist in landeslisten_db
+        (
+            landesliste.party_candidacy_pk,
+            landesliste.bundesland_pk,
+        ): landesliste.pk
+        for landesliste in landeslisten_db
     }
 
     return landeslisten_dict
