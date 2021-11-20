@@ -189,11 +189,14 @@ def seed_candidates_2017(db: Transaction, candidate_parties: dict[(str, int), in
                               "partei"]
 
     df_direct_candidates = \
-        df_candidates[(df_candidates["VorpAnzahl"].notna)][df_candidates["Gebietsart"] == "Wahlkreis"]["Stimme" == 1]
+        df_candidates[(df_candidates["VorpAnzahl"].notna())][df_candidates["Gebietsart"] == "Wahlkreis"][
+            df_candidates["Stimme"] == 1]
 
-    wahl_2017_nr = 1
+    wahl_2017_nr = 2
+    parteien = df_direct_candidates["Gruppenname"]
+    print(f"parteien = {parteien}")
     df_direct_candidates["partei"] = df_direct_candidates.apply(
-        lambda row: candidate_parties.get((row.Gruppenname, wahl_2017_nr), 1), axis=1)
+        lambda row: candidate_parties.get((row.Gruppenname, wahl_2017_nr)), axis=1)
 
     df_direct_candidates = df_direct_candidates[["Gebietsnummer", "partei"]]
 
