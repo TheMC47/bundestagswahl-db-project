@@ -15,26 +15,6 @@ class PartyCSV:
     def abbrv_or_name(self):
         return self.abbrv if self.abbrv else self.name
 
-
-@dataclass
-class PartyDB:
-    pk: int
-    name: str
-    abbrv: str
-
-    @property
-    def abbrv_or_name(self):
-        return self.abbrv if self.abbrv else self.name
-
-
-@dataclass
-class CandidacyDB:
-    pk: int
-    party_pk: int
-    vote_id: int
-    additional_txt: str
-
-
 def seed_parties(db: Transaction = None):
 
     if db is None:
