@@ -5,61 +5,48 @@ from connection import Transaction
 from seed_parties import seed_parties
 
 
-def seed_partei_kandidaturen_2017(db: Transaction, parties: dict[str, int]) -> dict[(str, int), int]:
-    print(f"parties dict = {parties}")
-    df_candidates = pd.read_csv("kerg.csv", sep=";")
-
-    df_candidates = df_candidates[(df_candidates["Gruppenart"] == "Partei")]
-    df_candidates = df_candidates[df_candidates["Gruppenname"].notna()]
-
-    df_parties_2017 = df_candidates[df_candidates["VorpAnzahl"].notna()]
-    df_parties_2017["wahl"] = 2
-    df_parties_2017 = df_parties_2017[["Gruppenname", "wahl"]]
-
-    df_parties_2017["partei"] = df_parties_2017.apply(lambda row: parties.get(row.Gruppenname), axis=1)
-    # df_parties_2017.drop_duplicates()
-    df_parties_2017 = df_parties_2017[["partei", "wahl"]]
-
-    print(df_parties_2017)
-    parties_2017_tuples = df_parties_2017.apply(tuple, axis=1)
-    db_parties_2017 = db.insert_into("parteiKandidaturen", parties_2017_tuples, ["partei", "wahl"])
-
-    party_candidates_dict = {
-        (p[1], p[2]): p[0] for p in db_parties_2017
-    }
-
-    return party_candidates_dict
 
 
-def seed_wahldaten(db: Transaction, wahlkreise):
-    df = pd.read_csv('kerg1.csv',
-                     sep=",")
-    print(df.columns)
-    df["GehoertZu"] = df["GehoertZu"].fillna(0.0).astype(int)
-    df = df[(df["GehoertZu"] != 99)]
-    # df["wahlkreis"] = wahlkreise.get((df["Gebiet"], df["GehoertZu"]))
-    df["wahlkreis"] = df.apply(lambda row: wahlkreise.get((row.Gebiet, row.GehoertZu)), axis=1)
-    df = df[~df["Gebiet"].isna()]
-    df = df[~df["wahlkreis"].isna()]
-    wahldaten_attr = [
-        "wahlberechtigte",
-        "waehlende",
-        "wahlkreis",
-        "ungueltig_erste_stimme",
-        "ungueltig_zweite_stimme", "wahl",
+
+
+
+def year_to_wahlid(year: int) -> int:
+    return 1 if year == 2021 else 2
+
+
+def seed_wahldaten(year: int, kerg_df=None, db: Transaction = None):
+    if kerg_df is None:
+        kerg_df = pd.read_csv("kerg1.csv", sep=",")
+
+    if db is None:
+        db = Transaction()
+
+    only_wahlkreise = kerg_df[
+        (kerg_df["GehoertZu"] != 99) & (~kerg_df["GehoertZu"].isna())
     ]
-    print(df.columns)
-    print(df['Wahlberechtigte2021'])
-    df_2021 = df[["Wahlberechtigte2021", "Waehlende2021", "wahlkreis", "UngultigErst2021", "UngultigZwei2021"]]
-    df_2021["wahl"] = 1
-    df_2017 = df[["Wahlberechtigte2017", "Waehlende2017", "wahlkreis", "UngultigErst2017", "UngultigZwei2017"]]
-    df_2017["wahl"] = 2
 
-    tuples_2021 = df_2021.apply(tuple, axis=1)
-    tuples_2017 = df_2017.apply(tuple, axis=1)
+    tuples_year = only_wahlkreise[
+        [
+            f"Wahlberechtigte{year}",
+            f"Waehlende{year}",
+            "Nr",
+            f"UngultigErst{year}",
+            f"UngultigZwei{year}",
+        ]
+    ].assign(wahl=year_to_wahlid(year))
 
-    db.insert_into("wahlkreiswahldaten", tuples_2021, wahldaten_attr)
-    db.insert_into("wahlkreiswahldaten", tuples_2017, wahldaten_attr)
+    return db.insert_into(
+        "wahlkreiswahldaten",
+        tuples_year.apply(tuple, axis=1),
+        [
+            "wahlberechtigte",
+            "waehlende",
+            "wahlkreis",
+            "ungueltig_erste_stimme",
+            "ungueltig_zweite_stimme",
+            "wahl",
+        ],
+    )
 
 
 def seed_landeslisten_2021(db: Transaction, parties_candidates: dict[(str, int), int], bundeslaender: dict[str, int]) -> \
