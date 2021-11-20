@@ -25,3 +25,11 @@ class CandidacyDB:
     party_pk: int
     vote_id: int
     additional_txt: str
+
+
+@dataclass
+class Direktcandidate:
+    pk: int
+    candidate: int
+    wahlkreis_pk: int
+    party_candidacy_pk: int

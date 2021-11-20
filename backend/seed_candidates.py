@@ -5,6 +5,7 @@ from connection import Transaction
 from seed_parties import seed_parties
 
 
+from data_classes import Direktcandidate, Landesliste
 
 
 
@@ -123,12 +124,12 @@ def seed_landeslisten_2017(db: Transaction, parties_candidates: dict[(str, int),
     return landeslisten_2017_dict
 
 
-def seed_candidates_2021(db: Transaction, parties: dict[str, int],
-                         landeslisten_dict: dict[(int, int), int], bundeslaender) -> \
-        dict[(str, str), int]:
+def seed_candidates_2021(
+    db: Transaction,
+    parties: dict[str, int],
+    landeslisten_dict: dict[(int, int), int],
+) -> dict[(str, str), int]:
     df_candidates = pd.read_csv("kandidaturen.csv", sep=";")
-
-    print(df_candidates.columns)
 
     # Candidates
     candidates_attr = [
@@ -138,36 +139,46 @@ def seed_candidates_2021(db: Transaction, parties: dict[str, int],
         "Namenszusatz",
         "Beruf",
         "Geburtsjahr",
-        "Geschlecht"]
+        "Geschlecht",
+    ]
 
-    directcandidate_attr = ["kandidat", "wahlkreis", "partei"]
-    listenkandidat_attr = ["kandidat", "landesliste", "listennummer"]
+    wahlkreis_party_candidacy_to_direct_candidacy = {}
 
     candidates_groups = df_candidates.groupby(candidates_attr)
-    for id, (name, group) in enumerate(candidates_groups):
-        print(f"name = {name}")
-        print(f"group = {group}")
-        #       candidate = tuple(x for x in ([id + 1] + [row[i] for i in candidates_attr]))
+    for name, group in candidates_groups:
         candidate_db = db.insert_into("kandidaten", name, candidates_attr)
         candidate_id = candidate_db[0][0]
-        for row_index, row_serie in group.iterrows():
-            row = row_serie.to_dict()
-            print(f"row = {row}")
-            print(f"type = {type(row)}")
+
+        for _, row_series in group.iterrows():
+            row = row_series.to_dict()
+            party_candidacy = ""
+
+            if not row["Gruppenname"].startswith("EB: "):
+                party_candidacy = parties[(row["Gruppenname"], 1)]
+
+            region_pk = row["Gebietsnummer"]
 
             if row["Gebietsart"] == "Land":
-                landesliste = landeslisten_dict.get(
-                    (parties.get((row.get("Gruppenname"), 1)), row.get("Gebietsnummer")))
-                listenplatz = row.get("Listenplatz")
+                landesliste = landeslisten_dict[(party_candidacy, region_pk)]
+                listenplatz = row["Listenplatz"]
 
-                listen_candidate = (
-                    candidate_id, landesliste, listenplatz)
-                if landesliste != None:
-                    db.insert_into("listenkandidaten", listen_candidate, listenkandidat_attr)
+                db.insert_into(
+                    "listenkandidaten",
+                    (candidate_id, landesliste, listenplatz),
+                    ["kandidat", "landesliste", "listennummer"],
+                )
 
             else:
-                direct_candidate = (candidate_id, row.get("Gebietsnummer"), parties.get((row.get("Gruppenname"), 1)))
-                db.insert_into("direktkandidaten", direct_candidate, directcandidate_attr)
+                dk = db.insert_into(
+                    "direktkandidaten",
+                    (candidate_id, region_pk, party_candidacy),
+                    ["kandidat", "wahlkreis", "partei"],
+                    Direktcandidate,
+                )
+                wahlkreis_party_candidacy_to_direct_candidacy[
+                    (dk.wahlkreis_pk, dk.party_candidacy_pk)
+                ] = dk.pk
+    return wahlkreis_party_candidacy_to_direct_candidacy
 
 
 def seed_candidates_2017(db: Transaction, candidate_parties: dict[(str, int), int]):
