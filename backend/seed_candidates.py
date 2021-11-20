@@ -6,7 +6,6 @@ from seed_parties import seed_parties
 
 
 def seed_partei_kandidaturen_2017(db: Transaction, parties: dict[str, int]) -> dict[(str, int), int]:
-
     print(f"parties dict = {parties}")
     df_candidates = pd.read_csv("kerg.csv", sep=";")
 
@@ -63,9 +62,9 @@ def seed_wahldaten(db: Transaction, wahlkreise):
     db.insert_into("wahlkreiswahldaten", tuples_2017, wahldaten_attr)
 
 
-
-def seed_landeslisten_2021(db: Transaction, parties_candidates: dict[(str, int), int], bundeslaender: dict[str, int]) -> dict[
-    (int, int), int]:
+def seed_landeslisten_2021(db: Transaction, parties_candidates: dict[(str, int), int], bundeslaender: dict[str, int]) -> \
+        dict[
+            (int, int), int]:
     df_candidates = pd.read_csv("kandidaturen.csv", sep=";")
     wahl_2021_nr = 1
 
@@ -80,7 +79,7 @@ def seed_landeslisten_2021(db: Transaction, parties_candidates: dict[(str, int),
     df_landeslisten["GebietLandAbk"] = df_landeslisten["GebietLandAbk"].apply(
         lambda abk: bundeslaender.get(abk))
 
-    df_landeslisten = df_landeslisten[df_landeslisten["GebietLandAbk"].notna() & df_landeslisten["Gruppenname"].notna() ]
+    df_landeslisten = df_landeslisten[df_landeslisten["GebietLandAbk"].notna() & df_landeslisten["Gruppenname"].notna()]
 
     landeslisten = df_landeslisten.apply(tuple, axis=1)
 
@@ -136,7 +135,7 @@ def seed_landeslisten_2017(db: Transaction, parties_candidates: dict[(str, int),
 
 
 def seed_candidates_2021(db: Transaction, parties: dict[str, int],
-                         landeslisten_dict: dict[(int, int), int]) -> \
+                         landeslisten_dict: dict[(int, int), int], bundeslaender) -> \
         dict[(str, str), int]:
     df_candidates = pd.read_csv("kandidaturen.csv", sep=";")
 
@@ -157,17 +156,28 @@ def seed_candidates_2021(db: Transaction, parties: dict[str, int],
 
     candidates_groups = df_candidates.groupby(candidates_attr)
     for id, (name, group) in enumerate(candidates_groups):
-        for row_index, row in group.iterrows():
-            candidate = tuple(x for x in ([id] + [row[i] for i in candidates_attr]))
-            db.insert_into("kandidaten", candidate, ["id"] + candidates_attr)
-            if row["Kennzeichen"] == "Landesliste":
+        print(f"name = {name}")
+        print(f"group = {group}")
+        #       candidate = tuple(x for x in ([id + 1] + [row[i] for i in candidates_attr]))
+        candidate_db = db.insert_into("kandidaten", name, candidates_attr)
+        candidate_id = candidate_db[0][0]
+        for row_index, row_serie in group.iterrows():
+            row = row_serie.to_dict()
+            print(f"row = {row}")
+            print(f"type = {type(row)}")
+
+            if row["Gebietsart"] == "Land":
+                landesliste = landeslisten_dict.get(
+                    (parties.get((row.get("Gruppenname"), 1)), row.get("Gebietsnummer")))
+                listenplatz = row.get("Listenplatz")
+
                 listen_candidate = (
-                    id, landeslisten_dict.get((parties.get((row["Gruppenname"], 1)))),
-                    row["VerknListenplatz"])
-                db.insert_into("listenkandidaten", listen_candidate, listenkandidat_attr)
+                    candidate_id, landesliste, listenplatz)
+                if landesliste != None:
+                    db.insert_into("listenkandidaten", listen_candidate, listenkandidat_attr)
 
             else:
-                direct_candidate = (id, row["Gebietsnummer"], parties.get((row["Gruppenname"], 1)))
+                direct_candidate = (candidate_id, row.get("Gebietsnummer"), parties.get((row.get("Gruppenname"), 1)))
                 db.insert_into("direktkandidaten", direct_candidate, directcandidate_attr)
 
 
@@ -202,7 +212,6 @@ def seed_candidates_2017(db: Transaction, candidate_parties: dict[(str, int), in
 def seed_Ergebnisse(db: Transaction, direct_candidates_2017: dict[(int, int), int],
                     direct_candidates_2021: dict[(int, int), int], parties_candidacy: dict[(str, int): int],
                     landeslisten_2017: dict[(int, int):int], landeslisten_2021: dict[(int, int):int]):
-
     df_results = pd.read_csv('kerg.csv', sep=";")
 
     df_results_wahlkreise = df_results[
@@ -262,7 +271,6 @@ def seed_Ergebnisse(db: Transaction, direct_candidates_2017: dict[(int, int), in
     zweitstimmeErgebnis2017 = df_zweitstimmeErgebnis2017.apply(tuple, axis=1)
 
     db.insert_into("zweitstimmeErgebnisse", zweitstimmeErgebnis2017, ["landesliste", "anzahl_stimmen", "wahlkreis"])
-
 
 
 '''

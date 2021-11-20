@@ -1,4 +1,5 @@
-from seed_candidates import seed_partei_kandidaturen_2017, seed_landeslisten_2021, seed_candidates_2021
+from seed_candidates import seed_partei_kandidaturen_2017, seed_landeslisten_2021, seed_candidates_2021, \
+    seed_candidates_2017, seed_Ergebnisse
 from connection import Transaction
 from seed_parties import seed_parties
 
@@ -23,10 +24,13 @@ def seed_db():
 
     print(parties_candidates_dict)
 
-    direct_candidates_2021 = seed_candidates_2021(db,parties_candidates_dict, landeslisten2021_dict)
+    direct_candidates_2021 = seed_candidates_2021(db, parties_candidates_dict, landeslisten2021_dict,
+                                                  bundeslaender_dict)
 
 
+#  direct_candidates_2017 = seed_candidates_2017(db, parties_candidates_dict)
 
-
+#    seed_Ergebnisse(db, direct_candidates_2017, direct_candidates_2021, parties_candidates_dict, landeslisten2017_dict,
+#               landeslisten2021_dict)
 
 seed_db()
