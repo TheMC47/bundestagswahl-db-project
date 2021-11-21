@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE wahlen
 (
     id      SERIAL,
@@ -122,7 +123,7 @@ CREATE TABLE listenkandidaten
 );
 CREATE TABLE waehler
 (
-    id             CHAR(64) NOT NULL UNIQUE,
+    id             uuid DEFAULT uuid_generate_v4 (),
     wahlkreis      INT      NOT NULL,
     wahl           INT      NOT NULL,
     hat_abgestimmt Bool DEFAULT FALSE,
@@ -138,7 +139,6 @@ CREATE TABLE erststimmen
 (
     id             SERIAL,
     direktkandidat INT,
-    is_valid       Bool DEFAULT TRUE,
     PRIMARY KEY (id),
     FOREIGN KEY (direktkandidat) REFERENCES direktkandidaten (id) ON
         UPDATE CASCADE ON
@@ -149,7 +149,6 @@ CREATE TABLE zweitstimmen
     id          SERIAL,
     landesliste INT NOT NULL,
     wahlkreis   INT NOT NULL, -- A check constraint on wahlkreis.bundesland == landesliste.bundesland?
-    is_valid    Bool DEFAULT TRUE,
     PRIMARY KEY (id),
     FOREIGN KEY (landesliste) REFERENCES landeslisten (id) ON
         UPDATE CASCADE ON
@@ -174,7 +173,7 @@ CREATE TABLE zweitstimmeErgebnisse
     id             SERIAL,
     landesliste    INT NOT NULL,
     anzahl_stimmen INT,
-    wahlkreis      INT NOT NULL,
+    wahlkreis      INT NOT NULL,        -- A TRIGGER constraint on wahlkreis.bundesland == landesliste.bundesland?
     PRIMARY KEY (id),
     FOREIGN KEY (landesliste) REFERENCES landeslisten (id) ON
         UPDATE CASCADE ON
