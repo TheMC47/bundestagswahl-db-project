@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE wahlen
 (
     id      SERIAL,
@@ -122,7 +123,7 @@ CREATE TABLE listenkandidaten
 );
 CREATE TABLE waehler
 (
-    id             CHAR(64) NOT NULL UNIQUE,
+    id             uuid DEFAULT uuid_generate_v4 (),
     wahlkreis      INT      NOT NULL,
     wahl           INT      NOT NULL,
     hat_abgestimmt Bool DEFAULT FALSE,
