@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   server:
     image: postgrest/postgrest
@@ -14,3 +14,24 @@ services:
       - "5432:5432"
     env_file:
       - .env
+  schemaspy:
+    image: andrewjones/schemaspy-postgres:latest
+    command:
+      [
+        "-host",
+        "db",
+        "-port",
+        "5432",
+        "-u",
+        $POSTGRES_USER,
+        "-p",
+        $POSTGRES_PASSWORD,
+        "-db",
+        $POSTGRES_DB,
+        "-s",
+        "public",
+      ]
+    volumes:
+      - ./docs/schemaspy:/output
+    depends_on:
+      - db
