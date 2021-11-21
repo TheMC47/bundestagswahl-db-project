@@ -43,8 +43,10 @@ CREATE TABLE wahlkreiswahldaten
 CREATE TABLE parteien
 (
     id              SERIAL,
-    name            VARCHAR UNIQUE NOT NULL,
+    name            VARCHAR,
     kurzbezeichnung VARCHAR,
+    is_echte_partei BOOL NOT NULL,
+    UNIQUE(name, kurzbezeichnung),
     PRIMARY KEY (id)
 );
 CREATE TABLE parteiKandidaturen
@@ -180,5 +182,5 @@ CREATE TABLE zweitstimmeErgebnisse
     FOREIGN KEY (wahlkreis) REFERENCES wahlkreise (id) ON
         UPDATE CASCADE ON
         DELETE CASCADE,
-    UNIQUE (landesliste)
+    UNIQUE (landesliste, wahlkreis)
 );

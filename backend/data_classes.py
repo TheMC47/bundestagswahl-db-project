@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class Landesliste:
     pk: int
     party_candidacy_pk: int
-    bundesland_pk_: int
+    bundesland_pk: int
 
 
 @dataclass
