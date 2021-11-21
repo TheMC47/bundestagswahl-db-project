@@ -20,23 +20,26 @@ class Transaction:
 
         self.__cursor = self.__connection.cursor()
 
-    def run_query(self, query: str):
+    def run_query(self, query: str, dataklass=None):
         self.__cursor.execute(query)
+        ts = self.__cursor.fetchall()
+        if dataklass is None:
+            return ts
+        return [dataklass(*t) for t in ts]
 
     def healthcheck(self):
         self.run_query("SELECT version()")
         return self.__cursor.fetchone()
 
-    def select_one(self, table: str, pk: int, pk_name: str = "id"):
-        self.run_query(f"SELECT * FROM {table} WHERE {pk_name} = {pk}")
-        return self.__cursor.fetchone()
+    def select_where(
+        self, table: str, pk: int, pk_name: str = "id", dataklass=None
+    ):
+        return self.run_query(
+            f"SELECT * FROM {table} WHERE {pk_name} = {pk}", dataklass
+        )
 
-    def select_all(self, table: str):
-        self.run_query(f"SELECT * FROM {table}")
-        return self.__cursor.fetchall()
-
-    def fetchall(self):
-        return self.__cursor.fetchall()
+    def select_all(self, table: str, dataklass=None):
+        return self.run_query(f"SELECT * FROM {table}", dataklass)
 
     def __normalize_val(self, attr) -> str:
         if isinstance(attr, str):
@@ -61,16 +64,17 @@ class Transaction:
         table: str,
         val: Union[tuple, Iterable[tuple]],
         attrs: list[str] = None,
+        dataklass=None,
     ):
         values: str
         if isinstance(val, tuple):  # multiple imports
             val = [val]
         values = ",".join([self.__normalize_tuple(x) for x in val])
         attr_str: str = self.__normalize_attrs(attrs)
-        self.run_query(
-            f"INSERT INTO {table}{attr_str} VALUES {values} RETURNING *;"
+        return self.run_query(
+            f"INSERT INTO {table}{attr_str} VALUES {values} RETURNING *;",
+            dataklass,
         )
-        return self.__cursor.fetchall()
 
     def rollback(self):
         self.__cursor.rollback()
