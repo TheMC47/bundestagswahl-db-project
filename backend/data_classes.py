@@ -9,10 +9,11 @@ class Landesliste:
 
 
 @dataclass
-class PartyDB:
+class Party:
     pk: int
     name: str
     abbrv: str
+    real_party: bool
 
     @property
     def abbrv_or_name(self):
@@ -20,7 +21,7 @@ class PartyDB:
 
 
 @dataclass
-class CandidacyDB:
+class Candidacy:
     pk: int
     party_pk: int
     vote_id: int
