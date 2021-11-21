@@ -137,6 +137,8 @@ def seed_candidates_2021(
 
     wahlkreis_party_candidacy_to_direct_candidacy = {}
 
+    independent_candidates = {}
+
     candidates_groups = df_candidates.groupby(candidates_attr)
     for name, group in candidates_groups:
         candidate_db = db.insert_into("kandidaten", name, candidates_attr)
@@ -148,11 +150,21 @@ def seed_candidates_2021(
 
             if row["Kennzeichen"] == "anderer Kreiswahlvorschlag":
 
+                key = None
+                short_name = ""
+
+                if row["Gruppenname"].startswith("EB:"):
+                    key = row["GruppennameLang"]
+                    short_name = f"""EB: {row["Nachname"]}, {row["Vornamen"]}"""
+                else:
+                    key = row["Gruppenname"]
+                    short_name = row["Gruppenname"]
+
                 party = db.insert_into(
                     "parteien",
                     (
                         row["GruppennameLang"],
-                        f"""EB: {row["Nachname"]}, {row["Vornamen"]}""",
+                        short_name,
                         False,
                     ),
                     ["name", "kurzbezeichnung", "is_echte_partei"],
@@ -163,6 +175,10 @@ def seed_candidates_2021(
                     (party, 1),
                     ["partei", "wahl"],
                 )[0][0]
+
+                independent_candidates[
+                    (key, row["Gebietsnummer"])
+                ] = party_candidacy
 
             else:
                 party_candidacy = parties[(row["Gruppenname"], 1)]
@@ -189,7 +205,10 @@ def seed_candidates_2021(
                 wahlkreis_party_candidacy_to_direct_candidacy[
                     (dk.wahlkreis_pk, dk.party_candidacy_pk)
                 ] = dk.pk
-    return wahlkreis_party_candidacy_to_direct_candidacy
+    return (
+        wahlkreis_party_candidacy_to_direct_candidacy,
+        independent_candidates,
+    )
 
 
 def seed_candidates_2017(
@@ -234,20 +253,30 @@ def seed_year_first_results(
     db: Transaction,
     kerg_firstvotes,
     direct_candidates,
+    independent_candidates,
     year,
     parties_candidacy,
 ):
     wahlid = year_to_wahlid(year)
     selector = "Anzahl" if year == 2021 else "VorpAnzahl"
 
-    first_vote_results = kerg_firstvotes.dropna(subset=[selector])[
-        ["Gebietsnummer", "Gruppenname", selector]
-    ]
+    # df_results["Gruppenart"] == "Einzelbewerber/Wählergruppe"
+
+    first_vote_results = kerg_firstvotes.dropna(subset=[selector])
+
+    def candidate_pk(row):
+        party_key = None
+        if row["Gruppenart"] == "Einzelbewerber/Wählergruppe":
+            party_key = independent_candidates[
+                (row.Gruppenname, row.Gebietsnummer)
+            ]
+        else:
+            party_key = parties_candidacy[(row.Gruppenname, wahlid)]
+
+        return direct_candidates[(row.Gebietsnummer, party_key)]
 
     first_vote_results["direct_candidate_pk"] = first_vote_results.apply(
-        lambda row: direct_candidates[
-            (row.Gebietsnummer, parties_candidacy[(row.Gruppenname, wahlid)])
-        ],
+        candidate_pk,
         axis=1,
     )
 
@@ -300,6 +329,7 @@ def seed_ergebnisse(
     db: Transaction,
     direct_candidates_2017: dict[(int, int), int],
     direct_candidates_2021: dict[(int, int), int],
+    independent_candidates: dict[str, int],
     parties_candidacy: dict[(str, int):int],
     landeslisten_2017: dict[(int, int):int],
     landeslisten_2021: dict[(int, int):int],
@@ -309,7 +339,10 @@ def seed_ergebnisse(
     df_results_wahlkreise = df_results[
         (
             (df_results["Gebietsart"] == "Wahlkreis")
-            & (df_results["Gruppenart"] == "Partei")
+            & (
+                (df_results["Gruppenart"] == "Partei")
+                | (df_results["Gruppenart"] == "Einzelbewerber/Wählergruppe")
+            )
         )
     ]
 
@@ -320,6 +353,7 @@ def seed_ergebnisse(
         db,
         df_results_firstvotes,
         direct_candidates_2021,
+        independent_candidates,
         2021,
         parties_candidacy,
     )
@@ -328,6 +362,7 @@ def seed_ergebnisse(
         db,
         df_results_firstvotes,
         direct_candidates_2017,
+        independent_candidates,
         2017,
         parties_candidacy,
     )

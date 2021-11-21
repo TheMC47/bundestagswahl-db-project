@@ -27,7 +27,7 @@ def seed():
     seed_wahldaten(2017, db=db)
     landeslisten_2021 = seed_landeslisten_2021(db, seed_parties_res)
     landeslisten_2017 = seed_landeslisten_2017(db, seed_parties_res)
-    direct_candidates_2021 = seed_candidates_2021(
+    direct_candidates_2021, independent_candidates = seed_candidates_2021(
         db, seed_parties_res, landeslisten_2021
     )
     direct_candidates_2017 = seed_candidates_2017(db, seed_parties_res)
@@ -35,6 +35,7 @@ def seed():
         db,
         direct_candidates_2017,
         direct_candidates_2021,
+        independent_candidates,
         seed_parties_res,
         landeslisten_2017,
         landeslisten_2021,
