@@ -12,6 +12,18 @@ CREATE TABLE bundeslaender
     abkuerzung CHAR(2) UNIQUE,
     PRIMARY KEY (id)
 );
+CREATE TABLE bevoelkerung
+(
+    id         INT,
+    wahl       INT,
+    FOREIGN KEY (id) REFERENCES bundeslaender (id) ON
+        UPDATE CASCADE ON
+        DELETE CASCADE
+    FOREIGN KEY (wahl) REFERENCES wahl (id) ON
+        UPDATE CASCADE ON
+        DELETE CASCADE
+    PRIMARY KEY (id, wahl)
+);
 CREATE TABLE wahlkreise
 (
     id         INT,
