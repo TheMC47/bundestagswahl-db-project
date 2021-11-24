@@ -1,4 +1,5 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE
+EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE wahlen
 (
     id      SERIAL,
@@ -14,15 +15,16 @@ CREATE TABLE bundeslaender
 );
 CREATE TABLE bevoelkerung
 (
-    id         INT,
-    wahl       INT,
+    id              INT,
+    wahl            INT,
+    anzahl_bewohner INT,
     FOREIGN KEY (id) REFERENCES bundeslaender (id) ON
         UPDATE CASCADE ON
-        DELETE CASCADE
-    FOREIGN KEY (wahl) REFERENCES wahl (id) ON
+        DELETE CASCADE,
+        FOREIGN KEY (wahl) REFERENCES wahlen (id) ON
         UPDATE CASCADE ON
-        DELETE CASCADE
-    PRIMARY KEY (id, wahl)
+        DELETE CASCADE,
+        PRIMARY KEY (id, wahl)
 );
 CREATE TABLE wahlkreise
 (
@@ -59,7 +61,7 @@ CREATE TABLE parteien
     name            VARCHAR,
     kurzbezeichnung VARCHAR,
     is_echte_partei BOOL NOT NULL,
-    UNIQUE(name, kurzbezeichnung),
+    UNIQUE (name, kurzbezeichnung),
     PRIMARY KEY (id)
 );
 CREATE TABLE parteiKandidaturen
@@ -135,9 +137,9 @@ CREATE TABLE listenkandidaten
 );
 CREATE TABLE waehler
 (
-    id             uuid DEFAULT uuid_generate_v4 (),
-    wahlkreis      INT      NOT NULL,
-    wahl           INT      NOT NULL,
+    id             uuid DEFAULT uuid_generate_v4(),
+    wahlkreis      INT NOT NULL,
+    wahl           INT NOT NULL,
     hat_abgestimmt Bool DEFAULT FALSE,
     PRIMARY KEY (id),
     FOREIGN KEY (wahlkreis) REFERENCES wahlkreise (id) ON
@@ -185,7 +187,7 @@ CREATE TABLE zweitstimmeErgebnisse
     id             SERIAL,
     landesliste    INT NOT NULL,
     anzahl_stimmen INT,
-    wahlkreis      INT NOT NULL,        -- A TRIGGER constraint on wahlkreis.bundesland == landesliste.bundesland?
+    wahlkreis      INT NOT NULL, -- A TRIGGER constraint on wahlkreis.bundesland == landesliste.bundesland?
     PRIMARY KEY (id),
     FOREIGN KEY (landesliste) REFERENCES landeslisten (id) ON
         UPDATE CASCADE ON
