@@ -104,7 +104,7 @@ CREATE VIEW parteien_ohne_huerde(partei) AS (
     parteikandidaturen pk
     JOIN minderheitsparteien mp ON mp.id = pk.partei
 );
-CREATE VIEW mindest_landessitze_pro_partei(partei) AS (
+CREATE VIEW mindest_landessitze_pro_partei(partei, land, anzahl_sitze) AS (
   WITH hochst_all(land, hochst) AS (
     SELECT
       bl.id AS land,
@@ -129,14 +129,14 @@ CREATE VIEW mindest_landessitze_pro_partei(partei) AS (
     GROUP BY
       land
   ),
-  parteisitze_hochst (landesliste, land, hochst) AS (
+  parteisitze_hochst (partei, land, hochst) AS (
     SELECT
       z.partei,
       z.land,
       (z.anzahl_stimmen * 1.000) / (s.a - 0.5) AS hochst
     FROM
-      parteien_ohne_huerde h LEFT OUTER JOIN
-      zweitstimmen_pro_partei z ON h.partei = z.partei
+      parteien_ohne_huerde h
+      LEFT OUTER JOIN zweitstimmen_pro_partei z ON h.partei = z.partei
       JOIN (
         SELECT
           sl.land,
@@ -145,9 +145,9 @@ CREATE VIEW mindest_landessitze_pro_partei(partei) AS (
           sitzkontigente_pro_land sl
       ) s ON s.land = z.land
   ),
-  parteirank_pro_land (landesliste, land, rank) AS (
+  parteirank_pro_land (partei, land, rank) AS (
     SELECT
-      ph.landesliste,
+      ph.partei,
       ph.land,
       RANK() OVER (
         PARTITION BY ph.land
@@ -156,23 +156,30 @@ CREATE VIEW mindest_landessitze_pro_partei(partei) AS (
       )
     FROM
       parteisitze_hochst ph
-  ),
-  parteisitze_pro_land (landesliste, land, sitze) AS (
-    SELECT
-      rk.landesliste,
-      rk.land,
-      COUNT (*)
-    FROM
-      parteirank_pro_land rk
-      JOIN sitzkontigente_pro_land sl ON rk.land = sl.land
-    WHERE
-      rank <= sl.sitzkontigente
-    GROUP BY
-      rk.land,
-      rk.landesliste
   )
   SELECT
-    *
+    rk.partei,
+    rk.land,
+    COUNT (*)
   FROM
-    parteisitze_pro_land
-)
+    parteirank_pro_land rk
+    JOIN sitzkontigente_pro_land sl ON rk.land = sl.land
+  WHERE
+    rank <= sl.sitzkontigente
+  GROUP BY
+    rk.land,
+    rk.partei
+);
+CREATE VIEW anzahl_direktmandaten_pro_partei_pro_land(partei, land, anzahl_direkt) AS (
+  SELECT
+    dm.partei,
+    b.id,
+    COUNT(*)
+  FROM
+    direktmandaten dm
+    LEFT OUTER JOIN wahlkreise wk ON wk.id = dm.wahlkreis
+    LEFT OUTER JOIN bundeslaender b ON b.id = wk.bundesland
+  GROUP BY
+    dm.partei,
+    b.id
+);
