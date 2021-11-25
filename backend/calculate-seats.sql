@@ -97,6 +97,12 @@ CREATE VIEW parteien_ohne_huerde(partei) AS (
     *
   FROM
     parteien_5prozent
+  UNION
+  SELECT
+    pk.id
+  FROM
+    parteikandidaturen pk
+    JOIN minderheitsparteien mp ON mp.id = pk.partei
 );
 CREATE VIEW mindest_landessitze_pro_partei(partei) AS (
   WITH hochst_all(land, hochst) AS (
