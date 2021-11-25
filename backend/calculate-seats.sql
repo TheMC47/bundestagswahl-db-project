@@ -1,48 +1,172 @@
-WITH hochst_all(land, hochst) AS (
-    SELECT bl.id                                    AS land,
-           (bv.anzahl_bewohner * 1.000) / (a - 0.5) AS hochst
-    FROM bevoelkerung bv
-             JOIN bundeslaender bl ON bl.id = bv.id
-             JOIN wahlen w ON w.id = bv.wahl,
-         generate_series(1, 598) AS s(a)
-    WHERE w.id = 1
-    ORDER BY hochst DESC
-    LIMIT 598
-    )
-   , sitzkontigente_pro_land(land
-   , sitzkontigente) AS (
-SELECT land, COUNT (*)
-FROM hochst_all
-GROUP BY land
-    )
-        , zweitstimme_pro_partei(partei, land
-        , anzahl_stimmen) AS (
-SELECT z.landesliste, wk.bundesland, SUM (z.anzahl_stimmen)
-FROM zweitstimmeErgebnisse z JOIN wahlkreise wk
-ON z.wahlkreis = wk.id JOIN landeslisten l on z.landesliste = l.id JOIN parteiKandidaturen pk on l.partei = pk.id JOIN wahlen w ON pk.wahl = w.id
-where w.id = 1
-group by z.landesliste, wk.bundesland
-    ),
-    parteisitze_hochst (landesliste, land, hochst) AS (
-select  z.partei, z.land, (z.anzahl_stimmen * 1.000) / (s.a - 0.5) AS hochst
-from zweitstimme_pro_partei z,
-    (select sl.land, generate_series(1, sl.sitzkontigente) as a
-    FROM sitzkontigente_pro_land sl
-    ) s
-where s.land = z.land
-    )
-    , parteirank_pro_land (landesliste
-    , land
-    , rank) As (
-select ph.landesliste, ph.land, rank() over ( partition by ph.land order by ph.hochst DESC)
-from parteisitze_hochst ph
-    ), parteisitze_pro_land (landesliste, land, sitze) As (
-select rk.landesliste, rk.land, count (*)
-from parteirank_pro_land rk join sitzkontigente_pro_land sl
-on rk.land = sl.land
-where rank <= sl.sitzkontigente
-group by rk.land, rk.landesliste
-    )
-SELECT *
-FROM parteisitze_pro_land
-;
+CREATE VIEW zweitstimmen_pro_partei(partei, land, anzahl_stimmen) AS (
+  SELECT
+    pk.id,
+    wk.bundesland,
+    SUM (COALESCE(z.anzahl_stimmen, 0))
+  FROM
+    parteiKandidaturen pk
+    LEFT OUTER JOIN landeslisten l ON l.partei = pk.id
+    LEFT OUTER JOIN zweitstimmeErgebnisse z ON z.landesliste = l.id
+    LEFT OUTER JOIN wahlkreise wk ON z.wahlkreis = wk.id
+    LEFT OUTER JOIN wahlen w ON pk.wahl = w.id
+  WHERE
+    w.id = 1 -- FIXME
+  GROUP BY
+    pk.id,
+    wk.bundesland
+);
+CREATE VIEW anz_zweitstimmen_bundesweit(partei, anz) AS (
+  SELECT
+    partei,
+    SUM(anzahl_stimmen)
+  FROM
+    zweitstimmen_pro_partei -- FIXME pro wahl
+  GROUP BY
+    partei
+);
+CREATE VIEW parteien_5prozent(partei) AS (
+  SELECT
+    pk.id
+  FROM
+    parteikandidaturen pk
+    JOIN anz_zweitstimmen_bundesweit azbw ON azbw.partei = pk.id
+  WHERE
+    100 * azbw.anz / (
+      SELECT
+        SUM(anz)
+      FROM
+        anz_zweitstimmen_bundesweit
+    ) >= 5
+);
+CREATE VIEW erststimmen_pro_direktkandidat (
+  direktkandidat,
+  partei,
+  wahlkreis,
+  anzahl_stimmen
+) AS (
+  SELECT
+    e.direktkandidat,
+    pk.id,
+    dk.wahlkreis,
+    e.anzahl_stimmen
+  FROM
+    erststimmeergebnisse e
+    JOIN direktkandidaten dk ON e.direktkandidat = dk.id
+    JOIN parteiKandidaturen pk ON dk.partei = pk.id
+    JOIN wahlen w ON pk.wahl = w.id
+  WHERE
+    w.id = 1
+);
+CREATE VIEW direktmandaten(direktkandidat, partei, wahlkreis) AS (
+  WITH max_pro_wahlkreis(wahlkreis, anz) AS (
+    SELECT
+      wahlkreis,
+      MAX (anzahl_stimmen)
+    FROM
+      erststimmen_pro_direktkandidat
+    GROUP BY
+      wahlkreis
+  )
+  SELECT
+    e1.direktkandidat,
+    e1.partei,
+    e1.wahlkreis
+  FROM
+    erststimmen_pro_direktkandidat e1
+    JOIN max_pro_wahlkreis m ON e1.wahlkreis = m.wahlkreis
+  WHERE
+    e1.anzahl_stimmen = m.anz
+);
+CREATE VIEW mindestens_3_direktmandaten(partei) AS (
+  SELECT
+    partei
+  FROM
+    direktmandaten
+  GROUP BY
+    partei
+  HAVING
+    COUNT(*) >= 3
+);
+CREATE VIEW parteien_ohne_huerde(partei) AS (
+  SELECT
+    *
+  FROM
+    mindestens_3_direktmandaten
+  UNION
+  SELECT
+    *
+  FROM
+    parteien_5prozent
+);
+CREATE VIEW mindest_landessitze_pro_partei(partei) AS (
+  WITH hochst_all(land, hochst) AS (
+    SELECT
+      bl.id AS land,
+      (bv.anzahl_bewohner * 1.000) / (a - 0.5) AS hochst
+    FROM
+      bevoelkerung bv
+      JOIN bundeslaender bl ON bl.id = bv.id
+      JOIN wahlen w ON w.id = bv.wahl,
+      generate_series(1, 598) AS s(a)
+    WHERE
+      w.id = 1
+    ORDER BY
+      hochst DESC
+    LIMIT
+      598
+  ), sitzkontigente_pro_land(land, sitzkontigente) AS (
+    SELECT
+      land,
+      COUNT (*)
+    FROM
+      hochst_all
+    GROUP BY
+      land
+  ),
+  parteisitze_hochst (landesliste, land, hochst) AS (
+    SELECT
+      z.partei,
+      z.land,
+      (z.anzahl_stimmen * 1.000) / (s.a - 0.5) AS hochst
+    FROM
+      parteien_ohne_huerde h LEFT OUTER JOIN
+      zweitstimmen_pro_partei z ON h.partei = z.partei
+      JOIN (
+        SELECT
+          sl.land,
+          generate_series(1, sl.sitzkontigente) AS a
+        FROM
+          sitzkontigente_pro_land sl
+      ) s ON s.land = z.land
+  ),
+  parteirank_pro_land (landesliste, land, rank) AS (
+    SELECT
+      ph.landesliste,
+      ph.land,
+      RANK() OVER (
+        PARTITION BY ph.land
+        ORDER BY
+          ph.hochst DESC
+      )
+    FROM
+      parteisitze_hochst ph
+  ),
+  parteisitze_pro_land (landesliste, land, sitze) AS (
+    SELECT
+      rk.landesliste,
+      rk.land,
+      COUNT (*)
+    FROM
+      parteirank_pro_land rk
+      JOIN sitzkontigente_pro_land sl ON rk.land = sl.land
+    WHERE
+      rank <= sl.sitzkontigente
+    GROUP BY
+      rk.land,
+      rk.landesliste
+  )
+  SELECT
+    *
+  FROM
+    parteisitze_pro_land
+)
