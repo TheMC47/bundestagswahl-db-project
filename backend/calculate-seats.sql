@@ -24,7 +24,7 @@ where w.id = 1
 group by z.landesliste, wk.bundesland
     ),
     parteisitze_hochst (landesliste, land, hochst) AS (
-select z.land, z.partei, (z.anzahl_stimmen * 1.000) / (s.a - 0.5) AS hochst
+select  z.partei, z.land, (z.anzahl_stimmen * 1.000) / (s.a - 0.5) AS hochst
 from zweitstimme_pro_partei z,
     (select sl.land, generate_series(1, sl.sitzkontigente) as a
     FROM sitzkontigente_pro_land sl
