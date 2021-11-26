@@ -82,7 +82,7 @@ SELECT pk.id
 FROM parteikandidaturen pk
          JOIN minderheitsparteien mp ON mp.id = pk.partei
     );
-CREATE VIEW mindest_landessitze_pro_partei(partei, land, anzahl_sitze) AS
+CREATE VIEW mindest_sitzkontingente_pro_partei(partei, land, anzahl_sitze) AS
 (
 WITH hochst_all(land, hochst) AS (
     SELECT bl.id                                    AS land,
@@ -151,15 +151,36 @@ FROM direktmandaten dm
 GROUP BY dm.partei,
          b.id
     );
-CREATE VIEW Mindestsitzzahl_pro_partei_pro_land(partei, land, mindestsitzzahl) AS
+CREATE VIEW mindestsitzzahl_pro_partei_pro_land(partei, land, mindestsitzzahl, ueberhang) AS
 (
 SELECT sk.partei,
        sk.land,
        GREATEST(
                dk.anzahl_direkt,
-               round((1.00*sk.anzahl_sitze + COALESCE(dk.anzahl_direkt,0)) / 2)
+               round(
+                           (
+                               1.00 * sk.anzahl_sitze + COALESCE(dk.anzahl_direkt, 0)
+                               ) / 2
+                   )
+           ),
+       GREATEST(
+                   COALESCE(dk.anzahl_direkt, 0) - COALESCE(sk.anzahl_sitze, 0),
+                   0
            )
-FROM mindest_landessitze_pro_partei sk
+FROM mindest_sitzkontingente_pro_partei sk
          LEFT OUTER JOIN anzahl_direktmandaten_pro_partei_pro_land dk ON sk.partei = dk.partei
     AND sk.land = dk.land
+    );
+CREATE VIEW midestsitzanspruch_pro_partei(partei, mindessitzanspruch, ueberhang) AS
+(
+SELECT sz.partei,
+       COALESCE(
+               GREATEST(SUM(sz.mindestsitzzahl), SUM(sk.anzahl_sitze)),
+               0
+           ),
+       SUM(sz.ueberhang)
+FROM mindestsitzzahl_pro_partei_pro_land sz
+         LEFT OUTER JOIN mindest_sitzkontingente_pro_partei sk ON sz.land = sk.land
+    AND sz.partei = sk.partei
+GROUP BY sz.partei
     );
