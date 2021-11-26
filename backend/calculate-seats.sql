@@ -327,6 +327,9 @@ BEGIN
     IF curr > target
     THEN
       n := n - 1;
+    ELSIF curr < target
+    THEN
+      n := n + 1;
     ELSE
       RETURN;
     END IF;
@@ -363,34 +366,6 @@ FROM endgueltige_landessitze eg
   JOIN mindestsitzzahl_pro_partei_pro_land mind ON eg.partei = mind.partei AND eg.land = mind.land
 )
 SELECT partei, SUM(anz) FROM max_pro_land GROUP BY partei;
-  -- DELETE FROM endgueltige_landessitze WHERE partei = partei_id;
-  -- WITH hochst AS (
-  --      SELECT zt.land AS land,
-  --             (1.000 * zt.anzahl_stimmen) / (s.a - 0.5) AS hochst
-  --      FROM
-  --         zweitstimmen_pro_partei zt,
-  --         generate_series(1, n) AS s(a)
-  --     WHERE zt.partei = partei_id
-  --     ORDER BY hochst DESC
-  --     LIMIT n
-  -- )
-  -- INSERT INTO endgueltige_landessitze (partei, land, sitze)
-  -- SELECT partei_id, land, COUNT(*) AS sitze
-  -- FROM hochst
-  -- GROUP BY land;
-
--- WITH max_pro_land(land, anz) AS
--- (SELECT mind.land, GREATEST(eg.sitze, mind.mindestsitzzahl)
--- FROM endgueltige_landessitze eg
---   JOIN mindestsitzzahl_pro_partei_pro_land mind ON eg.partei = mind.partei AND eg.land = mind.land
--- WHERE mind.partei = 49
--- )
--- SELECT SUM(anz) FROM max_pro_land;
-
-
--- mandate_pro_partei_pro_bundesland(partei, bundesland, mandate)
-
--- abgeordnete(kandidat, partei, direkt, wahl)
 
 WITH mandate_pro_partei_pro_bundesland(partei, bundesland, mandate) AS(
   VALUES (49, 1, 10), (49, 13, 3), (49, 2, 3), (49, 3, 18), (49, 4, 1), (49, 12, 4)
