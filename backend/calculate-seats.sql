@@ -157,9 +157,9 @@ SELECT sk.partei,
        sk.land,
        GREATEST(
                dk.anzahl_direkt,
-               round((sk.anzahl_sitze + dk.anzahl_direkt) / 2)
+               round((1.00*sk.anzahl_sitze + COALESCE(dk.anzahl_direkt,0)) / 2)
            )
 FROM mindest_landessitze_pro_partei sk
-         JOIN anzahl_direktmandaten_pro_partei_pro_land dk ON sk.partei = dk.partei
+         LEFT OUTER JOIN anzahl_direktmandaten_pro_partei_pro_land dk ON sk.partei = dk.partei
     AND sk.land = dk.land
     );
