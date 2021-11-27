@@ -378,19 +378,43 @@ CREATE VIEW anzahl_landessitze(partei, land, anz) AS
       ON es.partei = dir.partei AND es.land = dir.land
 );
 
-SELECT l.partei,
-       lk.kandidat,
-       lk.listennummer,
-       l.bundesland,
-       RANK() OVER (ORDER BY lk.listennummer) as rank,
-       mpb.mandate
-FROM listenkandidaten lk
-  JOIN landeslisten l ON lk.landesliste = l.id
-  JOIN parteien_ohne_huerde h ON h.partei = l.partei
-  JOIN mandate_pro_partei_pro_bundesland mpb ON mpb.partei = l.partei AND mpb.bundesland=l.bundesland
-WHERE lk.kandidat NOT IN (SELECT kandidat FROM kandidaten_mit_direktmandat)
-  AND l.bundesland=1
+CREATE TABLE bundestagsmandaten(
+  id SERIAL,
+  kandidat INT NOT NULL,
+  partei INT,
+  bundesland INT NOT NULL,
+  direktmandat BOOL NOT NULL,
+  FOREIGN KEY (bundesland) REFERENCES bundeslaender(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  FOREIGN KEY (kandidat) REFERENCES kandidaten(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  FOREIGN KEY (partei) REFERENCES parteikandidaturen(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+);
+
+INSERT INTO bundestagsmandaten(kandidat, partei, bundesland, direktmandat)
+WITH ranked_listen_kandidate(partei, kandidat, listennummer, bundesland, rank, mandate) AS (
+  SELECT l.partei,
+         lk.kandidat,
+         lk.listennummer,
+         l.bundesland,
+         RANK() OVER (PARTITION BY lk.landesliste ORDER BY lk.listennummer) as rank,
+         als.anz
+  FROM listenkandidaten lk
+    JOIN landeslisten l ON lk.landesliste = l.id
+    JOIN parteien_ohne_huerde h ON h.partei = l.partei
+    JOIN anzahl_landessitze als ON als.partei = l.partei AND als.land=l.bundesland
+  WHERE lk.kandidat NOT IN (SELECT kandidat FROM kandidaten_mit_direktmandat)
 )
-SELECT *
+SELECT kandidat, partei, bundesland, false
 FROM ranked_listen_kandidate
 WHERE rank <= mandate;
+
+INSERT INTO bundestagsmandaten(kandidat, partei, bundesland, direktmandat)
+SELECT dk.kandidat, dm.partei, w.bundesland, true
+FROM direktmandaten dm
+  JOIN wahlkreise w ON w.id = dm.wahlkreis
+  JOIN direktkandidaten dk ON dk.id = dm.direktkandidat;
