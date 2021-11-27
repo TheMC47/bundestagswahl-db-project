@@ -5,12 +5,3 @@ CREATE TABLE minderheitsparteien (
         UPDATE CASCADE ON
         DELETE CASCADE
 );
-INSERT INTO
-  minderheitsparteien (
-    SELECT
-      id
-    FROM
-      parteien
-    WHERE
-      kurzbezeichnung = 'SSW'
-  );

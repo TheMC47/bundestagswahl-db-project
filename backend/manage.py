@@ -10,6 +10,7 @@ from seed_candidates import (
     seed_ergebnisse,
     seed_landeslisten_2017,
     seed_landeslisten_2021,
+    seed_minority_parties,
     seed_wahldaten,
 )
 from seed_parties import seed_parties
@@ -150,6 +151,7 @@ def generate_wahlkreis(
 def generate_votes(wahlkreis, year):
     # Get first vote results
     db = Transaction()
+    db.defer_constraints()
 
     if wahlkreis is not None:
         generate_wahlkreis(db, wahlkreis, year, True)
@@ -166,6 +168,7 @@ def generate_votes(wahlkreis, year):
 def seed():
     """Load data from csv files into the database"""
     db = Transaction()
+    db.defer_constraints()
     seed_parties_res = seed_parties(db)
     seed_wahldaten(2021, db=db)
     seed_wahldaten(2017, db=db)
@@ -184,6 +187,7 @@ def seed():
         landeslisten_2017,
         landeslisten_2021,
     )
+    seed_minority_parties(db)
     db.commit()
 
 
