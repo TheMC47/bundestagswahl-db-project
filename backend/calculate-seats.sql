@@ -263,7 +263,7 @@ BEGIN
 END;
 $FUNCTION$ LANGUAGE plpgsql;
 
-CREATE TABLE endgueltige_landessitze
+CREATE TABLE endgueltige_sitzkontingente
 (
   partei INT,
   land   INT,
@@ -274,17 +274,17 @@ CREATE TABLE endgueltige_landessitze
 );
 
 
--- INSERT INTO endgueltige_landessitze(partei, land, sitze)
+-- INSERT INTO endgueltige_sitzkontingente(partei, land, sitze)
 -- SELECT partei, land, mindestsitzzahl
 -- FROM mindestsitzzahl_pro_partei_pro_land;
 
 
-CREATE OR REPLACE FUNCTION update_landessitze(n int, partei_id int)
+CREATE OR REPLACE FUNCTION update_sitzkontingent(n int, partei_id int)
   RETURNS VOID
 AS
 $FUNCTION$
 BEGIN
-  DELETE FROM endgueltige_landessitze WHERE partei = partei_id;
+  DELETE FROM endgueltige_sitzkontingente WHERE partei = partei_id;
   WITH hochst AS (
        SELECT zt.land AS land,
               (1.000 * zt.anzahl_stimmen) / (s.a - 0.5) AS hochst
@@ -295,14 +295,14 @@ BEGIN
       ORDER BY hochst DESC
       LIMIT n
   )
-  INSERT INTO endgueltige_landessitze (partei, land, sitze)
+  INSERT INTO endgueltige_sitzkontingente (partei, land, sitze)
   SELECT partei_id, land, COUNT(*) AS sitze
   FROM hochst
   GROUP BY land;
 END
 $FUNCTION$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION calculate_endgueltige_landesssitze(partei_id int)
+CREATE OR REPLACE FUNCTION calculate_endgueltige_sitzkontingente(partei_id int)
   RETURNS VOID
 AS
 $FUNCTION$
@@ -314,11 +314,11 @@ BEGIN
   target := (SELECT sitze FROM sitze_pro_partei WHERE partei = partei_id);
   n := target;
   LOOP
-    PERFORM update_landessitze(n, partei_id);
+    PERFORM update_sitzkontingent(n, partei_id);
     curr := (
         WITH max_pro_land(land, anz) AS
         (SELECT mind.land, GREATEST(eg.sitze, mind.mindestsitzzahl)
-        FROM endgueltige_landessitze eg
+        FROM endgueltige_sitzkontingente eg
           JOIN mindestsitzzahl_pro_partei_pro_land mind ON eg.partei = mind.partei AND eg.land = mind.land
         WHERE mind.partei = partei_id
         )
@@ -337,7 +337,7 @@ BEGIN
 END;
 $FUNCTION$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION calculate_endgueltige_landesssitze_all()
+CREATE OR REPLACE FUNCTION calculate_endgueltige_sitzkontingente_all()
   RETURNS VOID
 AS
 $FUNCTION$
@@ -346,7 +346,7 @@ DECLARE
 BEGIN
   FOR p IN SELECT * FROM parteien_ohne_huerde
   LOOP
-    PERFORM calculate_endgueltige_landesssitze(p.partei);
+    PERFORM calculate_endgueltige_sitzkontingente(p.partei);
   END LOOP;
 END;
 $FUNCTION$ LANGUAGE plpgsql;
@@ -355,22 +355,33 @@ $FUNCTION$ LANGUAGE plpgsql;
 DO
 $$
  BEGIN
-   PERFORM calculate_endgueltige_landesssitze_all();
+   PERFORM distribute_sitze();
+   PERFORM calculate_endgueltige_sitzkontingente_all();
  END;
-$$
+$$;
 
 
-WITH max_pro_land(partei, land, anz) AS
-(SELECT mind.partei, mind.land, GREATEST(eg.sitze, mind.mindestsitzzahl)
-FROM endgueltige_landessitze eg
-  JOIN mindestsitzzahl_pro_partei_pro_land mind ON eg.partei = mind.partei AND eg.land = mind.land
-)
-SELECT partei, SUM(anz) FROM max_pro_land GROUP BY partei;
+CREATE VIEW endgueltige_sitze(partei, land, anz) AS 
+(
+  SELECT mind.partei, 
+         mind.land, 
+         GREATEST(eg.sitze, mind.mindestsitzzahl)
+  FROM endgueltige_sitzkontingente eg
+       JOIN mindestsitzzahl_pro_partei_pro_land mind 
+       ON eg.partei = mind.partei AND eg.land = mind.land
+);
 
-WITH mandate_pro_partei_pro_bundesland(partei, bundesland, mandate) AS(
-  VALUES (49, 1, 10), (49, 13, 3), (49, 2, 3), (49, 3, 18), (49, 4, 1), (49, 12, 4)
-),
-ranked_listen_kandidate(partei, kandidat, listennummer, bundesland, rank, mandate) AS (
+
+
+CREATE VIEW anzahl_landessitze(partei, land, anz) AS 
+(
+  SELECT es.partei, es.land, GREATEST(es.anz - COALESCE(dir.anzahl_direkt, 0), 0)
+  FROM
+    endgueltige_sitze es  
+    LEFT OUTER JOIN anzahl_direktmandaten_pro_partei_pro_land dir 
+      ON es.partei = dir.partei AND es.land = dir.land
+);
+
 SELECT l.partei,
        lk.kandidat,
        lk.listennummer,
