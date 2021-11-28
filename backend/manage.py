@@ -189,5 +189,14 @@ def seed():
     db.commit()
 
 
+@manage.command()
+@click.argument('script')
+def run_script(script):
+    db = Transaction()
+    with open(script, "r") as f:
+        db.run_query(f.read(), fetch=False)
+        db.commit()
+
+
 if __name__ == "__main__":
     manage()  # pylint: disable=no-value-for-parameter
