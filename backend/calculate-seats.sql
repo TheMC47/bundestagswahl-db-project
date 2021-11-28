@@ -198,7 +198,7 @@ GROUP BY sz.partei
     );
 
 -- Berechnung der Anzahl der Sitze im Bundestag pro Partei
-CREATE TABLE parteien_im_parlament
+CREATE TABLE sitze_pro_partei
 (
     partei INT PRIMARY KEY,
     sitze  INT,
