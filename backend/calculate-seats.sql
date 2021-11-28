@@ -5,7 +5,8 @@ CREATE VIEW erststimmen_pro_direktkandidat
              partei,
              wahlkreis,
              erststimmen
-                ) AS
+                )
+AS
 (
 SELECT e.direktkandidat,
        pk.id,
@@ -47,7 +48,7 @@ CREATE VIEW zweitstimmen_pro_partei_pro_land(partei, land, zweitstimmen) AS
 (
 SELECT pk.id,
        wk.bundesland,
-       SUM(COALESCE(z.zweitstimmen, 0))
+       SUM(COALESCE(z.anzahl_stimmen, 0))
 FROM parteiKandidaturen pk
          LEFT OUTER JOIN landeslisten l ON l.partei = pk.id
          LEFT OUTER JOIN zweitstimmeErgebnisse z ON z.landesliste = l.id
@@ -96,7 +97,7 @@ FROM mindestens_3_direktmandaten
 UNION
 
 SELECT *
-FROM parteien_5prozent
+FROM parteien_5_prozent
 
 UNION
 
@@ -109,7 +110,7 @@ FROM parteikandidaturen pk
 CREATE VIEW mindest_sitzkontingente_pro_partei(partei, land, sitzkontingente) AS
 (
 WITH hochst_all(land, hochst) AS (
-    SELECT bl.id AS land,
+    SELECT bl.id                                    AS land,
            (bv.anzahl_bewohner * 1.000) / (a - 0.5) AS hochst
     FROM bevoelkerung bv
              JOIN bundeslaender bl ON bl.id = bv.id
@@ -120,41 +121,32 @@ WITH hochst_all(land, hochst) AS (
     LIMIT 598
 ),
      sitzkontigente_pro_land(land, sitzkontigente) AS (
-         SELECT
-             land,
-             COUNT (*)
-         FROM
-             hochst_all
-         GROUP BY
-             land
+         SELECT land,
+                COUNT(*)
+         FROM hochst_all
+         GROUP BY land
      ),
      parteisitze_hochst (partei, land, hochst) AS (
-         SELECT
-             z.partei,
-             z.land,
-             (z.zweitstimmen * 1.000) / (s.a - 0.5) AS hochst
-         FROM
-             parteien_im_parlament h
-                 LEFT OUTER JOIN zweitstimmen_pro_partei_pro_land z ON h.partei = z.partei
-                 JOIN (
-                 SELECT
-                     sl.land,
-                     generate_series(1, sl.sitzkontigente) AS a
-                 FROM
-                     sitzkontigente_pro_land sl
-             ) s ON s.land = z.land
+         SELECT z.partei,
+                z.land,
+                (z.zweitstimmen * 1.000) / (s.a - 0.5) AS hochst
+         FROM parteien_im_parlament h
+                  LEFT OUTER JOIN zweitstimmen_pro_partei_pro_land z ON h.partei = z.partei
+                  JOIN (
+             SELECT sl.land,
+                    generate_series(1, sl.sitzkontigente) AS a
+             FROM sitzkontigente_pro_land sl
+         ) s ON s.land = z.land
      ),
      parteirank_pro_land (partei, land, rank) AS (
-         SELECT
-             ph.partei,
-             ph.land,
-             RANK() OVER (
-                 PARTITION BY ph.land
-                 ORDER BY
-                     ph.hochst DESC
-                 )
-         FROM
-             parteisitze_hochst ph
+         SELECT ph.partei,
+                ph.land,
+                RANK() OVER (
+                    PARTITION BY ph.land
+                    ORDER BY
+                        ph.hochst DESC
+                    )
+         FROM parteisitze_hochst ph
      )
 SELECT rk.partei,
        rk.land,
@@ -221,14 +213,14 @@ BEGIN
     DELETE FROM sitze_pro_partei;
     WITH hochst AS (
         SELECT h.partei, (1.000 * COALESCE(zt.zweitstimmen, 0)) / (s.a - 0.5) AS hochst
-        FROM
-            parteien_im_parlament h
-                LEFT OUTER JOIN zweitstimmen_bundesweit zt ON h.partei = zt.partei,
-            generate_series(1, n) AS s(a)
+        FROM parteien_im_parlament h
+                 LEFT OUTER JOIN zweitstimmen_bundesweit zt ON h.partei = zt.partei,
+             generate_series(1, n) AS s(a)
         ORDER BY hochst DESC
         LIMIT n
     )
-    INSERT INTO sitze_pro_partei(partei, sitze)
+    INSERT
+    INTO sitze_pro_partei(partei, sitze)
     SELECT partei, COUNT(*) AS sitze
     FROM hochst
     GROUP BY partei;
@@ -241,9 +233,9 @@ CREATE OR REPLACE FUNCTION distribute_sitze()
 AS
 $FUNCTION$
 DECLARE
-    uberhang INT;
+    uberhang   INT;
     sitze_curr INT;
-    p RECORD;
+    p          RECORD;
 BEGIN
     sitze_curr := 598;
     LOOP
@@ -252,7 +244,8 @@ BEGIN
                      (SELECT GREATEST(mpp.mindessitzanspruch - COALESCE(s.sitze, 0), 0) as u
                       FROM midestsitzanspruch_pro_partei mpp
                                LEFT OUTER JOIN sitze_pro_partei s ON mpp.partei = s.partei)
-            SELECT SUM(u) FROM ueberhang_q
+            SELECT SUM(u)
+            FROM ueberhang_q
         );
         IF uberhang > 3
         THEN
@@ -279,9 +272,9 @@ CREATE TABLE endgueltige_sitzkontingente
     partei INT,
     land   INT,
     sitze  INT,
-    PRIMARY KEY(partei, land),
-    FOREIGN KEY(land) REFERENCES bundeslaender(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY(partei) REFERENCES parteikandidaturen(id) ON DELETE CASCADE ON UPDATE CASCADE
+    PRIMARY KEY (partei, land),
+    FOREIGN KEY (land) REFERENCES bundeslaender (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (partei) REFERENCES parteikandidaturen (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
@@ -292,16 +285,16 @@ $FUNCTION$
 BEGIN
     DELETE FROM endgueltige_sitzkontingente WHERE partei = partei_id;
     WITH hochst AS (
-        SELECT zt.land AS land,
+        SELECT zt.land                                 AS land,
                (1.000 * zt.zweitstimmen) / (s.a - 0.5) AS hochst
-        FROM
-            zweitstimmen_pro_partei_pro_land zt,
-            generate_series(1, n) AS s(a)
+        FROM zweitstimmen_pro_partei_pro_land zt,
+             generate_series(1, n) AS s(a)
         WHERE zt.partei = partei_id
         ORDER BY hochst DESC
         LIMIT n
     )
-    INSERT INTO endgueltige_sitzkontingente (partei, land, sitze)
+    INSERT
+    INTO endgueltige_sitzkontingente (partei, land, sitze)
     SELECT partei_id, land, COUNT(*) AS sitze
     FROM hochst
     GROUP BY land;
@@ -313,8 +306,8 @@ CREATE OR REPLACE FUNCTION calculate_endgueltige_sitzkontingente(partei_id int)
 AS
 $FUNCTION$
 DECLARE
-    n INT;
-    curr INT;
+    n      INT;
+    curr   INT;
     target INT;
 BEGIN
     target := (SELECT sitze FROM sitze_pro_partei WHERE partei = partei_id);
@@ -325,10 +318,12 @@ BEGIN
             WITH max_pro_land(land, anz) AS
                      (SELECT mind.land, GREATEST(eg.sitze, mind.mindestsitzzahl)
                       FROM endgueltige_sitzkontingente eg
-                               JOIN mindestsitzzahl_pro_partei_pro_land mind ON eg.partei = mind.partei AND eg.land = mind.land
+                               JOIN mindestsitzzahl_pro_partei_pro_land mind
+                                    ON eg.partei = mind.partei AND eg.land = mind.land
                       WHERE mind.partei = partei_id
                      )
-            SELECT SUM(anz) FROM max_pro_land
+            SELECT SUM(anz)
+            FROM max_pro_land
         );
         IF curr > target
         THEN
@@ -378,27 +373,27 @@ FROM endgueltige_sitzkontingente eg
 CREATE VIEW anzahl_landessitze(partei, land, anz) AS
 (
 SELECT es.partei, es.land, GREATEST(es.anz - COALESCE(dir.anzahl_direkt, 0), 0)
-FROM
-    endgueltige_sitze es
-        LEFT OUTER JOIN anzahl_direktmandaten_pro_partei_pro_land dir
-                        ON es.partei = dir.partei AND es.land = dir.land
+FROM endgueltige_sitze es
+         LEFT OUTER JOIN anzahl_direktmandaten_pro_partei_pro_land dir
+                         ON es.partei = dir.partei AND es.land = dir.land
     );
 
-CREATE TABLE bundestagsmandaten(
-                                   id SERIAL,
-                                   kandidat INT NOT NULL,
-                                   partei INT,
-                                   bundesland INT NOT NULL,
-                                   direktmandat BOOL NOT NULL,
-                                   FOREIGN KEY (bundesland) REFERENCES bundeslaender(id)
-                                       ON UPDATE CASCADE
-                                       ON DELETE CASCADE,
-                                   FOREIGN KEY (kandidat) REFERENCES kandidaten(id)
-                                       ON UPDATE CASCADE
-                                       ON DELETE CASCADE,
-                                   FOREIGN KEY (partei) REFERENCES parteikandidaturen(id)
-                                       ON UPDATE CASCADE
-                                       ON DELETE CASCADE
+CREATE TABLE bundestagsmandaten
+(
+    id           SERIAL,
+    kandidat     INT  NOT NULL,
+    partei       INT,
+    bundesland   INT  NOT NULL,
+    direktmandat BOOL NOT NULL,
+    FOREIGN KEY (bundesland) REFERENCES bundeslaender (id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (kandidat) REFERENCES kandidaten (id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (partei) REFERENCES parteikandidaturen (id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 INSERT INTO bundestagsmandaten(kandidat, partei, bundesland, direktmandat)
@@ -412,7 +407,7 @@ WITH ranked_listen_kandidate(partei, kandidat, listennummer, bundesland, rank, m
     FROM listenkandidaten lk
              JOIN landeslisten l ON lk.landesliste = l.id
              JOIN parteien_im_parlament h ON h.partei = l.partei
-             JOIN anzahl_landessitze als ON als.partei = l.partei AND als.land=l.bundesland
+             JOIN anzahl_landessitze als ON als.partei = l.partei AND als.land = l.bundesland
     WHERE lk.kandidat NOT IN (SELECT kandidat FROM direkmandaten_pro_partei)
 )
 SELECT kandidat, partei, bundesland, false
