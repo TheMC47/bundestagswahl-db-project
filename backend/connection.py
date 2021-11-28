@@ -23,7 +23,7 @@ class Transaction:
     def run_query(self, query: str, dataklass=None, fetch=True):
         self.__cursor.execute(query)
         if not fetch:
-            return
+            return []
         ts = self.__cursor.fetchall()
         if dataklass is None:
             return ts
