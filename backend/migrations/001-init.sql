@@ -21,7 +21,7 @@ CREATE TABLE bevoelkerung
     FOREIGN KEY (id) REFERENCES bundeslaender (id) ON
         UPDATE CASCADE ON
         DELETE CASCADE,
-        FOREIGN KEY (wahl) REFERENCES wahlen (id) ON
+    FOREIGN KEY (wahl) REFERENCES wahlen (id) ON
         UPDATE CASCADE ON
         DELETE CASCADE,
         PRIMARY KEY (id, wahl)

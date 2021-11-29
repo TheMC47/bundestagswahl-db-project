@@ -20,10 +20,14 @@ class Transaction:
 
         self.__cursor = self.__connection.cursor()
 
+    def run_script(self, script_path: str):
+        with open(script_path, "r") as f:
+            self.run_query(f.read(), fetch=False)
+
     def run_query(self, query: str, dataklass=None, fetch=True):
         self.__cursor.execute(query)
         if not fetch:
-            return
+            return []
         ts = self.__cursor.fetchall()
         if dataklass is None:
             return ts
