@@ -1,3 +1,7 @@
+-- > python manage.py migrate
+-- > python manage.py seed
+-- > python manage.py run-script calculate-seats.sql
+--
 -- Bestimmung der Direktmandaten
 CREATE VIEW erststimmen_pro_direktkandidat
             (

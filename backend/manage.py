@@ -1,5 +1,7 @@
 import sys
 from dataclasses import dataclass
+from os import listdir
+from os.path import isfile, join, splitext
 
 import click
 
@@ -190,11 +192,27 @@ def seed():
 
 
 @manage.command()
-@click.argument('script')
+@click.argument("script")
 def run_script(script):
     db = Transaction()
-    with open(script, "r") as f:
-        db.run_query(f.read(), fetch=False)
+    db.run_script(script)
+    db.commit()
+
+
+@manage.command()
+def migrate():
+    MIGRATIONS_DIR = "migrations"
+    migrations = sorted(
+        [
+            f
+            for f in listdir(MIGRATIONS_DIR)
+            if (isfile(join(MIGRATIONS_DIR, f)) and splitext(f)[1] == ".sql")
+        ]
+    )
+    for migration in migrations:
+        print(f"Migrating: {migration}")
+        db = Transaction()
+        db.run_script(migration)
         db.commit()
 
 
