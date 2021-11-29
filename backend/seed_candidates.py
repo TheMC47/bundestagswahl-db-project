@@ -386,3 +386,12 @@ def seed_ergebnisse(
         2017,
         parties_candidacy,
     )
+
+
+def seed_minority_parties(db: Transaction):
+    db.run_query(
+        """INSERT INTO minderheitsparteien (
+    SELECT id FROM parteien WHERE kurzbezeichnung = 'SSW');
+    """,
+        fetch=False,
+    )

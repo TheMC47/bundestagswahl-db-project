@@ -1,5 +1,7 @@
 import sys
 from dataclasses import dataclass
+from os import listdir
+from os.path import isfile, join, splitext
 
 import click
 
@@ -10,6 +12,7 @@ from seed_candidates import (
     seed_ergebnisse,
     seed_landeslisten_2017,
     seed_landeslisten_2021,
+    seed_minority_parties,
     seed_wahldaten,
 )
 from seed_parties import seed_parties
@@ -184,7 +187,33 @@ def seed():
         landeslisten_2017,
         landeslisten_2021,
     )
+    seed_minority_parties(db)
     db.commit()
+
+
+@manage.command()
+@click.argument("script")
+def run_script(script):
+    db = Transaction()
+    db.run_script(script)
+    db.commit()
+
+
+@manage.command()
+def migrate():
+    MIGRATIONS_DIR = "migrations"
+    migrations = sorted(
+        [
+            f
+            for f in listdir(MIGRATIONS_DIR)
+            if (isfile(join(MIGRATIONS_DIR, f)) and splitext(f)[1] == ".sql")
+        ]
+    )
+    for migration in migrations:
+        print(f"Migrating: {migration}")
+        db = Transaction()
+        db.run_script(migration)
+        db.commit()
 
 
 if __name__ == "__main__":
