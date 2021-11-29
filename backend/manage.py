@@ -212,7 +212,7 @@ def migrate():
     for migration in migrations:
         print(f"Migrating: {migration}")
         db = Transaction()
-        db.run_script(migration)
+        db.run_script(join(MIGRATIONS_DIR, migration))
         db.commit()
 
 
