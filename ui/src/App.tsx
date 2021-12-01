@@ -2,6 +2,17 @@ import { useState } from 'react';
 import './App.css';
 import ResultBarChart from './components/ResultBarChart';
 
+export interface ElectionResult {
+  candidate: string,
+  value: number,
+  color: string
+}
+
+export interface ElectionResults {
+  data: ElectionResult[]
+}
+
+
 const sample = [{
   candidate: 'AFD',
   value: 25,
@@ -16,14 +27,13 @@ const sample = [{
   candidate: 'Grüne',
   value: 40,
   color: '#fbcb39'
-},
-];
+}];
 
 
 
 
 function App(): JSX.Element {
-  const [data, _setData] = useState([sample]);
+  const [data, _setData] = useState<ElectionResults['data']>(sample);
 
   return (
     <div className="App">
