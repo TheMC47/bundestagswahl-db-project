@@ -33,12 +33,12 @@ const sample = [{
 
 
 function App(): JSX.Element {
-  const [data, _setData] = useState<ElectionResults['data']>(sample);
+  const [data, _setData] = useState<ElectionResult[]>(sample);
 
   return (
     <div className="App">
-      <h2>Graphs with React</h2>
-      <ResultBarChart data={data} />
+      <h2>Ergebnisse</h2>
+      <ResultBarChart/>
     </div>
   );
 }
