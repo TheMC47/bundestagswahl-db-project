@@ -40,38 +40,42 @@ class ResultBarChart extends Component {
   }
 
   drawChart() {
-        const size = 500
-        const margin = 80;
+    const size = 500
+    const margin = 60;
         const svgContainer = d3.select('#container');
-        const svg = d3.select(this.ref.current).append('svg').attr('width', size).attr('height', size);
-        const width = 1000 - 2 * margin;
-        const height = 600 - 2 * margin;
+        const width = 1000 - 2*margin;
+        const height = 600 - 2*margin;
+        const svg = d3.select(this.ref.current).append('svg').attr('width', width).attr('height', height);
         const rectwidth = 60;
 
         const xScale = d3.scaleBand()
         .range([0, width])
         .domain(this.data.map((s) => s.candidate))
-        .padding(0.1);
+        .padding(0.2);
 
         const yScale = d3.scaleLinear()
             .range([height, 0])
             .domain([0, 100]);
 
         svg.append('g')
-            .attr('transform', `translate(0, ${height})`)
+            .attr('transform', `translate(${margin}, ${margin+ 400})`)
             .call(d3.axisBottom(xScale));
 
           svg.append('g')
+            .attr('transform', `translate(${margin}, ${margin-60})`)
             .call(d3.axisLeft(yScale));
 
   const barGroups = svg.selectAll()
   .data(this.data)
   .enter()
   .append('g')
+  if (this.data.length) {
+    return;
+  }
 
-        barGroups.append('rect').attr('x', (d,i) => i *(rectwidth + 1) )
+        barGroups.append('rect').attr('x', (d, _) => xScale(d.candidate))
         .attr('y', (d:ElectionResult) => d.value)
-        .attr('width', rectwidth).attr('height', d => height - yScale(d.value))
+        .attr('width', rectwidth).attr('height', d => yScale(d.value))
         .attr('fill', d => d.color)
         .on('mouseenter', function(actual, i) {
           d3.selectAll('.value')
@@ -112,15 +116,6 @@ class ResultBarChart extends Component {
         .attr('y', 15)
         .attr('text-anchor', 'middle')
         .text(this.title)
-
-    /*  barGroups
-      .append('text')
-      .attr('class', 'value')
-      .attr('x', (a:ElectionResult) =>   xScale.bandwidth())
-      .attr('y', (a) => yScale(a.value) + 30)
-      .attr('text-anchor', 'middle')
-      .text((a) => `${a.value}%`)*/
-
   }
 
 render()  {
