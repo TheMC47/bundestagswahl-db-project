@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './App.css';
 import ResultBarChart from './components/ResultBarChart';
+import BarChart from './components/BarChart';
 
 export interface ElectionResult {
   candidate: string,
@@ -27,6 +28,11 @@ const sample = [{
   candidate: 'Grüne',
   value: 40,
   color: '#fbcb39'
+},
+{
+  candidate: 'FDP',
+  value: 50,
+  color: '#ff0000',
 }];
 
 
@@ -38,7 +44,7 @@ function App(): JSX.Element {
   return (
     <div className="App">
       <h2>Ergebnisse</h2>
-      <ResultBarChart/>
+      <BarChart data = {sample} title = {'Ergebnisse'}/>
     </div>
   );
 }
