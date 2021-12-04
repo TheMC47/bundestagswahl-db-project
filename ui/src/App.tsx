@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import './App.css';
 import PieChart from './components/PieChart';
-import ResultBarChart  from './components/ResultBarChart';
 
 export interface ElectionResult {
   candidate: string;
@@ -43,7 +42,7 @@ function App(): JSX.Element {
     <div className="App">
       <h2>Ergebnisse</h2>
       <div>
-        <ResultBarChart />
+        <PieChart data={data} title='X' label='yy' />
       </div>
 
     </div>
