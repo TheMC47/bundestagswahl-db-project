@@ -1,48 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
-import PieChart from './components/PieChart';
+import SeatDistributionChart from './components/SeatDistribution';
+
+import { getSitzVerteilung } from './api'
 
 export interface ElectionResult {
-  candidate: string;
-  value: number;
-  color: string;
+  kurzbezeichnung: string;
+  sitze: number;
+  wahl: number;
 }
-
-export interface ElectionResults {
-  data: ElectionResult[];
-}
-
-const sample: ElectionResult[] = [
-  {
-    candidate: 'AFD',
-    value: 25,
-    color: '#000000',
-  },
-  {
-    candidate: 'SPD',
-    value: 30,
-    color: '#00a2ee',
-  },
-  {
-    candidate: 'Grüne',
-    value: 40,
-    color: '#fbcb39',
-  },
-  {
-    candidate: 'FDP',
-    value: 50,
-    color: '#ff0000',
-  },
-];
 
 function App(): JSX.Element {
-  const [data, _setData] = useState<ElectionResult[]>(sample);
+  const [data, setData] = useState<ElectionResult[]>([]);
+
+  useEffect(() => {
+    getSitzVerteilung(2021).then(d => setData(d))
+  }, [])
 
   return (
     <div className="App">
       <h2>Ergebnisse</h2>
-      <div>
-        <PieChart data={data} title='X' label='yy' />
+      <div style={{
+        maxWidth: '700px',
+        margin: '0 auto'
+      }}>
+        <SeatDistributionChart data={data} title='X' label='yy' />
       </div>
 
     </div>

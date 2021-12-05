@@ -1,6 +1,5 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-import styled from '@emotion/styled';
 import { ElectionResult } from '../App';
 
 
@@ -12,14 +11,24 @@ interface PieChartProps {
   label: string
 }
 
+const colorMap: Record<string, string> = {
+  'CDU': '#004B76',
+  'SPD': '#C0003D',
+  'AfD': '#80CDEC',
+  'FDP': '#F7BC3D',
+  'DIE LINKE': '#5F316E',
+  'GRÜNE': '#008549',
+  'CSU': '#0076B6'
+}
+
 function getData(data: ElectionResult[], label: string) {
   return {
-    labels: data.map(d => d.candidate),
+    labels: data.map(d => d.kurzbezeichnung),
     datasets: [
       {
         label: label,
-        data: data.map(d => d.value),
-        backgroundColor: data.map(d => d.color),
+        data: data.map(d => d.sitze),
+        backgroundColor: data.map(d => colorMap[d.kurzbezeichnung]),
 
       },
     ],
@@ -50,20 +59,9 @@ function getOptions(title: string) {
   }
 }
 
-
-
-
-const ChartWrapper = styled.div`
-  max-width: 700px;
-  margin: 0 auto;
-`;
-
-
-export default function PieChart(props: PieChartProps): JSX.Element {
+export default function SeatDistributionChart(props: PieChartProps): JSX.Element {
   return (
-    <ChartWrapper>
-      <Doughnut data={getData(props.data, props.label)} options={getOptions(props.title)} />
-    </ChartWrapper>
+    <Doughnut data={getData(props.data, props.label)} options={getOptions(props.title)} />
   )
 }
 
