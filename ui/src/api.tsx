@@ -8,8 +8,8 @@ async function api<T>(suffix: string, init?: RequestInit): Promise<T> {
   return await r.json();
 }
 
-const yearToId = (year: number): number => year == 2021 ? 1 : 0;
+/* const yearToId = (year: number): number => year == 2021 ? 1 : 2; */
 
-export async function getSitzVerteilung(year: number): Promise<ElectionResult[]> {
-  return api(`/sitze_pro_partei_full?wahl=eq.${yearToId(year)}`);
+export async function getSitzVerteilung(): Promise<ElectionResult[]> {
+  return api('/sitze_pro_partei_full');
 }

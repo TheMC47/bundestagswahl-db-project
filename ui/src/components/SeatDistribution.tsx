@@ -1,48 +1,61 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Table } from 'react-bootstrap';
 import { Doughnut } from 'react-chartjs-2';
 import { ElectionResult } from '../App';
 
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface PieChartProps {
+interface SeatDistributionProps {
   data: ElectionResult[],
-  title: string,
-  label: string
+  year: number
 }
 
-const colorMap: Record<string, string> = {
-  'CDU': '#004B76',
-  'SPD': '#C0003D',
-  'AfD': '#80CDEC',
-  'FDP': '#F7BC3D',
-  'DIE LINKE': '#5F316E',
-  'GRÜNE': '#008549',
-  'CSU': '#0076B6'
+export function SeatDistributionTable({ data, year }: SeatDistributionProps): JSX.Element {
+  const filteredData = data.filter(d => d.wahl == year)
+
+  return (
+    <Table>
+      <thead>
+        <tr>
+          <th>Partei</th>
+          <th>Anzahl Sitze</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          filteredData.map((d) =>
+            <tr key={d.kurzbezeichnung}>
+              <td>{d.kurzbezeichnung}</td>
+              <td>{d.sitze}</td>
+            </tr>
+          )
+        }
+      </tbody>
+    </Table>
+  )
 }
 
-function getData(data: ElectionResult[], label: string) {
-  return {
-    labels: data.map(d => d.kurzbezeichnung),
-    datasets: [
-      {
-        label: label,
-        data: data.map(d => d.sitze),
-        backgroundColor: data.map(d => colorMap[d.kurzbezeichnung]),
+export default function SeatDistributionChart({ data, year }: SeatDistributionProps): JSX.Element {
 
-      },
-    ],
-    hoverOffset: 2
-  };
+  const title = 'Sitzverteilung'
+  const label = 'Sitzverteilung'
 
-}
+  const colorMap: Record<string, string> = {
+    'CDU': '#004B76',
+    'SPD': '#C0003D',
+    'AfD': '#80CDEC',
+    'FDP': '#F7BC3D',
+    'DIE LINKE': '#5F316E',
+    'GRÜNE': '#008549',
+    'CSU': '#0076B6'
+  }
 
-function getOptions(title: string) {
-  return {
+  const options = {
     rotation: -90,
     circumference: 180,
     tooltip: {
-      enabled: false
+      enabled: true,
     },
     cutoutPercentage: 95,
     responsive: true,
@@ -57,11 +70,23 @@ function getOptions(title: string) {
       }
     }
   }
-}
 
-export default function SeatDistributionChart(props: PieChartProps): JSX.Element {
+
+  const filteredData = data.filter(d => d.wahl == year)
+  const chartData = {
+    labels: filteredData.map(d => d.kurzbezeichnung),
+    datasets: [
+      {
+        label: label,
+        data: filteredData.map(d => d.sitze),
+        backgroundColor: data.map(d => colorMap[d.kurzbezeichnung]),
+
+      },
+    ],
+    hoverOffset: 2
+  };
+
   return (
-    <Doughnut data={getData(props.data, props.label)} options={getOptions(props.title)} />
+    <Doughnut data={chartData} options={options} />
   )
 }
-

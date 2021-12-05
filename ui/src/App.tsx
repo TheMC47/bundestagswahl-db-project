@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import SeatDistributionChart from './components/SeatDistribution';
+import SeatDistributionChart, { SeatDistributionTable } from './components/SeatDistribution';
 
 import { getSitzVerteilung } from './api'
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Col, Container, Form, Row } from 'react-bootstrap';
 
 export interface ElectionResult {
   kurzbezeichnung: string;
@@ -12,22 +15,36 @@ export interface ElectionResult {
 
 function App(): JSX.Element {
   const [data, setData] = useState<ElectionResult[]>([]);
+  const [year, setYear] = useState<number>(1);
 
   useEffect(() => {
-    getSitzVerteilung(2021).then(d => setData(d))
+    getSitzVerteilung().then(d => setData(d))
   }, [])
 
-  return (
-    <div className="App">
-      <h2>Ergebnisse</h2>
-      <div style={{
-        maxWidth: '700px',
-        margin: '0 auto'
-      }}>
-        <SeatDistributionChart data={data} title='X' label='yy' />
-      </div>
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    setYear(+e.currentTarget.value)
+  }
 
-    </div>
+  return (
+    <Container className="App d-flex justify-content-center">
+      <div>
+        <h2>Ergebnisse</h2>
+        <Row>
+          <Col>
+            <SeatDistributionChart year={year} data={data} />
+          </Col>
+          <Col>
+            <Form.Select onChange={handleYearChange}>
+              <option value="1">2021</option>
+              <option value="2">2017</option>
+            </Form.Select>
+          </Col>
+        </Row>
+        <Row>
+          <SeatDistributionTable year={year} data={data} />
+        </Row>
+      </div>
+    </Container>
   );
 }
 
