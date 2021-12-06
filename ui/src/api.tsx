@@ -1,4 +1,4 @@
-import { ElectionResult } from './App';
+import { ElectionResult } from './models'
 
 export const URI = process.env.REACT_APP_URI
 

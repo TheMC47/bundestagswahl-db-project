@@ -1,14 +1,51 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Table } from 'react-bootstrap';
+import { Col, Container, Form, Row, Table } from 'react-bootstrap';
 import { Doughnut } from 'react-chartjs-2';
-import { ElectionResult } from '../App';
+import { getSitzVerteilung } from '../api'
+import { useEffect, useState } from 'react';
+import { ElectionResult } from '../models'
 
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface SeatDistributionProps {
-  data: ElectionResult[],
+  data: ElectionResult[]
   year: number
+}
+
+
+export default function SeatDistribution(): JSX.Element {
+
+  const [data, setData] = useState<ElectionResult[]>([]);
+  const [year, setYear] = useState<number>(1);
+
+  useEffect(() => {
+    getSitzVerteilung().then(d => setData(d))
+  }, [])
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    setYear(+e.currentTarget.value)
+  }
+
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <SeatDistributionChart year={year} data={data} />
+        </Col>
+        <Col>
+          <Form.Select onChange={handleYearChange}>
+            <option value="1">2021</option>
+            <option value="2">2017</option>
+          </Form.Select>
+        </Col>
+      </Row>
+      <Row>
+        <SeatDistributionTable year={year} data={data} />
+      </Row>
+    </Container>
+  );
+
 }
 
 export function SeatDistributionTable({ data, year }: SeatDistributionProps): JSX.Element {
@@ -36,7 +73,7 @@ export function SeatDistributionTable({ data, year }: SeatDistributionProps): JS
   )
 }
 
-export default function SeatDistributionChart({ data, year }: SeatDistributionProps): JSX.Element {
+export function SeatDistributionChart({ data, year }: SeatDistributionProps): JSX.Element {
 
   const title = 'Sitzverteilung'
   const label = 'Sitzverteilung'
@@ -79,8 +116,7 @@ export default function SeatDistributionChart({ data, year }: SeatDistributionPr
       {
         label: label,
         data: filteredData.map(d => d.sitze),
-        backgroundColor: data.map(d => colorMap[d.kurzbezeichnung]),
-
+        backgroundColor: filteredData.map(d => colorMap[d.kurzbezeichnung]),
       },
     ],
     hoverOffset: 2
