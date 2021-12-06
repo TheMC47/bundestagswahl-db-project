@@ -1,51 +1,16 @@
-import { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import PieChart from './components/PieChart';
-
-export interface ElectionResult {
-  candidate: string;
-  value: number;
-  color: string;
-}
-
-export interface ElectionResults {
-  data: ElectionResult[];
-}
-
-const sample: ElectionResult[] = [
-  {
-    candidate: 'AFD',
-    value: 25,
-    color: '#000000',
-  },
-  {
-    candidate: 'SPD',
-    value: 30,
-    color: '#00a2ee',
-  },
-  {
-    candidate: 'Grüne',
-    value: 40,
-    color: '#fbcb39',
-  },
-  {
-    candidate: 'FDP',
-    value: 50,
-    color: '#ff0000',
-  },
-];
+import { Col, Container } from 'react-bootstrap';
+import SeatDistribution from './components/SeatDistribution';
 
 function App(): JSX.Element {
-  const [data, _setData] = useState<ElectionResult[]>(sample);
 
   return (
-    <div className="App">
-      <h2>Ergebnisse</h2>
-      <div>
-        <PieChart data={data} title='X' label='yy' />
-      </div>
-
-    </div>
+    <Container className="App d-flex justify-content-center">
+      <Col className="mw-75">
+        <SeatDistribution />
+      </Col>
+    </Container>
   );
 }
 

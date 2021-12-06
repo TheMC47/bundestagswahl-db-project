@@ -17,15 +17,6 @@ CREATE TABLE endgueltige_sitzkontingente
     FOREIGN KEY (wahl) REFERENCES wahlen (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE sitze_pro_partei
-(
-    partei INT PRIMARY KEY,
-    sitze  INT,
-    wahl   INT,
-    FOREIGN KEY (partei) REFERENCES parteikandidaturen(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (wahl) REFERENCES wahlen(id) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
 
 CREATE VIEW endgueltige_sitze(partei, land, anz) AS
 (

@@ -1,0 +1,15 @@
+import { ElectionResult } from './models'
+
+export const URI = process.env.REACT_APP_URI
+
+
+async function api<T>(suffix: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(URI + suffix, init);
+  return await r.json();
+}
+
+/* const yearToId = (year: number): number => year == 2021 ? 1 : 2; */
+
+export async function getSitzVerteilung(): Promise<ElectionResult[]> {
+  return api('/sitze_pro_partei_full');
+}

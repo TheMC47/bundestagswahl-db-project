@@ -1,3 +1,12 @@
+CREATE TABLE sitze_pro_partei
+(
+    partei INT PRIMARY KEY,
+    sitze  INT,
+    wahl   INT,
+    FOREIGN KEY (partei) REFERENCES parteikandidaturen(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (wahl) REFERENCES wahlen(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
 CREATE TABLE bundestagsmandaten
 (
     id           SERIAL,
