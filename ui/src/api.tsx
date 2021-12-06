@@ -1,4 +1,4 @@
-import { ElectionResult } from './models'
+import { ElectionResult, Deputy } from './models'
 
 export const URI = process.env.REACT_APP_URI
 
@@ -12,4 +12,8 @@ async function api<T>(suffix: string, init?: RequestInit): Promise<T> {
 
 export async function getSitzVerteilung(): Promise<ElectionResult[]> {
   return api('/sitze_pro_partei_full');
+}
+
+export async function getDeputies(): Promise<Deputy[]> {
+  return api('/abgeordnete');
 }
