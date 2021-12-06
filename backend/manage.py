@@ -216,5 +216,18 @@ def migrate():
         db.commit()
 
 
+@manage.command()
+def setup():
+    print("Migrating...")
+    migrate.callback()
+    print("Done!")
+    print("Seeding...")
+    seed.callback()
+    print("Done!")
+    print("Calculating seats...")
+    run_script.callback("calculate-seats.sql")
+    print("Done!")
+
+
 if __name__ == "__main__":
     manage()  # pylint: disable=no-value-for-parameter
