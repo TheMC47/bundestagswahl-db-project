@@ -1,4 +1,4 @@
-import { ElectionResult, Deputy } from './models'
+import { ElectionResult, Deputy, ElectionRegionResult, Region } from './models'
 
 export const URI = process.env.REACT_APP_URI
 
@@ -16,4 +16,13 @@ export async function getSitzVerteilung(): Promise<ElectionResult[]> {
 
 export async function getDeputies(): Promise<Deputy[]> {
   return api('/abgeordnete');
+}
+
+export async function getResults(id: number): Promise<ElectionRegionResult[]> {
+  return api(`/alle_ergebnisse?wahlkreis=eq.${id}`);
+}
+
+
+export async function getRegions(): Promise<Region[]> {
+  return api('/wahlkreise');
 }
