@@ -14,34 +14,23 @@ interface SeatDistributionProps {
 }
 
 
-export default function SeatDistribution(): JSX.Element {
+export default function SeatDistribution(props: {year: number}): JSX.Element {
 
   const [data, setData] = useState<ElectionResult[]>([]);
-  const [year, setYear] = useState<number>(1);
 
   useEffect(() => {
     getSitzVerteilung().then(d => setData(d))
   }, [])
 
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setYear(+e.currentTarget.value)
-  }
-
   return (
     <Container>
       <Row>
         <Col>
-          <SeatDistributionChart year={year} data={data} />
-        </Col>
-        <Col>
-          <Form.Select onChange={handleYearChange}>
-            <option value="1">2021</option>
-            <option value="2">2017</option>
-          </Form.Select>
+          <SeatDistributionChart year={props.year} data={data} />
         </Col>
       </Row>
       <Row>
-        <SeatDistributionTable year={year} data={data} />
+        <SeatDistributionTable year={props.year} data={data} />
       </Row>
     </Container>
   );

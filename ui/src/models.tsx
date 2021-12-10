@@ -11,7 +11,7 @@ export interface Deputy {
 
 export interface TightestWinner {
     wahl: number;
-    partei_kurzbezeichnung: string;
+    kurzbezeichnung: string;
     wahlkreis: string;
     rank: number;
 }
