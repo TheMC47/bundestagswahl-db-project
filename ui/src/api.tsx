@@ -1,7 +1,6 @@
-import { ElectionResult, Deputy } from './models'
+import { ElectionResult, Deputy, ElectionRegionResult, Region, RegionSummary } from './models'
 
 export const URI = process.env.REACT_APP_URI
-
 
 async function api<T>(suffix: string, init?: RequestInit): Promise<T> {
   const r = await fetch(URI + suffix, init);
@@ -16,4 +15,21 @@ export async function getSitzVerteilung(): Promise<ElectionResult[]> {
 
 export async function getDeputies(): Promise<Deputy[]> {
   return api('/abgeordnete');
+}
+
+export async function getResults(id: number): Promise<ElectionRegionResult[]> {
+  return api(`/alle_ergebnisse?wahlkreis=eq.${id}`);
+}
+
+
+export async function getRegions(): Promise<Region[]> {
+  return api('/wahlkreise');
+}
+
+export async function getRegionSummary(id: number): Promise<RegionSummary> {
+  return api(`/wahlkreis_uebersicht?wahlkreis=eq.${id}`, {
+    headers: new Headers({
+      'Accept': 'application/vnd.pgrst.object+json'
+    })
+  });
 }
