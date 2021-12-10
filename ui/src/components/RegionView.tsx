@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react';
-import { ElectionRegionResult, Region } from '../models'
-import { getResults, getRegions } from '../api'
-import { Container, Table } from 'react-bootstrap';
+import { ElectionRegionResult, Region, RegionSummary } from '../models'
+import { getResults, getRegions, getRegionSummary } from '../api'
+import { Container, Row, Table } from 'react-bootstrap';
 import { Form } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 
 
-export interface PerPartyResultsProps {
-  region: number
+export interface RegionProps {
+  region: Region
 }
 
-export function PerPartyResults({ region }: PerPartyResultsProps): JSX.Element {
+export function PerPartyResults({ region }: RegionProps): JSX.Element {
   const [results, setResults] = useState<ElectionRegionResult[]>([]);
 
   useEffect(() => {
-    getResults(region).then(ds => {
+    getResults(region.id).then(ds => {
       setResults(ds)
     })
   }, [region])
@@ -61,9 +62,34 @@ export function PerPartyResults({ region }: PerPartyResultsProps): JSX.Element {
 
 }
 
+export function RegionSummaryView({ region }: RegionProps): JSX.Element {
+
+  const [regionSummary, setRegionSummary] = useState<RegionSummary | undefined>(undefined);
+
+  useEffect(() => {
+    getRegionSummary(region.id).then(data => {
+      setRegionSummary(data)
+    }
+    )
+  })
+
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <strong>Gewinner:</strong> {regionSummary?.gewinner} ({regionSummary?.sieger_partei})
+        </Col>
+        <Col>
+          <strong>Wahlbeteiligung:</strong> {regionSummary?.wahlbeteiligung}%
+        </Col>
+      </Row>
+    </Container>
+  );
+}
+
 
 export default function RegionView(): JSX.Element {
-  const [region, setRegion] = useState<number | undefined>(undefined);
+  const [region, setRegion] = useState<Region | undefined>(undefined);
   const [regions, setRegions] = useState<Region[]>([]);
 
   useEffect(() => {
@@ -71,17 +97,18 @@ export default function RegionView(): JSX.Element {
   }, [])
 
   const handleRegionChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setRegion(+e.currentTarget.value)
+    setRegion(regions[+e.currentTarget.value])
   }
 
   return (
     <Container>
-      <Form.Select onChange={handleRegionChange} value={region}>
+      <Form.Select onChange={handleRegionChange} value={region?.id}>
         <option value="" selected disabled>Wahlkreis...</option>
         {regions.map(r =>
           <option value={r.id} key={r.id}>{r.name}</option>
         )}
       </Form.Select>
+      {region && <RegionSummaryView region={region} />}
       {region && <PerPartyResults region={region} />}
     </Container>
   );

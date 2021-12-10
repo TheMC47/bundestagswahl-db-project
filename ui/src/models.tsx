@@ -28,3 +28,10 @@ export interface Region {
   id: number;
   name: string;
 }
+
+export interface RegionSummary {
+  wahlkreis: number;
+  sieger_partei: string;
+  gewinner: string;
+  wahlbeteiligung: number;
+}

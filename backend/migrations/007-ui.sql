@@ -73,6 +73,30 @@ FROM zweitstimmeergebnisse ze
   JOIN landeslisten ll ON ll.id = ze.landesliste
   JOIN parteikandidaturen pk ON ll.partei = pk.id
 GROUP BY ze.wahlkreis, pk.wahl;
+
+CREATE VIEW wahlkreis_uebersicht
+(
+  wahlkreis,
+  wahlbeteiligung,
+  gewinner,
+  sieger_partei
+) AS
+SELECT
+  wk.id,
+  ROUND(100.00 * wd.waehlende / wd.wahlberechtigte, 2),
+  full_name(k),
+  p.kurzbezeichnung
+FROM wahlkreise wk
+  JOIN wahlkreiswahldaten wd ON wd.wahlkreis = wk.id
+  JOIN direktkandidaten dk ON dk.wahlkreis = wk.id
+  JOIN kandidaten k ON k.id = dk.kandidat
+  JOIN bundestagsmandaten bm ON bm.kandidat = k.id
+  JOIN parteikandidaturen pk ON dk.partei = pk.id
+  JOIN parteien p ON p.id = pk.partei
+WHERE bm.direktmandat = TRUE AND wd.wahl = 1;
+
+GRANT SELECT ON wahlkreis_uebersicht TO web_anon;
+
 CREATE VIEW alle_ergebnisse(
   wahlkreis,
   kurzbezeichnung,
