@@ -1,4 +1,4 @@
-import { ElectionResult, Deputy } from './models'
+import {ElectionResult, Deputy, TightestWinner} from './models'
 
 export const URI = process.env.REACT_APP_URI
 
@@ -16,4 +16,8 @@ export async function getSitzVerteilung(): Promise<ElectionResult[]> {
 
 export async function getDeputies(): Promise<Deputy[]> {
   return api('/abgeordnete');
+}
+
+export async function getTightestWinner(): Promise<TightestWinner[]> {
+    return api('/knappste_sieger');
 }

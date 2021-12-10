@@ -88,7 +88,7 @@ def generate_second_votes(db: Transaction, wkdaten: Wahlkreisdaten):
 
     for tup in second_vote_res:
         second_votesq = f"""
-        INSERT INTO zweitstimmen(landesliste, wahlkreis) (
+        INSERT INTO zweitstimmen(landesliste, wahlkreis) (        
             SELECT {tup[1]}, {tup[3]}
             FROM generate_series(1, {tup[2]})
         ) RETURNING *
