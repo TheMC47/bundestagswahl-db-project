@@ -23,7 +23,7 @@ function App(): JSX.Element {
           </Nav>
         </Container>
       </Navbar>
-      <Container className="App d-flex justify-content-center">
+      <Container className="App d-flex justify-content-center p-6 mt-5">
         <Routes>
           <Route path="/seat-distribution" element={<SeatDistribution />} />
           <Route path="/deputies" element={<Deputies />} />
