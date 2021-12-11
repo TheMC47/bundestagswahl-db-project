@@ -36,6 +36,10 @@ export async function getRegions(): Promise<Region[]> {
   return api('/wahlkreise');
 }
 
+export async function getStatesAndRegions(): Promise<State[]> {
+  return api('/bundeslaender?select=*,wahlkreise(*)');
+}
+
 export async function getRegionSummary(id: number): Promise<RegionSummary> {
   return api(`/wahlkreis_uebersicht?wahlkreis=eq.${id}`, {
     headers: new Headers({

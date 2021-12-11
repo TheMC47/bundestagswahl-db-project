@@ -37,6 +37,12 @@ export interface Region {
   name: string;
 }
 
+export interface State {
+  id: number;
+  name: string;
+  wahlkreise: Region[];
+}
+
 export interface RegionSummary {
   wahlkreis: number;
   sieger_partei: string;
