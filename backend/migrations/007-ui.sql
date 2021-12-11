@@ -47,6 +47,7 @@ GRANT SELECT ON abgeordnete TO web_anon;
 -- Q3
 
 GRANT SELECT ON wahlkreise TO web_anon;
+GRANT SELECT ON bundeslaender TO web_anon;
 
 CREATE VIEW summe_erststimmen
 (
@@ -307,3 +308,167 @@ FROM mindestsitzzahl_pro_partei_pro_land ml
 WHERE ml.ueberhang > 0;
 
 GRANT SELECT ON ueberhangsmandate TO web_anon;
+
+
+-- Q7
+CREATE VIEW erststimmenergebenisse_einzelstimmen
+(
+  direktkandidat,
+  anzahl_stimmen
+)
+AS
+SELECT direktkandidat, COUNT(*)
+FROM erststimmen
+GROUP BY direktkandidat;
+
+CREATE VIEW zweitstimmenergebnisse_einzelstimmen
+(
+  landesliste,
+  anzahl_stimmen,
+  wahlkreis
+)
+AS
+SELECT landesliste, wahlkreis, COUNT(*)
+FROM zweitstimmen
+GROUP BY landesliste, wahlkreis;
+
+CREATE VIEW summe_erststimmen_einzelstimmen
+(
+  wahlkreis,
+  wahl,
+  anzahl
+)
+AS
+SELECT dk.wahlkreis, pk.wahl, SUM(ee.anzahl_stimmen)
+FROM erststimmenergebenisse_einzelstimmen ee
+  JOIN direktkandidaten dk ON dk.id = ee.direktkandidat
+  JOIN parteikandidaturen pk ON dk.partei = pk.id
+GROUP BY dk.wahlkreis, pk.wahl;
+
+CREATE VIEW summe_zweitstimmen_einzelstimmen
+(
+  wahlkreis,
+  wahl,
+  anzahl
+)
+AS
+SELECT ze.wahlkreis, pk.wahl, SUM(ze.anzahl_stimmen)
+FROM zweitstimmenergebnisse_einzelstimmen ze
+  JOIN landeslisten ll ON ll.id = ze.landesliste
+  JOIN parteikandidaturen pk ON ll.partei = pk.id
+GROUP BY ze.wahlkreis, pk.wahl;
+
+CREATE VIEW wahlkreis_uebersicht_einzelstimmen
+(
+  wahlkreis,
+  wahlbeteiligung,
+  gewinner,
+  sieger_partei
+) AS
+SELECT
+  wk.id,
+  ROUND(100.00 * wd.waehlende / wd.wahlberechtigte, 2),
+  full_name(k),
+  p.kurzbezeichnung
+FROM wahlkreise wk
+  JOIN wahlkreiswahldaten wd ON wd.wahlkreis = wk.id
+  JOIN direktkandidaten dk ON dk.wahlkreis = wk.id
+  JOIN kandidaten k ON k.id = dk.kandidat
+  JOIN bundestagsmandaten bm ON bm.kandidat = k.id
+  JOIN parteikandidaturen pk ON dk.partei = pk.id
+  JOIN parteien p ON p.id = pk.partei
+WHERE bm.direktmandat = TRUE AND wd.wahl = 1;
+
+GRANT SELECT ON wahlkreis_uebersicht_einzelstimmen TO web_anon;
+
+CREATE VIEW alle_ergebnisse_einzelstimmen(
+  wahlkreis,
+  kurzbezeichnung,
+  erststimmen_anzahl_2017,
+  erststimmen_prozent_2017,
+  erststimmen_anzahl_2021,
+  erststimmen_prozent_2021,
+  unterschied_erststimmen,
+  zweitstimmen_anzahl_2017,
+  zweitstimmen_prozent_2017,
+  zweitstimmen_anzahl_2021,
+  zweitstimmen_prozent_2021,
+  unterschied_zweitstimmen
+) AS
+WITH erststimmen_vgl
+(
+  partei_kandidatur,
+  wahlkreis,
+  anz_2021,
+  prozent_2021,
+  anz_2017,
+  prozent_2017
+)
+AS
+(
+  SELECT pk2021.partei,
+         wk.id,
+         e2021.anzahl_stimmen,
+         ROUND(100.00 * e2021.anzahl_stimmen  / se2021.anzahl, 1),
+         e2017.anzahl_stimmen,
+         ROUND(100.00 * e2017.anzahl_stimmen  / se2017.anzahl, 1)
+  FROM wahlkreise wk
+    JOIN summe_erststimmen_einzelstimmen se2021 ON se2021.wahl = 1 AND se2021.wahlkreis = wk.id
+    JOIN summe_erststimmen_einzelstimmen se2017 ON se2017.wahl = 2 AND se2017.wahlkreis = wk.id
+    JOIN direktkandidaten dk2021 ON dk2021.wahlkreis = wk.id
+    JOIN parteikandidaturen pk2021 ON pk2021.id = dk2021.partei AND pk2021.wahl = 1
+    JOIN erststimmenergebenisse_einzelstimmen e2021 ON e2021.direktkandidat = dk2021.id
+    LEFT OUTER JOIN (
+         direktkandidaten dk2017
+         JOIN parteikandidaturen pk2017 ON pk2017.id = dk2017.partei AND pk2017.wahl = 2
+         JOIN erststimmenergebenisse_einzelstimmen e2017 ON e2017.direktkandidat = dk2017.id
+      ) ON dk2017.wahlkreis = wk.id AND pk2017.partei = pk2021.partei
+),
+zweitstimmen_vgl
+(
+  partei_kandidatur,
+  wahlkreis,
+  anz_2021,
+  prozent_2021,
+  anz_2017,
+  prozent_2017
+)
+AS
+(
+  SELECT pk2021.partei,
+         wk.id,
+         ze2021.anzahl_stimmen,
+         ROUND(100.00 * ze2021.anzahl_stimmen  / sz2021.anzahl, 1),
+         ze2017.anzahl_stimmen,
+         ROUND(100.00 * ze2017.anzahl_stimmen  / sz2017.anzahl, 1)
+  FROM wahlkreise wk
+    JOIN summe_zweitstimmen_einzelstimmen sz2021 ON sz2021.wahl = 1 AND sz2021.wahlkreis = wk.id
+    JOIN summe_zweitstimmen_einzelstimmen sz2017 ON sz2017.wahl = 2 AND sz2017.wahlkreis = wk.id
+    JOIN zweitstimmenergebnisse_einzelstimmen ze2021 ON ze2021.wahlkreis = wk.id
+    JOIN landeslisten ll2021 ON ll2021.id = ze2021.landesliste
+    JOIN parteikandidaturen pk2021 ON pk2021.id = ll2021.partei AND pk2021.wahl = 1
+    LEFT OUTER JOIN (
+      zweitstimmenergebnisse_einzelstimmen ze2017
+      JOIN landeslisten ll2017 ON ll2017.id = ze2017.landesliste
+      JOIN parteikandidaturen pk2017 ON pk2017.id = ll2017.partei AND pk2017.wahl = 2
+    ) ON ze2017.wahlkreis = wk.id AND pk2017.partei = pk2021.partei
+)
+SELECT COALESCE(e.wahlkreis, z.wahlkreis) AS wahlkreis,
+       p.kurzbezeichnung,
+       e.anz_2017 AS erststimmen_anzahl_2017,
+       e.prozent_2017 AS erststimmen_prozent_2017,
+       e.anz_2021 AS erststimmen_anzahl_2021,
+       e.prozent_2021 AS erststimmen_prozent_2021,
+       e.prozent_2021 - e.prozent_2017 AS unterschied_erststimmen,
+       z.anz_2017 AS zweitstimmen_anzahl_2017,
+       z.prozent_2017 AS zweitstimmen_prozent_2017,
+       z.anz_2021 AS zweitstimmen_anzahl_2021,
+       z.prozent_2021 AS zweitstimmen_prozent_2021,
+       z.prozent_2021 - z.prozent_2017 AS unterschied_zweitstimmen
+FROM zweitstimmen_vgl z
+     FULL OUTER JOIN erststimmen_vgl e
+     ON e.partei_kandidatur = z.partei_kandidatur AND z.wahlkreis = e.wahlkreis
+     JOIN parteien p ON p.id = COALESCE(COALESCE(e.partei_kandidatur, z.partei_kandidatur));
+
+
+GRANT SELECT ON alle_ergebnisse_einzelstimmen TO web_anon;

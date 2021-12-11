@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ElectionRegionResult, Region, RegionSummary, State } from '../models'
-import { getResults, getRegionSummary, getStatesAndRegions } from '../api'
+import { getResultsSingleVotes, getRegionSummarySingleVotes, getStatesAndRegions } from '../api'
 import { Container, Row, Table } from 'react-bootstrap';
 import { Form } from 'react-bootstrap';
 import { Col } from 'react-bootstrap';
@@ -14,7 +14,7 @@ export function PerPartyResults({ region }: RegionProps): JSX.Element {
   const [results, setResults] = useState<ElectionRegionResult[]>([]);
 
   useEffect(() => {
-    getResults(region.id).then(ds => {
+    getResultsSingleVotes(region.id).then(ds => {
       setResults(ds)
     })
   }, [region])
@@ -65,10 +65,10 @@ export function RegionSummaryView({ region }: RegionProps): JSX.Element {
   const [regionSummary, setRegionSummary] = useState<RegionSummary | undefined>(undefined);
 
   useEffect(() => {
-    getRegionSummary(region.id).then(data => {
+    getRegionSummarySingleVotes(region.id).then(data => {
       setRegionSummary(data)
-    }
-  )}, [])
+    })
+  }, [])
 
   return (
     <Row>
@@ -83,7 +83,7 @@ export function RegionSummaryView({ region }: RegionProps): JSX.Element {
 }
 
 
-export default function RegionView(): JSX.Element {
+export default function RegionViewSingleVotes(): JSX.Element {
 
 
   const [statesAndRegions, setStates] = useState<State[]>([]);

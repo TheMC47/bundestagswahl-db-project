@@ -6,7 +6,8 @@ import {
   RegionSummary,
   TightestWinner,
   Party,
-  Ueberhangsmandate
+  Ueberhangsmandate,
+  State
 } from './models'
 
 export const URI = process.env.REACT_APP_URI
@@ -31,6 +32,9 @@ export async function getResults(id: number): Promise<ElectionRegionResult[]> {
   return api(`/alle_ergebnisse?wahlkreis=eq.${id}`);
 }
 
+export async function getResultsSingleVotes(id: number): Promise<ElectionRegionResult[]> {
+  return api(`/alle_ergebnisse_einzelstimmen?wahlkreis=eq.${id}`);
+}
 
 export async function getRegions(): Promise<Region[]> {
   return api('/wahlkreise');
@@ -58,4 +62,12 @@ export async function getTightestWinner(wahl: number, partei: number): Promise<T
 
 export async function getUeberhangsmandate(wahl: number): Promise<Ueberhangsmandate[]> {
   return api(`/ueberhangsmandate?wahl=eq.${wahl}`);
+}
+
+export async function getRegionSummarySingleVotes(id: number): Promise<RegionSummary> {
+  return api(`/wahlkreis_uebersicht_einzelstimmen?wahlkreis=eq.${id}`, {
+    headers: new Headers({
+      'Accept': 'application/vnd.pgrst.object+json'
+    })
+  });
 }
