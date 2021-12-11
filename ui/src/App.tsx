@@ -12,7 +12,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App(): JSX.Element {
 
-
   return (
     <Router>
       <Navbar bg="dark" variant="dark">
