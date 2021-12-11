@@ -1,4 +1,4 @@
-import { ElectionResult, Deputy, ElectionRegionResult, Region, RegionSummary, TightestWinner } from './models'
+import { ElectionResult, Deputy, ElectionRegionResult, Region, RegionSummary, TightestWinner, Party } from './models'
 
 export const URI = process.env.REACT_APP_URI
 
@@ -35,6 +35,10 @@ export async function getRegionSummary(id: number): Promise<RegionSummary> {
   });
 }
 
-export async function getTightestWinner(): Promise<TightestWinner[]> {
-    return api('/knappste_sieger');
+export async function getParties(): Promise<Party[]> {
+  return api(`/parties`);
+}
+
+export async function getTightestWinner(wahl: number, partei: number): Promise<TightestWinner[]> {
+  return api(`/knappste_sieger?wahl=eq.${wahl}&partei_id=eq.${partei}`);
 }
