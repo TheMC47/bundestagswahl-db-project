@@ -46,7 +46,7 @@ export default function Ueberhangsmandate(): JSX.Element {
 }
 
 export function UeberhangsmandateTable({data, year}: UeberhangsmandateProps): JSX.Element {
-    const filteredData = data.filter(d => d.wahl == year);
+    const filteredData = data.filter(d => d.wahl == year)
 
 
     return (

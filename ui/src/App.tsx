@@ -22,7 +22,7 @@ function App(): JSX.Element {
             <Nav.Link href="/deputies">Deputies List</Nav.Link>
             <Nav.Link href="/region">Region Results</Nav.Link>
             <Nav.Link href="/tightest-winners">Knappste Ergebnisse</Nav.Link>
-            <Nav.Link href="/overhang-seats">Überhangsmandate</Nav.Link>
+            <Nav.Link href="/ueberhangsmandate">Überhangsmandate</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
@@ -32,7 +32,7 @@ function App(): JSX.Element {
           <Route path="/deputies" element={<Deputies />} />
           <Route path="/region" element={<RegionView />} />
           <Route path="/tightest-winners" element={<TightestWinnerView />} />
-          <Route path="/overhang-seats" element={<Ueberhangsmandate />} />
+          <Route path="/ueberhangsmandate" element={<Ueberhangsmandate />} />
         </Routes>
       </Container>
     </Router>
