@@ -1,37 +1,37 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import {Col, Container, Form} from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 import SeatDistribution from './components/SeatDistribution';
 import Deputies from './components/Deputies'
-import TightestWins from './components/TightestWinner';
-import {useState} from "react";
+import RegionView from './components/RegionView'
+import { Navbar } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App(): JSX.Element {
-    const [year, setYear] = useState<number>(1);
 
-    const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-        setYear(+e.currentTarget.value)
-    }
 
-    return (
-        <Container className="App d-flex justify-content-center">
-            <Col>
-                <Form.Select onChange={handleYearChange}>
-                    <option value="1">2021</option>
-                    <option value="2">2017</option>
-                </Form.Select>
-            </Col>
-            <Col className="mw-75">
-                <SeatDistribution year={year}/>
-            </Col>
-            <Col>
-                <Deputies/>
-            </Col>
-            <Col>
-                <TightestWins year={year}/>
-            </Col>
+  return (
+    <Router>
+      <Navbar bg="dark" variant="dark">
+        <Container>
+          <Navbar.Brand href="#home">Bundestagswahl</Navbar.Brand>
+          <Nav className="me-auto">
+            <Nav.Link href="/seat-distribution">Seat Distribution</Nav.Link>
+            <Nav.Link href="/deputies">Deputies List</Nav.Link>
+            <Nav.Link href="/region">Region Results</Nav.Link>
+          </Nav>
         </Container>
-    );
+      </Navbar>
+      <Container className="App d-flex justify-content-center p-6 mt-5">
+        <Routes>
+          <Route path="/seat-distribution" element={<SeatDistribution />} />
+          <Route path="/deputies" element={<Deputies />} />
+          <Route path="/region" element={<RegionView />} />
+        </Routes>
+      </Container>
+    </Router>
+  );
 }
 
 export default App;

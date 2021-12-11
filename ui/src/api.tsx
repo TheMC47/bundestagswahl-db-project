@@ -1,4 +1,4 @@
-import {ElectionResult, Deputy, TightestWinner} from './models'
+import { ElectionResult, Deputy, ElectionRegionResult, Region, RegionSummary, TightestWinner } from './models'
 
 export const URI = process.env.REACT_APP_URI
 
@@ -16,6 +16,23 @@ export async function getSitzVerteilung(): Promise<ElectionResult[]> {
 
 export async function getDeputies(): Promise<Deputy[]> {
   return api('/abgeordnete');
+}
+
+export async function getResults(id: number): Promise<ElectionRegionResult[]> {
+  return api(`/alle_ergebnisse?wahlkreis=eq.${id}`);
+}
+
+
+export async function getRegions(): Promise<Region[]> {
+  return api('/wahlkreise');
+}
+
+export async function getRegionSummary(id: number): Promise<RegionSummary> {
+  return api(`/wahlkreis_uebersicht?wahlkreis=eq.${id}`, {
+    headers: new Headers({
+      'Accept': 'application/vnd.pgrst.object+json'
+    })
+  });
 }
 
 export async function getTightestWinner(): Promise<TightestWinner[]> {
