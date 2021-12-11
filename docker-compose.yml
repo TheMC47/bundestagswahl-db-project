@@ -22,6 +22,14 @@ services:
       - server
   db:
     image: postgres:13
+    command:
+      - "postgres"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "max_wal_size=16384"
+      - "-c"
+      - "min_wal_size=4096"
     ports:
       - "5432:5432"
     env_file:
