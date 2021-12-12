@@ -483,8 +483,7 @@ FROM bundestagsmandaten bm
      JOIN bundeslaender bl on bm.bundesland = bl.id
      JOIN kandidaten k ON k.id = bm.kandidat
      JOIN listenkandidaten lk ON lk.kandidat = k.id
-WHERE bm.wahl = 1 AND bm.direktmandat = FALSE
-GROUP BY bl.id, pk.id;
+WHERE bm.wahl = 1 AND bm.direktmandat = FALSE;
 
 CREATE VIEW gewinner_parteien_wahlkreis(bundesland, partei, kandidat, wahlkreis)
 AS
