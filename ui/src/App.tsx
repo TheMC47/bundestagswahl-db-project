@@ -12,7 +12,7 @@ import KoalitionenView from './components/Koalitionen'
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { JoblessnessBarChart } from "./components/JoblessnessAnalysis";
+import { JoblessnessBarChart } from './components/JoblessnessAnalysis';
 
 function App(): JSX.Element {
 
@@ -25,7 +25,6 @@ function App(): JSX.Element {
             <Nav.Link href="/seat-distribution">Seat Distribution</Nav.Link>
             <Nav.Link href="/deputies">Deputies List</Nav.Link>
             <Nav.Link href="/region">Region Results</Nav.Link>
-            <Nav.Link href="/region-single-votes">Region Results (Single Votes)</Nav.Link>
             <Nav.Link href="/tightest-winners">Knappste Ergebnisse</Nav.Link>
             <Nav.Link href="/ueberhangsmandate">Überhangsmandate</Nav.Link>
             <Nav.Link href="/gewinner">Gewinnerparteien</Nav.Link>

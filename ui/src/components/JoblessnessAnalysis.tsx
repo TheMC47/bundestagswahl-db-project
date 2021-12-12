@@ -1,7 +1,7 @@
-import { Bar } from "react-chartjs-2";
-import { JoblessnessDistricts, JoblessnessSummary } from "../models";
-import { useEffect, useState } from "react";
-import { getDistricts, getJoblessnessAnalysis } from "../api";
+import { Bar } from 'react-chartjs-2';
+import { JoblessnessDistricts, JoblessnessSummary } from '../models';
+import { useEffect, useState } from 'react';
+import { getDistricts, getJoblessnessAnalysis } from '../api';
 
 import {
   Chart,
@@ -46,12 +46,11 @@ export function JoblessnessBarChart(): JSX.Element {
 
 
   return (
-    <JoblessnessAnalysis dataLinks={dataLinks} dataRechts={dataRechts} districts={districts}/>
+    <JoblessnessAnalysis dataLinks={dataLinks} dataRechts={dataRechts} districts={districts} />
   )
 }
 
-
-export function JoblessnessAnalysis({ dataLinks, dataRechts, districts }: joblessnessAnalysisProps) {
+export function JoblessnessAnalysis({ dataLinks, dataRechts, districts }: joblessnessAnalysisProps): JSX.Element {
   const title = 'Arbeitslosigkeit Analyse'
 
   console.log(dataLinks.map(d => d.anzahlstimmen))
@@ -95,7 +94,7 @@ export function JoblessnessAnalysis({ dataLinks, dataRechts, districts }: jobles
   };
 
   return (
-    <Bar data={barData} options={options}/>
+    <Bar data={barData} options={options} />
   )
 
 }
