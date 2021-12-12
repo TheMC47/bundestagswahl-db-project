@@ -22,28 +22,28 @@ function App(): JSX.Element {
         <Container>
           <Navbar.Brand href="#home">Bundestagswahl</Navbar.Brand>
           <Nav className="me-auto">
-            <Nav.Link href="/seat-distribution">Seat Distribution</Nav.Link>
-            <Nav.Link href="/deputies">Deputies List</Nav.Link>
-            <Nav.Link href="/region">Region Results</Nav.Link>
-            <Nav.Link href="/tightest-winners">Knappste Ergebnisse</Nav.Link>
+            <Nav.Link href="/sitzverteilung">Sitzverteilung</Nav.Link>
+            <Nav.Link href="/abgeordnete">Abgeordnete</Nav.Link>
+            <Nav.Link href="/wahlkreisuebersicht">Wahlkreisübersicht</Nav.Link>
+            <Nav.Link href="/knappste-sieger">Knappste Sieger</Nav.Link>
             <Nav.Link href="/ueberhangsmandate">Überhangsmandate</Nav.Link>
-            <Nav.Link href="/gewinner">Gewinnerparteien</Nav.Link>
+            <Nav.Link href="/wahlkreissieger">Wahlkreissieger</Nav.Link>
             <Nav.Link href="/koalitionen">Koalitionen</Nav.Link>
-            <Nav.Link href="/joblessness">Arbeitslosigkeit Analyse</Nav.Link>
+            <Nav.Link href="/arbeitslosigkeit">Arbeitslosigkeit und ideologische Tendenzen</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
       <Container className="App d-flex justify-content-center p-6 mt-5">
         <Routes>
-          <Route path="/seat-distribution" element={<SeatDistribution />} />
-          <Route path="/deputies" element={<Deputies />} />
-          <Route path="/region" element={<RegionView />} />
+          <Route path="/sitzverteilung" element={<SeatDistribution />} />
+          <Route path="/abgeordnete" element={<Deputies />} />
+          <Route path="/wahlkreisuebersicht" element={<RegionView />} />
           <Route path="/region-single-votes" element={<RegionViewSingleVotes />} />
-          <Route path="/tightest-winners" element={<TightestWinnerView />} />
+          <Route path="/knappste-sieger" element={<TightestWinnerView />} />
           <Route path="/ueberhangsmandate" element={<UeberhangsmandateView />} />
-          <Route path="/gewinner" element={<GewinnerView />} />
+          <Route path="/wahlkreissieger" element={<GewinnerView />} />
           <Route path="/koalitionen" element={<KoalitionenView />} />
-          <Route path="/joblessness" element={<JoblessnessBarChart />} />
+          <Route path="/arbeitslosigkeit" element={<JoblessnessBarChart />} />
         </Routes>
       </Container>
     </Router>
