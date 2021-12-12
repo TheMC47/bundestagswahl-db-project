@@ -68,7 +68,7 @@ export function RegionSummaryView({ region }: RegionProps): JSX.Element {
     getRegionSummary(region.id).then(data => {
       setRegionSummary(data)
     }
-  )}, [])
+  )}, [region])
 
   return (
     <Row>
