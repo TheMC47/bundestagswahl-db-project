@@ -1,4 +1,5 @@
 import sys
+import os
 from dataclasses import dataclass
 from os import listdir
 from os.path import isfile, join, splitext
@@ -18,6 +19,7 @@ from seed_candidates import (
 from seed_parties import seed_parties
 
 from seed_structure_data import seed_unemployment
+
 
 @click.group()
 def manage():
@@ -239,6 +241,9 @@ def setup():
     print("Calculating seats...")
     run_script.callback("calculate-seats.sql")
     print("Done!")
+    print("Refreshing schema...")
+    os.system("docker-compose kill -s SIGUSR1 server")
+    print("Done")
 
 
 if __name__ == "__main__":
