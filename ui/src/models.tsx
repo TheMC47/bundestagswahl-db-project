@@ -63,3 +63,24 @@ export interface Ueberhangsmandate {
   land: string;
   ueberhange: number;
 }
+
+export interface WahlkreisGewinner {
+  kandidat: string;
+  wahlkreis: number;
+}
+
+export interface ListenGewinner {
+  kandidat: string;
+  listennummer: number;
+}
+
+export interface AlleGewinner {
+  wahlkreise?: WahlkreisGewinner[];
+  listenplaetze?: ListenGewinner[];
+}
+
+export interface ParteiGewinner {
+  partei: string;
+  bundsland: number;
+  gewinner: AlleGewinner;
+}

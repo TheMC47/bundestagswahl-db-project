@@ -7,6 +7,7 @@ import RegionView from './components/RegionView'
 import TightestWinnerView from './components/TightestWinner';
 import UeberhangsmandateView from './components/Ueberhangsmandate';
 import RegionViewSingleVotes  from './components/RegionViewSingleVotes'
+import GewinnerView  from './components/GewinnerParteien'
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -25,6 +26,7 @@ function App(): JSX.Element {
             <Nav.Link href="/region-single-votes">Region Results (Single Votes)</Nav.Link>
             <Nav.Link href="/tightest-winners">Knappste Ergebnisse</Nav.Link>
             <Nav.Link href="/ueberhangsmandate">Überhangsmandate</Nav.Link>
+            <Nav.Link href="/gewinner">Gewinnerparteien</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
@@ -36,6 +38,7 @@ function App(): JSX.Element {
           <Route path="/region-single-votes" element={<RegionViewSingleVotes />} />
           <Route path="/tightest-winners" element={<TightestWinnerView />} />
           <Route path="/ueberhangsmandate" element={<UeberhangsmandateView />} />
+          <Route path="/gewinner" element={<GewinnerView />} />
         </Routes>
       </Container>
     </Router>
