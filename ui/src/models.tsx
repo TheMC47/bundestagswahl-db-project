@@ -84,3 +84,8 @@ export interface ParteiGewinner {
   bundsland: number;
   gewinner: AlleGewinner;
 }
+
+export interface Koalition {
+  koalition: string[];
+  sitze: number;
+}

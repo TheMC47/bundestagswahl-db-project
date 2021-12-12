@@ -537,3 +537,57 @@ FROM gewinner g
      JOIN parteien p ON p.id = pk.partei;
 
 GRANT SELECT ON gewinner_parteien TO web_anon;
+
+CREATE VIEW koalitionen(koalition, sitze) AS
+WITH RECURSIVE SUPERSET(combination, size, biggest) AS
+(
+    SELECT ARRAY [partei], 1, partei
+    FROM sitze_pro_partei
+    WHERE wahl = 1
+
+    UNION ALL
+
+    SELECT s.partei || prev.combination, prev.size + 1, s.partei
+    FROM
+      SUPERSET prev,
+      sitze_pro_partei s
+    WHERE s.wahl = 1
+     AND prev.size < (SELECT COUNT(*) FROM sitze_pro_partei WHERE wahl = 1)
+     AND NOT s.partei = ANY (prev.combination)
+     AND prev.biggest < s.partei
+),
+koaliation_sitze(koalition, sitze) AS
+(
+    SELECT combination, (
+           SELECT SUM(s.sitze)
+           FROM UNNEST(combination) AS pks(pk)
+                JOIN sitze_pro_partei s
+                ON s.partei = pks.pk
+            )
+    FROM SUPERSET
+),
+moegliche_koalitionen AS (
+    SELECT koalition, sitze
+    FROM koaliation_sitze
+    WHERE sitze >= (SELECT CEIL(1.0*SUM(sitze) / 2) FROM sitze_pro_partei WHERE wahl = 1)
+),
+kleinste_koalitionen AS (
+    SELECT k1.koalition, k1.sitze
+    FROM moegliche_koalitionen k1
+    WHERE NOT EXISTS(
+      SELECT *
+      FROM moegliche_koalitionen k2
+      WHERE k1.koalition @> k2.koalition
+            AND cardinality(k2.koalition) < cardinality(k1.koalition)
+))
+
+SELECT (
+    SELECT json_agg(p.kurzbezeichnung)
+    FROM UNNEST(kk.koalition) AS k(pk)
+         JOIN parteikandidaturen pk ON pk.id = k.pk
+         JOIN parteien p ON p.id = pk.partei
+), kk.sitze
+FROM kleinste_koalitionen kk;
+
+
+GRANT SELECT ON koalitionen TO web_anon;
