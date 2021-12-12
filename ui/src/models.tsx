@@ -35,3 +35,17 @@ export interface RegionSummary {
   gewinner: string;
   wahlbeteiligung: number;
 }
+
+export interface JoblessnessDistricts {
+  land_id: number;
+  land: string;
+  rank: number;
+
+}
+export interface JoblessnessSummary {
+  ideologie: string;
+  bundesland: string;
+  anzahlstimmen: number;
+
+}
+

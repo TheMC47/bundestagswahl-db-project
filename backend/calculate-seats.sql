@@ -234,3 +234,11 @@ FROM direktmandaten dm
 WHERE dm.wahl = 1;
 
 DROP TABLE endgueltige_sitzkontingente CASCADE;
+
+UPDATE parteien
+SET ideologie = 'l'
+WHERE kurzbezeichnung IN ('DIE LINKE','GRÜNE', 'ÖDP', 'SPD');
+
+UPDATE parteien
+SET ideologie = 'r'
+WHERE kurzbezeichnung IN ('AFD','CDU', 'CSU', 'FDP');

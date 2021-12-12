@@ -1,4 +1,12 @@
-import { ElectionResult, Deputy, ElectionRegionResult, Region, RegionSummary } from './models'
+import {
+  ElectionResult,
+  Deputy,
+  ElectionRegionResult,
+  Region,
+  RegionSummary,
+  JoblessnessSummary,
+  JoblessnessDistricts
+} from './models'
 
 export const URI = process.env.REACT_APP_URI
 
@@ -33,3 +41,10 @@ export async function getRegionSummary(id: number): Promise<RegionSummary> {
     })
   });
 }
+export async function getDistricts(): Promise<JoblessnessDistricts[]> {
+  return api('/rank_arbeitslosigkeit');
+}
+
+export async function getJoblessnessAnalysis(ideologie: string): Promise<JoblessnessSummary[]> {
+  return api(`/arbeitslosigkeit_uebersicht?ideologie=eq.${ideologie}`);}
+

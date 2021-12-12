@@ -31,6 +31,7 @@ CREATE TABLE wahlkreise
     id         INT,
     name       VARCHAR(128) NOT NULL,
     bundesland INT          NOT NULL,
+    arbeitslosenquote float4,
     PRIMARY KEY (id),
     FOREIGN KEY (bundesland) REFERENCES bundeslaender (id) ON
         UPDATE CASCADE ON
@@ -55,12 +56,24 @@ CREATE TABLE wahlkreiswahldaten
         DELETE CASCADE,
     UNIQUE (wahlkreis, wahl)
 );
+CREATE TABLE arbeitslosigkeit
+(
+    id         SERIAL,
+    wahlkreis  INT NOT NULL,
+    arbeitslosenquote float4,
+    PRIMARY KEY (id),
+    FOREIGN KEY (wahlkreis) REFERENCES wahlkreise (id) ON
+        UPDATE CASCADE ON
+        DELETE CASCADE,
+    UNIQUE (wahlkreis)
+);
 CREATE TABLE parteien
 (
     id              SERIAL,
     name            VARCHAR,
     kurzbezeichnung VARCHAR,
     is_echte_partei BOOL NOT NULL,
+    ideologie VARCHAR(1) NOT NULL DEFAULT 'n',
     UNIQUE (name, kurzbezeichnung),
     PRIMARY KEY (id)
 );

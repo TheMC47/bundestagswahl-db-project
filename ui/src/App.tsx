@@ -7,6 +7,7 @@ import RegionView from './components/RegionView'
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { JoblessnessBarChart } from "./components/JoblessnessAnalysis";
 
 function App(): JSX.Element {
 
@@ -20,6 +21,7 @@ function App(): JSX.Element {
             <Nav.Link href="/seat-distribution">Seat Distribution</Nav.Link>
             <Nav.Link href="/deputies">Deputies List</Nav.Link>
             <Nav.Link href="/region">Region Results</Nav.Link>
+            <Nav.Link href="/joblessness">Arbeitslosigkeit Analyse</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
@@ -28,6 +30,7 @@ function App(): JSX.Element {
           <Route path="/seat-distribution" element={<SeatDistribution />} />
           <Route path="/deputies" element={<Deputies />} />
           <Route path="/region" element={<RegionView />} />
+          <Route path="/joblessness" element={<JoblessnessBarChart />} />
         </Routes>
       </Container>
     </Router>

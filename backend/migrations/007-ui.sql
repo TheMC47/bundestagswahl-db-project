@@ -188,3 +188,50 @@ FROM zweitstimmen_vgl z
 
 
 GRANT SELECT ON alle_ergebnisse TO web_anon;
+
+
+CREATE VIEW rank_arbeitslosigkeit (land_id, land, rank) AS
+(
+WITH arbeitslosigkeit_pro_land(land_id, land, arbeitslosenquote) AS (
+    SELECT bl.id, bl.name, AVG(ak.arbeitslosenquote)
+    FROM arbeitslosigkeit ak
+             JOIN wahlkreise wk ON ak.wahlkreis = wk.id
+             JOIN bundeslaender bl ON wk.bundesland = bl.id
+    GROUP BY wk.bundesland, bl.id
+)
+SELECT rk.*
+FROM (
+         SELECT al.land_id, al.land, RANK() OVER (ORDER BY al.arbeitslosenquote DESC) as rank
+         FROM arbeitslosigkeit_pro_land al) rk
+ORDER BY rank
+    );
+GRANT SELECT ON rank_arbeitslosigkeit TO web_anon;
+
+
+CREATE VIEW arbeitslosigkeit_uebersicht(ideologie, bundesland, anzahlstimmen) AS
+(
+WITH summe_zweitstimmen_pro_land(land_id, anzahlstimmen) AS (
+    SELECT wk.bundesland, SUM(sz.anzahl)
+    FROM summe_zweitstimmen sz
+             JOIN wahlkreise wk ON sz.wahlkreis = wk.id
+    WHERE sz.wahl = 1
+    GROUP BY wk.bundesland
+),
+     anteil_pro_bundesland(ideologie, bundesland, anzahlstimmen, rank) AS (
+         SELECT p.ideologie, ra.land, 1.0 * SUM(zl.zweitstimmen) / sl.anzahlstimmen, ra.rank
+         FROM zweitstimmen_pro_partei_pro_land zl
+                  JOIN parteiKandidaturen pk ON zl.partei = pk.id
+                  JOIN parteien p ON pk.partei = p.id
+                  JOIN rank_arbeitslosigkeit ra ON zl.land = ra.land_id
+                  JOIN summe_zweitstimmen_pro_land sl ON sl.land_id = ra.land_id
+         WHERE zl.wahl = 1
+           and p.ideologie in ('l', 'r')
+         GROUP BY p.ideologie, ra.land_id, ra.land, sl.anzahlstimmen, ra.rank
+     )
+select ideologie, bundesland, anzahlstimmen
+from anteil_pro_bundesland
+ORDER BY rank
+    );
+
+GRANT SELECT ON arbeitslosigkeit_uebersicht TO web_anon;
+
