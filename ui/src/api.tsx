@@ -52,6 +52,6 @@ export async function getTightestWinner(wahl: number, partei: number): Promise<T
   return api(`/knappste_sieger?wahl=eq.${wahl}&partei_id=eq.${partei}`);
 }
 
-export async function getUeberhangsmandate(): Promise<ueberhangsmandate[]> {
-  return api('/ueberhangsmandate');
+export async function getUeberhangsmandate(wahl: number): Promise<ueberhangsmandate[]> {
+  return api(`/ueberhangsmandate?wahl=eq.${wahl}`);
 }
