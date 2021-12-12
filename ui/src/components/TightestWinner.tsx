@@ -20,7 +20,7 @@ export default function TightestWinnerView(): JSX.Element {
   })
 
   const handlePartyChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setParty(parties[+e.currentTarget.value])
+    setParty(parties.find((p) => p.id == +e.currentTarget.value))
   }
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     setYear(+e.currentTarget.value)
@@ -34,15 +34,15 @@ export default function TightestWinnerView(): JSX.Element {
           <option value="2">2017</option>
         </Form.Select>
         {year &&
-        <Form.Select onChange={handlePartyChange} value={party?.id}>
+          <Form.Select onChange={handlePartyChange} value={party?.id}>
             <option value="" selected disabled>Partei...</option>
-          {parties.map(p =>
-            <option value={p.id} key={p.id}>{( p.kurzbezeichnung != "" ) ? p.kurzbezeichnung : p.name}</option>
-          )}
-        </Form.Select>
+            {parties.map(p =>
+              <option value={p.id} key={p.id}>{(p.kurzbezeichnung != '') ? p.kurzbezeichnung : p.name}</option>
+            )}
+          </Form.Select>
         }
       </Row>
-      {party && <PerPartyResults party={party} year={year!}/>}
+      {year && party && <PerPartyResults party={party} year={year} />}
     </Container>
   );
 }
@@ -60,26 +60,26 @@ export function PerPartyResults({ party, year }: PartyProps): JSX.Element {
     <Container>
       <Row>
         <div>
-          <h2> Top knappste {results[0] && results[0]!.siege ? "Siege" : "Besiegte"}</h2>
+          <h2> Top knappste {results[0] && results[0].siege ? 'Siege' : 'Besiegte'}</h2>
         </div>
       </Row>
       <Table>
         <thead>
-        <tr>
-          <th> Rank</th>
-          <th> Wahlkreise</th>
-        </tr>
+          <tr>
+            <th> Rank</th>
+            <th> Wahlkreise</th>
+          </tr>
         </thead>
         <tbody>
-        {
+          {
 
-          results.map((d, i) =>
-            <tr key={i}>
-              <td>{d.rank}</td>
-              <td>{d.wahlkreis}</td>
-            </tr>
-          )
-        }
+            results.map((d, i) =>
+              <tr key={i}>
+                <td>{d.rank}</td>
+                <td>{d.wahlkreis}</td>
+              </tr>
+            )
+          }
         </tbody>
       </Table>
     </Container>

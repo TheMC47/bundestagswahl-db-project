@@ -1,13 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { Col, Container, Row } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import SeatDistribution from './components/SeatDistribution';
 import Deputies from './components/Deputies'
 import RegionView from './components/RegionView'
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import TightestWinnerView from "./components/TightestWinner";
+import TightestWinnerView from './components/TightestWinner';
 
 function App(): JSX.Element {
 

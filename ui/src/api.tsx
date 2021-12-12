@@ -36,7 +36,7 @@ export async function getRegionSummary(id: number): Promise<RegionSummary> {
 }
 
 export async function getParties(): Promise<Party[]> {
-  return api(`/parties`);
+  return api('/parties');
 }
 
 export async function getTightestWinner(wahl: number, partei: number): Promise<TightestWinner[]> {

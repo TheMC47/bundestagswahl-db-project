@@ -296,14 +296,3 @@ WHERE p.is_echte_partei
 
 
 GRANT SELECT ON parties TO web_anon;
-
-
-
-
-
-
-
-
-
-
-
