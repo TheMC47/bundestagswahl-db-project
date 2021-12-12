@@ -298,8 +298,8 @@ WHERE p.is_echte_partei
 GRANT SELECT ON parties TO web_anon;
 
 -- Q5
-CREATE VIEW ueberhangsmandate (wahl, partei_id, partei_kurzbezeichnung, land_id, land_abkuerzung, ueberhange) AS
-SELECT ml.wahl, p.id, p.kurzbezeichnung, bl.id, bl.name, ml.ueberhang
+CREATE VIEW ueberhangsmandate (wahl, partei, land, ueberhange) AS
+SELECT ml.wahl, p.kurzbezeichnung, bl.name, ml.ueberhang
 FROM mindestsitzzahl_pro_partei_pro_land ml
          JOIN bundeslaender bl ON ml.land = bl.id
          JOIN parteiKandidaturen pk ON ml.partei = pk.id

@@ -5,7 +5,7 @@ import SeatDistribution from './components/SeatDistribution';
 import Deputies from './components/Deputies'
 import RegionView from './components/RegionView'
 import TightestWinnerView from './components/TightestWinner';
-import Ueberhangsmandate from './components/Ueberhangsmandate';
+import UeberhangsmandateView from './components/Ueberhangsmandate';
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -32,7 +32,7 @@ function App(): JSX.Element {
           <Route path="/deputies" element={<Deputies />} />
           <Route path="/region" element={<RegionView />} />
           <Route path="/tightest-winners" element={<TightestWinnerView />} />
-          <Route path="/ueberhangsmandate" element={<Ueberhangsmandate />} />
+          <Route path="/ueberhangsmandate" element={<UeberhangsmandateView />} />
         </Routes>
       </Container>
     </Router>

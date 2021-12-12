@@ -6,7 +6,7 @@ import {
   RegionSummary,
   TightestWinner,
   Party,
-  ueberhangsmandate
+  Ueberhangsmandate
 } from './models'
 
 export const URI = process.env.REACT_APP_URI
@@ -52,6 +52,6 @@ export async function getTightestWinner(wahl: number, partei: number): Promise<T
   return api(`/knappste_sieger?wahl=eq.${wahl}&partei_id=eq.${partei}`);
 }
 
-export async function getUeberhangsmandate(wahl: number): Promise<ueberhangsmandate[]> {
+export async function getUeberhangsmandate(wahl: number): Promise<Ueberhangsmandate[]> {
   return api(`/ueberhangsmandate?wahl=eq.${wahl}`);
 }

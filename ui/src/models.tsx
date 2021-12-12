@@ -51,18 +51,9 @@ export interface Party {
   kurzbezeichnung: string;
 }
 
-export interface ueberhangsmandate {
+export interface Ueberhangsmandate {
   wahl: number;
   partei: string;
   land: string;
-  ueberhange: number;
-}
-
-export interface ueberhangsmandate {
-  wahl: number;
-  partei_id: number;
-  partei_kurzbezeichnung: string;
-  land_id: number;
-  land_abkuerzung: string;
   ueberhange: number;
 }
