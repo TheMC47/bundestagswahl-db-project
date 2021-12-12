@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 
+
 @dataclass
 class Landesliste:
     pk: int
@@ -14,6 +15,7 @@ class Party:
     name: str
     abbrv: str
     real_party: bool
+    ideologie: str
 
     @property
     def abbrv_or_name(self):
