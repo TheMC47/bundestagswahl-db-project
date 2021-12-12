@@ -9,6 +9,7 @@ import {
   Ueberhangsmandate,
   State,
   ParteiGewinner,
+  Koalition,
   JoblessnessSummary,
   JoblessnessDistricts
 } from './models'
@@ -89,4 +90,8 @@ export async function getStates(): Promise<State[]> {
 
 export async function getGewinner(bundesland: number): Promise<ParteiGewinner[]> {
   return api(`/gewinner_parteien?bundesland=eq.${bundesland}`)
+}
+
+export async function getKoalitionen(): Promise<Koalition[]> {
+  return api('/koalitionen')
 }
