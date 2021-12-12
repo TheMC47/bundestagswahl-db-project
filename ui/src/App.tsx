@@ -1,12 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { Col, Container, Row } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import SeatDistribution from './components/SeatDistribution';
 import Deputies from './components/Deputies'
 import RegionView from './components/RegionView'
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import TightestWinnerView from './components/TightestWinner';
 
 function App(): JSX.Element {
 
@@ -20,6 +21,7 @@ function App(): JSX.Element {
             <Nav.Link href="/seat-distribution">Seat Distribution</Nav.Link>
             <Nav.Link href="/deputies">Deputies List</Nav.Link>
             <Nav.Link href="/region">Region Results</Nav.Link>
+            <Nav.Link href="/tightest-winners">Knappste Ergebnisse</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
@@ -28,6 +30,7 @@ function App(): JSX.Element {
           <Route path="/seat-distribution" element={<SeatDistribution />} />
           <Route path="/deputies" element={<Deputies />} />
           <Route path="/region" element={<RegionView />} />
+          <Route path="/tightest-winners" element={<TightestWinnerView />} />
         </Routes>
       </Container>
     </Router>

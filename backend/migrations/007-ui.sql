@@ -188,3 +188,111 @@ FROM zweitstimmen_vgl z
 
 
 GRANT SELECT ON alle_ergebnisse TO web_anon;
+
+-- Q6
+CREATE VIEW knappste_sieger(wahl, partei_id, partei, wkr_id, wahlkreis, siege, rank) AS
+(
+with rank_pro_wahlkreis(wahl, direktkandidat, wahlkreis, partei, anzahl_stimmen, rank) AS (
+    SELECT pk.wahl,
+           es.direktKandidat,
+           dk.wahlkreis,
+           dk.partei,
+           es.anzahl_stimmen,
+           RANK() OVER (PARTITION BY pk.wahl, dk.wahlkreis ORDER BY es.anzahl_stimmen DESC) AS rank
+    FROM erststimmeErgebnisse es
+             JOIN direktkandidaten dk ON es.direktkandidat = dk.id
+             JOIN parteiKandidaturen pk ON dk.partei = pk.id
+)
+   , vorsprung_sieger_kandidaten(wahl, direktkandidat, wahlkreis, partei, rank, vorsprung) AS (
+    SELECT rk.wahl,
+           rk.direktKandidat,
+           rk.wahlkreis,
+           rk.partei,
+           rk.rank,
+           rk.anzahl_stimmen - COALESCE(LEAD(rk.anzahl_stimmen)
+                                        OVER ( PARTITION BY rk.wahl, rk.wahlkreis ORDER BY rk.anzahl_stimmen DESC ),
+                                        0) AS vorsprung
+    FROM rank_pro_wahlkreis rk
+    WHERE rk.Rank <= 2
+)
+   , top_knappste_Siege(wahl, direktkandidat, wahlkreis, partei, rank) AS (
+    SELECT rp.wahl, rp.direktkandidat, rp.wahlkreis, rp.partei, rp.rank_vorsprung
+    FROM (
+             SELECT vk.wahl,
+                    vk.direktkandidat,
+                    vk.wahlkreis,
+                    vk.partei,
+                    RANK() OVER (PARTITION BY vk.wahl, vk.partei ORDER BY vk.vorsprung ) AS rank_vorsprung
+             FROM vorsprung_sieger_kandidaten vk
+             WHERE vk.rank = 1) rp
+    WHERE rp.rank_vorsprung <= 10
+)
+   , vorsprung_besiegte_kandidaten (wahl, direktKandidat, wahlkreis, partei, vorsprung) AS (
+    SELECT rk.wahl,
+           rk.direktKandidat,
+           rk.wahlkreis,
+           rk.partei,
+           (MAX(rk.anzahl_stimmen) OVER ( PARTITION BY rk.wahl, rk.wahlkreis ORDER BY rk.anzahl_stimmen DESC )) -
+           rk.anzahl_stimmen AS vorsprung
+    FROM rank_pro_wahlkreis rk
+)
+   , knappste_besiegte_kandidaten(wahl, direktKandidat, wahlkreis, partei, rank) AS (
+    SELECT rk.wahl,
+           rk.direktKandidat,
+           rk.wahlkreis,
+           rk.partei,
+           rk.rank
+    FROM (
+             SELECT vk.*, RANK() OVER ( PARTITION BY vk.wahl, vk.partei ORDER BY vk.vorsprung ) AS rank
+             FROM vorsprung_besiegte_kandidaten vk
+             WHERE NOT EXISTS(
+                     SELECT
+                     FROM top_knappste_Siege ts
+                     WHERE vk.partei = ts.partei
+                       AND vk.wahl = ts.wahl)) rk
+    WHERE rk.rank <= 10
+)
+   , alle_knappste_sieger(wahl, direktkandidat, wahlkreis, partei, rank, siege) AS (
+    SELECT ts.wahl,
+           ts.direktkandidat,
+           ts.wahlkreis,
+           ts.partei,
+           ts.rank,
+           true
+    FROM top_knappste_Siege ts
+    UNION
+    SELECT kb.wahl,
+           kb.direktkandidat,
+           kb.wahlkreis,
+           kb.partei,
+           kb.rank,
+           false
+    FROM knappste_besiegte_kandidaten kb
+)
+SELECT ks.wahl,
+       p.id,
+       p.kurzbezeichnung,
+       wd.id,
+       wd.name,
+       ks.siege,
+       Rank() OVER ( Partition BY ks.wahl, p.id, p.kurzbezeichnung ORDER BY ks.rank )
+FROM alle_knappste_sieger ks
+         JOIN wahlkreise wd ON ks.wahlkreis = wd.id
+         JOIN parteiKandidaturen pk ON ks.partei = pk.id
+         JOIN parteien p ON pk.partei = p.id
+    );
+
+GRANT SELECT ON knappste_sieger TO web_anon;
+
+
+CREATE VIEW parties(id, name, kurzbezeichnung) AS
+SELECT p.id, p.name, p.kurzbezeichnung
+FROM parteien p
+WHERE p.is_echte_partei
+  and EXISTS(SELECT *
+             FROM direktkandidaten dk
+                      JOIN parteiKandidaturen pk ON dk.partei = pk.id
+             WHERE pk.partei = p.id);
+
+
+GRANT SELECT ON parties TO web_anon;

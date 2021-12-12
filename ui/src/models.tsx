@@ -9,6 +9,14 @@ export interface Deputy {
   partei_kurzbezeichnung: string;
 }
 
+export interface TightestWinner {
+  wahl: number;
+  partei: string;
+  wahlkreis: string;
+  rank: number;
+  siege: boolean;
+}
+
 export interface ElectionRegionResult {
   wahlkreis: number;
   kurzbezeichnung: string,
@@ -34,4 +42,11 @@ export interface RegionSummary {
   sieger_partei: string;
   gewinner: string;
   wahlbeteiligung: number;
+}
+
+export interface Party {
+  wahl: number;
+  id: number;
+  name: string;
+  kurzbezeichnung: string;
 }

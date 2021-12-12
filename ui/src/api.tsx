@@ -1,6 +1,7 @@
-import { ElectionResult, Deputy, ElectionRegionResult, Region, RegionSummary } from './models'
+import { ElectionResult, Deputy, ElectionRegionResult, Region, RegionSummary, TightestWinner, Party } from './models'
 
 export const URI = process.env.REACT_APP_URI
+
 
 async function api<T>(suffix: string, init?: RequestInit): Promise<T> {
   const r = await fetch(URI + suffix, init);
@@ -32,4 +33,12 @@ export async function getRegionSummary(id: number): Promise<RegionSummary> {
       'Accept': 'application/vnd.pgrst.object+json'
     })
   });
+}
+
+export async function getParties(): Promise<Party[]> {
+  return api('/parties');
+}
+
+export async function getTightestWinner(wahl: number, partei: number): Promise<TightestWinner[]> {
+  return api(`/knappste_sieger?wahl=eq.${wahl}&partei_id=eq.${partei}`);
 }
