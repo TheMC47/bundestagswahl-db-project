@@ -6,6 +6,7 @@ import Deputies from './components/Deputies'
 import RegionView from './components/RegionView'
 import TightestWinnerView from './components/TightestWinner';
 import UeberhangsmandateView from './components/Ueberhangsmandate';
+import RegionViewSingleVotes  from './components/RegionViewSingleVotes'
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -21,6 +22,7 @@ function App(): JSX.Element {
             <Nav.Link href="/seat-distribution">Seat Distribution</Nav.Link>
             <Nav.Link href="/deputies">Deputies List</Nav.Link>
             <Nav.Link href="/region">Region Results</Nav.Link>
+            <Nav.Link href="/region-single-votes">Region Results (Single Votes)</Nav.Link>
             <Nav.Link href="/tightest-winners">Knappste Ergebnisse</Nav.Link>
             <Nav.Link href="/ueberhangsmandate">Überhangsmandate</Nav.Link>
           </Nav>
@@ -31,6 +33,7 @@ function App(): JSX.Element {
           <Route path="/seat-distribution" element={<SeatDistribution />} />
           <Route path="/deputies" element={<Deputies />} />
           <Route path="/region" element={<RegionView />} />
+          <Route path="/region-single-votes" element={<RegionViewSingleVotes />} />
           <Route path="/tightest-winners" element={<TightestWinnerView />} />
           <Route path="/ueberhangsmandate" element={<UeberhangsmandateView />} />
         </Routes>
