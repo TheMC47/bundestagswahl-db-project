@@ -10,6 +10,8 @@ import {
   State,
   ParteiGewinner,
   Koalition,
+  JoblessnessSummary,
+  JoblessnessDistricts
 } from './models'
 
 export const URI = process.env.REACT_APP_URI
@@ -53,6 +55,13 @@ export async function getRegionSummary(id: number): Promise<RegionSummary> {
     })
   });
 }
+export async function getDistricts(): Promise<JoblessnessDistricts[]> {
+  return api('/rank_arbeitslosigkeit');
+}
+
+export async function getJoblessnessAnalysis(ideologie: string): Promise<JoblessnessSummary[]> {
+  return api(`/arbeitslosigkeit_uebersicht?ideologie=eq.${ideologie}`);}
+
 
 export async function getParties(): Promise<Party[]> {
   return api('/parties');

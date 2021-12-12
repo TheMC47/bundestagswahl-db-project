@@ -50,6 +50,20 @@ export interface RegionSummary {
   wahlbeteiligung: number;
 }
 
+export interface JoblessnessDistricts {
+  land_id: number;
+  land: string;
+  rank: number;
+
+}
+export interface JoblessnessSummary {
+  ideologie: string;
+  bundesland: string;
+  anzahlstimmen: number;
+
+}
+
+
 export interface Party {
   wahl: number;
   id: number;

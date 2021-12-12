@@ -12,6 +12,7 @@ import KoalitionenView from './components/Koalitionen'
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { JoblessnessBarChart } from './components/JoblessnessAnalysis';
 
 function App(): JSX.Element {
 
@@ -28,6 +29,7 @@ function App(): JSX.Element {
             <Nav.Link href="/ueberhangsmandate">Überhangsmandate</Nav.Link>
             <Nav.Link href="/gewinner">Gewinnerparteien</Nav.Link>
             <Nav.Link href="/koalitionen">Koalitionen</Nav.Link>
+            <Nav.Link href="/joblessness">Arbeitslosigkeit Analyse</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
@@ -41,6 +43,7 @@ function App(): JSX.Element {
           <Route path="/ueberhangsmandate" element={<UeberhangsmandateView />} />
           <Route path="/gewinner" element={<GewinnerView />} />
           <Route path="/koalitionen" element={<KoalitionenView />} />
+          <Route path="/joblessness" element={<JoblessnessBarChart />} />
         </Routes>
       </Container>
     </Router>

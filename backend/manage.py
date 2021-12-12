@@ -17,6 +17,7 @@ from seed_candidates import (
 )
 from seed_parties import seed_parties
 
+from seed_structure_data import seed_unemployment
 
 @click.group()
 def manage():
@@ -182,6 +183,7 @@ def seed():
     seed_parties_res = seed_parties(db)
     seed_wahldaten(2021, db=db)
     seed_wahldaten(2017, db=db)
+    seed_unemployment(db)
     landeslisten_2021 = seed_landeslisten_2021(db, seed_parties_res)
     landeslisten_2017 = seed_landeslisten_2017(db, seed_parties_res)
     direct_candidates_2021, independent_candidates = seed_candidates_2021(
