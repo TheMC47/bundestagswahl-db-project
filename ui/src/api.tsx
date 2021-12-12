@@ -7,7 +7,8 @@ import {
   TightestWinner,
   Party,
   Ueberhangsmandate,
-  State
+  State,
+  ParteiGewinner,
 } from './models'
 
 export const URI = process.env.REACT_APP_URI
@@ -70,4 +71,13 @@ export async function getRegionSummarySingleVotes(id: number): Promise<RegionSum
       'Accept': 'application/vnd.pgrst.object+json'
     })
   });
+}
+
+export async function getStates(): Promise<State[]> {
+  return api('/bundeslaender?select=*');
+}
+
+
+export async function getGewinner(bundesland: number): Promise<ParteiGewinner[]> {
+  return api(`/gewinner_parteien?bundesland=eq.${bundesland}`)
 }

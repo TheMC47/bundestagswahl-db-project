@@ -472,3 +472,68 @@ FROM zweitstimmen_vgl z
 
 
 GRANT SELECT ON alle_ergebnisse_einzelstimmen TO web_anon;
+
+-- Q4
+
+CREATE VIEW gewinner_parteien_bundesland(bundesland, partei, kandidat, listennummer)
+AS
+SELECT bl.id, pk.id, full_name(k), lk.listennummer
+FROM bundestagsmandaten bm
+     JOIN parteikandidaturen pk ON pk.id = bm.partei
+     JOIN bundeslaender bl on bm.bundesland = bl.id
+     JOIN kandidaten k ON k.id = bm.kandidat
+     JOIN listenkandidaten lk ON lk.kandidat = k.id
+WHERE bm.wahl = 1 AND bm.direktmandat = FALSE
+GROUP BY bl.id, pk.id;
+
+CREATE VIEW gewinner_parteien_wahlkreis(bundesland, partei, kandidat, wahlkreis)
+AS
+SELECT bl.id, pk.id, full_name(k), wk.id
+FROM bundestagsmandaten bm
+     JOIN parteikandidaturen pk ON pk.id = bm.partei
+     JOIN bundeslaender bl on bm.bundesland = bl.id
+     JOIN kandidaten k ON k.id = bm.kandidat
+     JOIN direktkandidaten dk ON dk.partei = pk.id AND dk.kandidat = k.id
+     JOIN wahlkreise wk ON dk.wahlkreis = wk.id
+WHERE bm.wahl = 1 AND bm.direktmandat = TRUE
+ORDER BY wk.id ;
+
+CREATE VIEW gewinner_parteien (bundesland, partei, gewinner) AS
+WITH grouped_bundesland_gewinner(bundesland, partei, listenplaetze) AS
+(
+  SELECT bundesland, partei,
+         json_agg(json_build_object(
+            'kandidat', kandidat,
+            'listennummer', listennummer
+         ))
+  FROM gewinner_parteien_bundesland
+  GROUP BY bundesland, partei
+),
+grouped_wahlkreis_gewinner(bundesland, partei, wahlkreise) AS
+(
+  SELECT bundesland, partei,
+         json_agg(json_build_object(
+            'kandidat', kandidat,
+            'wahlkreis', wahlkreis
+         ))
+  FROM gewinner_parteien_wahlkreis
+  GROUP BY bundesland, partei
+),
+gewinner(partei, bundesland, gewinner) AS
+(
+SELECT COALESCE(b.partei, w.partei),
+       COALESCE(b.bundesland, w.bundesland),
+       json_build_object(
+          'wahlkreise', w.wahlkreise,
+          'listenplaetze', b.listenplaetze
+       )
+FROM grouped_wahlkreis_gewinner w
+     FULL OUTER JOIN  grouped_bundesland_gewinner b
+       ON b.partei = w.partei AND b.bundesland = w.bundesland
+)
+SELECT g.bundesland, p.kurzbezeichnung, g.gewinner
+FROM gewinner g
+     JOIN parteikandidaturen pk ON g.partei = pk.id
+     JOIN parteien p ON p.id = pk.partei;
+
+GRANT SELECT ON gewinner_parteien TO web_anon;
