@@ -50,3 +50,10 @@ export interface Party {
   name: string;
   kurzbezeichnung: string;
 }
+
+export interface Ueberhangsmandate {
+  wahl: number;
+  partei: string;
+  land: string;
+  ueberhange: number;
+}
