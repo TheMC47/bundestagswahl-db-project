@@ -4,12 +4,6 @@ import { getUeberhangsmandate } from '../api';
 import { Col, Container, Form, Row, Table } from 'react-bootstrap';
 
 
-interface UeberhangsmandateProps {
-  data: Ueberhangsmandate[];
-  year: number;
-}
-
-
 export default function UeberhangsmandateView(): JSX.Element {
 
   const [data, setData] = useState<Ueberhangsmandate[]>([]);
@@ -36,36 +30,27 @@ export default function UeberhangsmandateView(): JSX.Element {
         </Col>
       </Row>
       <Col>
-        <UeberhangsmandateTable data={data} year={year} />
+        <Table>
+          <thead>
+            <tr>
+              <th>Partei</th>
+              <th>Bundesland</th>
+              <th>Überhangmandate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              data.map((d, index) =>
+                <tr key={index}>
+                  <td>{d.partei}</td>
+                  <td>{d.land}</td>
+                  <td>{d.ueberhange}</td>
+                </tr>
+              )
+            }
+          </tbody>
+        </Table>
       </Col>
     </Container>
   );
-}
-
-export function UeberhangsmandateTable({ data, year }: UeberhangsmandateProps): JSX.Element {
-  const filteredData = data.filter(d => d.wahl == year)
-
-
-  return (
-    <Table>
-      <thead>
-        <tr>
-          <th>Partei</th>
-          <th>Bundesland</th>
-          <th>Überhangmandate</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          filteredData.map((d, index) =>
-            <tr key={index}>
-              <td>{d.partei}</td>
-              <td>{d.land}</td>
-              <td>{d.ueberhange}</td>
-            </tr>
-          )
-        }
-      </tbody>
-    </Table>
-  )
 }
