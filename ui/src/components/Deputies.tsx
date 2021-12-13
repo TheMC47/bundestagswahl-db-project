@@ -14,20 +14,21 @@ export default function Deputies(): JSX.Element {
   }, [])
 
   return (
-    <Container>
+    <Container className="col-6">
+      <h2 className="mb-5">Abgeordnete</h2>
       <Table>
         <thead>
           <tr>
-            <th> Name </th>
-            <th> Partei </th>
+            <th className="text-start"> Name </th>
+            <th className="text-end"> Partei </th>
           </tr>
         </thead>
         <tbody>
           {
             deputies.map((d, i) =>
               <tr key={i}>
-                <td>{d.name}</td>
-                <td>{d.partei_kurzbezeichnung}</td>
+                <td className="text-start">{d.name}</td>
+                <td className="text-end">{d.partei_kurzbezeichnung}</td>
               </tr>
             )
           }

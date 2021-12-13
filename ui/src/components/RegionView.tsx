@@ -106,6 +106,7 @@ export default function RegionView(): JSX.Element {
 
   return (
     <Container>
+      <h2 className="mb-5">Wahlkreisübersicht</h2>
       <Row>
         <Col>
           <Row>

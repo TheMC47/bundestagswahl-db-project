@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Party, TightestWinner } from '../models'
 import { getParties, getTightestWinner } from '../api'
 import { Container, Form, Row, Table } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 
 
 export interface PartyProps {
@@ -28,11 +29,14 @@ export default function TightestWinnerView(): JSX.Element {
   return (
     <Container>
       <Row>
-        <Form.Select onChange={handleYearChange}>
-          <option value="" selected disabled>Jahr...</option>
-          <option value="1">2021</option>
-          <option value="2">2017</option>
-        </Form.Select>
+        <Col>
+          <Form.Select onChange={handleYearChange}>
+            <option value="" selected disabled>Jahr...</option>
+            <option value="1">2021</option>
+            <option value="2">2017</option>
+          </Form.Select>
+        </Col>
+        <Col>
         {year &&
           <Form.Select onChange={handlePartyChange} value={party?.id}>
             <option value="" selected disabled>Partei...</option>
@@ -41,6 +45,7 @@ export default function TightestWinnerView(): JSX.Element {
             )}
           </Form.Select>
         }
+        </Col>
       </Row>
       {year && party && <PerPartyResults party={party} year={year} />}
     </Container>
@@ -57,7 +62,7 @@ export function PerPartyResults({ party, year }: PartyProps): JSX.Element {
   }, [party])
 
   return (
-    <Container>
+    <Container className="mt-5">
       <Row>
         <div>
           <h2> Top knappste {results[0] && results[0].siege ? 'Siege' : 'Besiegte'}</h2>

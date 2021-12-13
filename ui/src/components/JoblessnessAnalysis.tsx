@@ -14,6 +14,7 @@ import {
   BarController,
   BarElement
 } from 'chart.js';
+import { Container } from 'react-bootstrap';
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, Title, CategoryScale, BarController, BarElement);
 
@@ -46,7 +47,12 @@ export function JoblessnessBarChart(): JSX.Element {
 
 
   return (
-    <JoblessnessAnalysis dataLinks={dataLinks} dataRechts={dataRechts} districts={districts} />
+    <Container>
+      <h2 className="mb-5">Arbeitslosigkeit und ideologische Tendenzen</h2>
+      <p> Bundesländer von links nach rechts in abnehmender Arbeitslosigkeitsquote dargestellt.
+      </p>
+      <JoblessnessAnalysis dataLinks={dataLinks} dataRechts={dataRechts} districts={districts} />
+    </Container>
   )
 }
 

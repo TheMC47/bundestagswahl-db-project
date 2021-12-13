@@ -16,6 +16,7 @@ export default function KoalitionenView(): JSX.Element {
 
   return (
     <Container className="col-5">
+      <h2 className="mb-5">Mögliche Koalitionen</h2>
       <Table>
         <thead>
           <tr>

@@ -21,6 +21,7 @@ export default function UeberhangsmandateView(): JSX.Element {
 
   return (
     <Container>
+      <h2 className="mb-5">Überhangsmandate</h2>
       <Row>
         <Col>
           <Form.Select onChange={handleYearChange}>
@@ -29,7 +30,7 @@ export default function UeberhangsmandateView(): JSX.Element {
           </Form.Select>
         </Col>
       </Row>
-      <Col>
+      <Col className="mt-5">
         <Table>
           <thead>
             <tr>

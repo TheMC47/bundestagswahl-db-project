@@ -99,6 +99,7 @@ export default function GewinnerView(): JSX.Element {
 
   return (
     <Container>
+      <h2 className="mb-5">Wahlkreissieger</h2>
       <Row>
         <Form.Select onChange={handleStateChange} value={bundesland?.id || ''}>
           <option value="" disabled>Bundesland...</option>
