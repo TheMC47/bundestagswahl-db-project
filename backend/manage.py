@@ -1,4 +1,5 @@
 import sys
+import os
 from dataclasses import dataclass
 from os import listdir
 from os.path import isfile, join, splitext
@@ -16,6 +17,8 @@ from seed_candidates import (
     seed_wahldaten,
 )
 from seed_parties import seed_parties
+
+from seed_structure_data import seed_unemployment
 
 
 @click.group()
@@ -142,7 +145,6 @@ def generate_wahlkreis(
         )
 
     wkdaten = Wahlkreisdaten(*data[0])
-    generate_voters(db, wkdaten)
     generate_first_votes(db, wkdaten)
     generate_second_votes(db, wkdaten)
 
@@ -154,13 +156,24 @@ def generate_votes(wahlkreis, year):
     # Get first vote results
     db = Transaction()
 
+    db.disable_constraints('erststimmen')
+    db.disable_constraints('zweitstimmen')
+    db.disable_constraints('wahlkreise')
+
     if wahlkreis is not None:
         generate_wahlkreis(db, wahlkreis, year, True)
+        db.enable_constraints('erststimmen')
+        db.enable_constraints('zweitstimmen')
+        db.enable_constraints('wahlkreise')
         db.commit()
         return
 
     for w in db.select_all("wahlkreise"):
         generate_wahlkreis(db, w[0], year)
+
+    db.enable_constraints('erststimmen')
+    db.enable_constraints('zweitstimmen')
+    db.enable_constraints('wahlkreise')
 
     db.commit()
 
@@ -172,6 +185,7 @@ def seed():
     seed_parties_res = seed_parties(db)
     seed_wahldaten(2021, db=db)
     seed_wahldaten(2017, db=db)
+    seed_unemployment(db)
     landeslisten_2021 = seed_landeslisten_2021(db, seed_parties_res)
     landeslisten_2017 = seed_landeslisten_2017(db, seed_parties_res)
     direct_candidates_2021, independent_candidates = seed_candidates_2021(
@@ -214,6 +228,22 @@ def migrate():
         db = Transaction()
         db.run_script(join(MIGRATIONS_DIR, migration))
         db.commit()
+
+
+@manage.command()
+def setup():
+    print("Migrating...")
+    migrate.callback()
+    print("Done!")
+    print("Seeding...")
+    seed.callback()
+    print("Done!")
+    print("Calculating seats...")
+    run_script.callback("calculate-seats.sql")
+    print("Done!")
+    print("Refreshing schema...")
+    os.system("docker-compose kill -s SIGUSR1 server")
+    print("Done")
 
 
 if __name__ == "__main__":

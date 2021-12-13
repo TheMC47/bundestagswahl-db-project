@@ -44,6 +44,12 @@ class Transaction:
             f"SELECT * FROM {table} WHERE {pk_name} = {pk}", dataklass
         )
 
+    def disable_constraints(self, table: str):
+        self.run_query(f"ALTER TABLE {table} DISABLE TRIGGER ALL", fetch=False)
+
+    def enable_constraints(self, table: str):
+        self.run_query(f"ALTER TABLE {table} ENABLE TRIGGER ALL", fetch=False)
+
     def select_all(self, table: str, dataklass=None):
         return self.run_query(f"SELECT * FROM {table}", dataklass)
 

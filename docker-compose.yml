@@ -8,8 +8,28 @@ services:
       - .env
     depends_on:
       - db
+  ui:
+    build: ./ui
+    volumes:
+      - "./ui:/app"
+    ports:
+      - "3006:3006"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - PORT=3006
+      - REACT_APP_URI=http://localhost:3000
+    depends_on:
+      - server
   db:
     image: postgres:13
+    command:
+      - "postgres"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "max_wal_size=16384"
+      - "-c"
+      - "min_wal_size=4096"
     ports:
       - "5432:5432"
     env_file:
