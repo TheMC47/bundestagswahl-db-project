@@ -1,11 +1,12 @@
 import random
 from locust import HttpUser, between, task
 
+
 # locust -H http://localhost:3000 -u n -r n --autostart  -f load-tester.py
 
 
 class WebsiteUser(HttpUser):
-    wait_time = between(0.8, 1.2) # TODO adapt
+    wait_time = between(0.8, 1.2)  # TODO adapt
 
     @task(25)
     def sitzverteilung(self):
@@ -29,13 +30,28 @@ class WebsiteUser(HttpUser):
         )
 
     @task(10)
-    def stimmkreissieger(self):
-        pass
+    def wahlkreisssieger(self):
+        bundesland = random.randint(1, 16)
+        self.client.get(f"/gewinner_parteien?bundesland=eq.{bundesland}", name="/gewinner_parteien")
 
     @task(10)
     def ueberhangsmandate(self):
-        pass
+        year = random.choice([1, 2])
+        self.client.get(f"/ueberhangsmandate?wahl=eq.{year}", name="/ueberhangsmandate")
 
     @task(20)
     def knappste_sieger(self):
-        pass
+        year = random.choice([1, 2])
+        party = random.randint(1, 63)
+        self.client.get(f"/knappste_sieger?wahl=eq.{year}&partei_id=eq.{party}", name="/knappste_sieger")
+
+    @task(10)
+    def koalition(self):
+        self.client.get("/koalitionen")
+
+    @task(10)
+    def arbeitslosigkeit_analyse(self):
+        links = 'l'
+        rechts = 'r'
+        self.client.get(f"/arbeitslosigkeit_uebersicht?ideologie=eq.{links}", name="/arbeitslosigkeit_uebersicht")
+        self.client.get(f"/arbeitslosigkeit_uebersicht?ideologie=eq.{rechts}", name="/arbeitslosigkeit_uebersicht")
