@@ -1,12 +1,23 @@
 import random
-from locust import HttpUser, between, task
+
+from locust import HttpUser, between, task, events
+
+# locust -H http://localhost:3000 -u n -r n --autostart --watit-time t -f load-tester.py
 
 
-# locust -H http://localhost:3000 -u n -r n --autostart  -f load-tester.py
+@events.init_command_line_parser.add_listener
+def _(parser):
+    parser.add_argument("--wait-time", type=int, default=1, help="Parameterized wait-time")
 
 
 class WebsiteUser(HttpUser):
-    wait_time = between(0.8, 1.2)  # TODO adapt
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.t = self.environment.parsed_options.wait_time
+
+    def wait_time(self):
+        return between(self.t*0.8, self.t*1.2)(self)
 
     @task(25)
     def sitzverteilung(self):
