@@ -53,9 +53,9 @@ Average wait time (in ms) per endpoint per test
 
 [^1]: This is done for pragmatic reasons: the bottleneck is the database and the
     server, not the UI, since it is executed on the client. Moreover, in a
-    production setting. the UI can run on its own machine(s) or a dedicated
+    production setting, the UI can run on its own machine(s) or a dedicated
     Content Distribution Network (CDN), thus separating the two components
     entirely. Another reason is that it is not practical to emulate many
     browsers *with javascript* on a consumer-grade machine; and testing just the
-    protcol requires only HTTP and thus way less ressources, allowing to focus
+    protocol requires only HTTP and in this way less resources, allowing to focus
     the benchmark on the database.
