@@ -1,131 +1,33 @@
 # Loadtesting
 
-Statistics grouped per endpoint
+Command to generate the benchmark (grouped per endpoint)
 ``` sh
-locust -H http://localhost:3000 -u NUM_USERS -r SPAWN_RATE --autostart --wait-time WAIT_TIME -f load-tester.py PerEndpointUser
+locust -H http://localhost:3000 -u N -r N --autostart --wait-time T -f load-tester.py PerEndpointUser
 ```
 
-n = SPAWN_RATE = NUM_USERS
+### Tests
+All tests ran a total of five minutes. No request failed. The detailed results
+for each test can be found in `TEST_NUMBER.html`
 
-n = 100, t = 5
+| Test Number  | Number of users | Wait-time (seconds) | Number of Requests | Requests per second |
+|--------------|-----------------|---------------------|--------------------|---------------------|
+| 0 (Baseline) | 1               | 1                   | 452                | 1.51                |
+| 1            | 100             | 5                   | 8950               | 29.86               |
+| 2            | 100             | 1                   | 43815              | 146.13              |
+| 3            | 500             | 5                   | 44619              | 148.82              |
+| 4            | 500             | 1                   | 51515              | 171.84              |
 
-locust -H http://localhost:3000 -u 100 -r 100 --autostart --wait-time 5 -f load-tester.py --run-time 5m PerEndpointUser
+### Results Summary
+Average wait time (in ms) per endpoint per test
 
- Name                                                                              # reqs      # fails  |     Avg     Min     Max  Median  |   req/s failures/s
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
- GET /abgeordnete                                                                     603     0(0.00%)  |      19       4     972      11  |    2.01    0.00
- GET /alle_ergebnisse                                                                1477     0(0.00%)  |      55      37     538      47  |    4.93    0.00
- GET /bundeslaender?select=*,wahlkreise(*)                                           1477     0(0.00%)  |      19       4     928      10  |    4.93    0.00
- GET /gewinner_parteien                                                               609     0(0.00%)  |      28       7     964      16  |    2.03    0.00
- GET /knappste_sieger                                                                1214     0(0.00%)  |      44      17     851      34  |    4.05    0.00
- GET /sitze_pro_partei_full                                                          1468     0(0.00%)  |      11       2     697       6  |    4.90    0.00
- GET /ueberhangsmandate                                                               625     0(0.00%)  |      29       8     867      18  |    2.09    0.00
- GET /wahlkreis_uebersicht                                                           1477     0(0.00%)  |      11       2     588       5  |    4.93    0.00
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
- Aggregated                                                                          8950     0(0.00%)  |      27       2     972      13  |   29.86    0.00
-
-Response time percentiles (approximated)
- Type     Name                                                                                  50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
---------|--------------------------------------------------------------------------------|---------|------|------|------|------|------|------|------|------|------|------|------|
- GET      /abgeordnete                                                                           11     18     19     20     21     23     27    390    970    970    970    603
- GET      /alle_ergebnisse                                                                       47     59     65     69     73     78     88    190    490    540    540   1477
- GET      /bundeslaender?select=*,wahlkreise(*)                                                  10     15     16     17     18     19    210    410    920    930    930   1477
- GET      /gewinner_parteien                                                                     16     28     31     32     34     37     41    420    960    960    960    609
- GET      /knappste_sieger                                                                       34     48     54     56     58     61     67    410    810    850    850   1214
- GET      /sitze_pro_partei_full                                                                  6      8      9      9     10     12     15    280    680    700    700   1468
- GET      /ueberhangsmandate                                                                     18     31     33     34     36     38    260    370    870    870    870    625
- GET      /wahlkreis_uebersicht                                                                   5      9     10     10     11     13     31    200    540    590    590   1477
---------|--------------------------------------------------------------------------------|---------|------|------|------|------|------|------|------|------|------|------|------|
- None     Aggregated                                                                             13     22     36     40     56     68     79    290    810    970    970   8950
-
-
-
-locust -H http://localhost:3000 -u 100 -r 100 --autostart --wait-time 1 -f load-tester.py --run-time 5m PerEndpointUser
-
- Name                                                                              # reqs      # fails  |     Avg     Min     Max  Median  |   req/s failures/s
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
- GET /abgeordnete                                                                    2916     0(0.00%)  |       9       4     612       7  |    9.73    0.00
- GET /alle_ergebnisse                                                                7307     0(0.00%)  |      47      37     416      44  |   24.37    0.00
- GET /bundeslaender?select=*,wahlkreise(*)                                           7307     0(0.00%)  |       8       3     678       6  |   24.37    0.00
- GET /gewinner_parteien                                                              2998     0(0.00%)  |      13       7     695      10  |   10.00    0.00
- GET /knappste_sieger                                                                5750     0(0.00%)  |      26      17     684      23  |   19.18    0.00
- GET /sitze_pro_partei_full                                                          7323     0(0.00%)  |       5       2     703       4  |   24.42    0.00
- GET /ueberhangsmandate                                                              2907     0(0.00%)  |      14       8     622      11  |    9.70    0.00
- GET /wahlkreis_uebersicht                                                           7307     0(0.00%)  |       5       2     546       4  |   24.37    0.00
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
- Aggregated                                                                         43815     0(0.00%)  |      17       2     703       9  |  146.13    0.00
-
-Response time percentiles (approximated)
- Type     Name                                                                                  50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
---------|--------------------------------------------------------------------------------|---------|------|------|------|------|------|------|------|------|------|------|------|
- GET      /abgeordnete                                                                            7      7      8      9     15     20     27     36    290    610    610   2916
- GET      /alle_ergebnisse                                                                       44     47     51     53     60     65     73     80    330    420    420   7307
- GET      /bundeslaender?select=*,wahlkreise(*)                                                   6      6      7      8     14     18     26     33    270    680    680   7307
- GET      /gewinner_parteien                                                                     10     11     12     13     20     28     36     41    410    700    700   2998
- GET      /knappste_sieger                                                                       23     25     28     30     38     47     55     60    210    680    680   5750
- GET      /sitze_pro_partei_full                                                                  4      4      5      5      8     12     19     27    220    700    700   7323
- GET      /ueberhangsmandate                                                                     11     12     14     15     21     30     37     44    560    620    620   2907
- GET      /wahlkreis_uebersicht                                                                   4      5      5      6      8     11     16     24    290    550    550   7307
---------|--------------------------------------------------------------------------------|---------|------|------|------|------|------|------|------|------|------|------|------|
- None     Aggregated                                                                              9     17     23     31     43     50     61     67    290    680    700  43815
-
-
-locust -H http://localhost:3000 -u 500 -r 500 --autostart --wait-time 1 -f load-tester.py --run-time 5m PerEndpointUser
-
- Name                                                                              # reqs      # fails  |     Avg     Min     Max  Median  |   req/s failures/s
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
- GET /abgeordnete                                                                    3407     0(0.00%)  |    2155      14   17356    1500  |   11.36    0.00
- GET /alle_ergebnisse                                                                8480     0(0.00%)  |    2283      82   23334    1600  |   28.29    0.00
- GET /bundeslaender?select=*,wahlkreise(*)                                           8606     0(0.00%)  |    2253      10   22231    1500  |   28.71    0.00
- GET /gewinner_parteien                                                              3387     0(0.00%)  |    2211      15   16389    1500  |   11.30    0.00
- GET /knappste_sieger                                                                6925     0(0.00%)  |    2230      45   21668    1600  |   23.10    0.00
- GET /sitze_pro_partei_full                                                          8619     0(0.00%)  |    2219       6   22212    1500  |   28.75    0.00
- GET /ueberhangsmandate                                                              3553     0(0.00%)  |    2145      23   18294    1500  |   11.85    0.00
- GET /wahlkreis_uebersicht                                                           8538     0(0.00%)  |    2185       7   23528    1500  |   28.48    0.00
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
- Aggregated                                                                         51515     0(0.00%)  |    2221       6   23528    1500  |  171.84    0.00
-
-Response time percentiles (approximated)
-
- Type     Name                                                                                  50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
---------|--------------------------------------------------------------------------------|---------|------|------|------|------|------|------|------|------|------|------|------|
- GET      /abgeordnete                                                                         1500   2300   3000   3500   5000   6600   8600  10000  15000  17000  17000   3407
- GET      /alle_ergebnisse                                                                     1600   2400   3200   3700   5200   6900   9100  11000  17000  23000  23000   8480
- GET      /bundeslaender?select=*,wahlkreise(*)                                                1500   2400   3100   3600   5300   7000   9200  11000  18000  22000  22000   8606
- GET      /gewinner_parteien                                                                   1500   2300   3100   3600   5300   6700   8600  10000  15000  16000  16000   3387
- GET      /knappste_sieger                                                                     1600   2400   3100   3600   5000   6700   9000  10000  17000  22000  22000   6925
- GET      /sitze_pro_partei_full                                                               1500   2400   3100   3600   5200   6900   9000  11000  17000  22000  22000   8619
- GET      /ueberhangsmandate                                                                   1500   2300   3000   3400   5200   6500   8700  11000  17000  18000  18000   3553
- GET      /wahlkreis_uebersicht                                                                1500   2300   3100   3600   5200   6800   8800  10000  16000  24000  24000   8538
---------|--------------------------------------------------------------------------------|---------|------|------|------|------|------|------|------|------|------|------|------|
- None     Aggregated                                                                           1500   2400   3100   3600   5200   6800   9000  11000  17000  22000  24000  51515
-
-
-
-locust -H http://localhost:3000 -u 500 -r 500 --autostart --wait-time 5 -f load-tester.py --run-time 5m PerEndpointUser
- Name                                                                              # reqs      # fails  |     Avg     Min     Max  Median  |   req/s failures/s
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
- GET /abgeordnete                                                                    2983     0(0.00%)  |      36       4    3890       7  |    9.95    0.00
- GET /alle_ergebnisse                                                                7381     0(0.00%)  |      59      37    2536      44  |   24.62    0.00
- GET /bundeslaender?select=*,wahlkreise(*)                                           7382     0(0.00%)  |      43       3    4287       6  |   24.62    0.00
- GET /gewinner_parteien                                                              3064     0(0.00%)  |      36       7    4110      10  |   10.22    0.00
- GET /knappste_sieger                                                                5986     0(0.00%)  |      53      18    4043      23  |   19.97    0.00
- GET /sitze_pro_partei_full                                                          7515     0(0.00%)  |      36       2    4280       4  |   25.07    0.00
- GET /ueberhangsmandate                                                              2926     0(0.00%)  |      40       7    3638      11  |    9.76    0.00
- GET /wahlkreis_uebersicht                                                           7382     0(0.00%)  |      21       2    3173       4  |   24.62    0.00
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
- Aggregated                                                                         44619     0(0.00%)  |      41       2    4287       9  |  148.82    0.00
-
-Response time percentiles (approximated)
- Type     Name                                                                                  50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
---------|--------------------------------------------------------------------------------|---------|------|------|------|------|------|------|------|------|------|------|------|
- GET      /abgeordnete                                                                            7      7      8      9     15     21     39   1300   3400   3900   3900   2983
- GET      /alle_ergebnisse                                                                       44     48     51     54     63     69     92    470   1700   2500   2500   7381
- GET      /bundeslaender?select=*,wahlkreise(*)                                                   6      6      8      9     15     21     49   1800   3700   4300   4300   7382
- GET      /gewinner_parteien                                                                     10     11     13     14     22     30     38   1200   3300   4100   4100   3064
- GET      /knappste_sieger                                                                       23     26     29     32     40     50     63   1500   3400   4000   4000   5986
- GET      /sitze_pro_partei_full                                                                  4      4      5      6      9     14     34   1600   3300   4300   4300   7515
- GET      /ueberhangsmandate                                                                     11     12     14     15     23     32     43   1400   3400   3600   3600   2926
- GET      /wahlkreis_uebersicht                                                                   4      5      5      6      8     12     40    530   2500   3200   3200   7382
---------|--------------------------------------------------------------------------------|---------|------|------|------|------|------|------|------|------|------|------|------|
- None     Aggregated                                                                              9     19     24     36     45     54     74   1100   3200   4000   4300  44619
+| Endpoint                                    | 0 (baseline) | 1  | 2  | 3  | 4    |
+|---------------------------------------------|--------------|----|----|----|------|
+| GET /abgeordnete                            | 12           | 19 | 9  | 36 | 2155 |
+| GET /alle_ergebnisse                        | 42           | 55 | 47 | 59 | 2283 |
+| GET /bundeslaender?select=\*,wahlkreise(\*) | 11           | 19 | 8  | 43 | 2253 |
+| GET /gewinner_parteien                      | 17           | 28 | 13 | 36 | 2211 |
+| GET /knappste_sieger                        | 31           | 44 | 26 | 53 | 2230 |
+| GET /sitze_pro_partei_full                  | 7            | 11 | 5  | 36 | 2219 |
+| GET /ueberhangsmandate                      | 18           | 29 | 14 | 40 | 2145 |
+| GET /wahlkreis_uebersicht                   | 3            | 11 | 5  | 21 | 2185 |
+| Aggregated                                  | 18           | 27 | 17 | 41 | 2221 |
