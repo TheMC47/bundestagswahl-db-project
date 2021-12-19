@@ -10,7 +10,7 @@ def _(parser):
     parser.add_argument("--wait-time", type=int, default=1, help="Parameterized wait-time")
 
 
-class WebsiteUser(HttpUser):
+class PerEndpointUser(HttpUser):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,13 +56,52 @@ class WebsiteUser(HttpUser):
         party = random.randint(1, 63)
         self.client.get(f"/knappste_sieger?wahl=eq.{year}&partei_id=eq.{party}", name="/knappste_sieger")
 
-    @task(10)
-    def koalition(self):
-        self.client.get("/koalitionen")
+
+class PerTaskUser(HttpUser):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.t = self.environment.parsed_options.wait_time
+
+    def wait_time(self):
+        return between(self.t*0.8, self.t*1.2)(self)
+
+    @task(25)
+    def sitzverteilung(self):
+        self.client.get("/sitze_pro_partei_full", name="Q1")
 
     @task(10)
-    def arbeitslosigkeit_analyse(self):
-        links = 'l'
-        rechts = 'r'
-        self.client.get(f"/arbeitslosigkeit_uebersicht?ideologie=eq.{links}", name="/arbeitslosigkeit_uebersicht")
-        self.client.get(f"/arbeitslosigkeit_uebersicht?ideologie=eq.{rechts}", name="/arbeitslosigkeit_uebersicht")
+    def abgeordnete(self):
+        self.client.get("/abgeordnete", name="Q2")
+
+    @task(25)
+    def alle_ergebnisse(self):
+        wahlkreis = random.randint(1, 298)
+        self.client.get("/bundeslaender?select=*,wahlkreise(*)", name="Q3")
+        self.client.get(
+            f"/wahlkreis_uebersicht?wahlkreis=eq.{wahlkreis}",
+            name="Q3",
+        )
+        self.client.get(
+            f"/alle_ergebnisse?wahlkreis=eq.{wahlkreis}",
+            name="Q3",
+        )
+
+    @task(10)
+    def wahlkreisssieger(self):
+        bundesland = random.randint(1, 16)
+        self.client.get(
+            f"/gewinner_parteien?bundesland=eq.{bundesland}",
+            name="Q4"
+        )
+
+    @task(10)
+    def ueberhangsmandate(self):
+        year = random.choice([1, 2])
+        self.client.get(f"/ueberhangsmandate?wahl=eq.{year}", name="Q5")
+
+    @task(20)
+    def knappste_sieger(self):
+        year = random.choice([1, 2])
+        party = random.randint(1, 63)
+        self.client.get(f"/knappste_sieger?wahl=eq.{year}&partei_id=eq.{party}", name="Q6")
