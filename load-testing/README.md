@@ -24,8 +24,9 @@ endpoints:
 | Q6      | Knappste Sieger  | /knappste_sieger                        |
 
 ### Tests
-All tests ran a total of five minutes. No request failed. The detailed results
-for each test can be found in `TEST_NUMBER.html`
+All tests ran a total of five minutes (CPU: Intel i7-8750H (12) @ 4.100GHz, RAM:
+12GB), OS: Manjaro Linux x86_64, 4.19.217-1-MANJARO). No request failed. The
+detailed results for each test can be found in `TEST_NUMBER.html`.
 
 | Test Number  | Number of users | Wait-time (seconds) | Number of Requests | Requests per second |
 |--------------|-----------------|---------------------|--------------------|---------------------|
