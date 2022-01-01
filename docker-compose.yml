@@ -30,6 +30,8 @@ services:
       - "max_wal_size=16384"
       - "-c"
       - "min_wal_size=4096"
+      - "-c"
+      - "pgrst.jwt_secret=${PGRST_JWT_SECRET}"
     ports:
       - "5432:5432"
     env_file:
