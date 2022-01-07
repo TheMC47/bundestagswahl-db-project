@@ -231,6 +231,62 @@ def migrate():
 
 
 @manage.command()
+@click.option("-w", "--wahlkreis", type=int, required=True)
+@click.option("-n", "--number", type=int, required=True)
+def create_voters(wahlkreis, number):
+    # Get first vote results
+    db = Transaction()
+
+    query = f"""
+        INSERT INTO waehler(wahl,wahlkreis,hat_abgestimmt) (
+            SELECT 1, {wahlkreis}, false
+            FROM generate_series(1, {number})
+        ) RETURNING id;
+    """
+    data = db.run_query(query)
+    print('\n'.join([d[0] for d in data]))
+    db.commit()
+
+
+@manage.command()
+@click.option("-w", "--wahlkreis", type=int, required=True)
+@click.option("-n", "--number", type=int, required=True)
+def create_keys(wahlkreis, number):
+    # Get first vote results
+    db = Transaction()
+
+    query = f"""
+        INSERT INTO wahlkreis_keys(wahlkreis) (
+            SELECT {wahlkreis}
+            FROM generate_series(1, {number})
+        ) RETURNING *;
+    """
+    data = db.run_query(query)
+    print('\n'.join([d[0] for d in data]))
+    db.commit()
+
+
+@manage.command()
+@click.option("-w", "--wahlkreis", type=int, required=True)
+@click.option("-f", "--first-name", type=str, required=True)
+@click.option("-l", "--last-name", type=str, required=True)
+def add_helper(wahlkreis, first_name, last_name):
+    # Get first vote results
+    db = Transaction()
+
+    query = f"""
+        INSERT INTO wahlkreishelfer(wahlkreis,nachname,vornamen)
+        VALUES ({wahlkreis}, '{last_name}', '{first_name}')
+        RETURNING kennung;
+    """
+
+    data = db.run_query(query)
+    print(f"Key: {data[0][0]}")
+
+    db.commit()
+
+
+@manage.command()
 def setup():
     print("Migrating...")
     migrate.callback()
@@ -242,7 +298,7 @@ def setup():
     run_script.callback("calculate-seats.sql")
     print("Done!")
     print("Refreshing schema...")
-    os.system("docker-compose kill -s SIGUSR1 server")
+    os.system("docker-compose kill -s SIGUSR1 server > /dev/null 2>&1")
     print("Done")
 
 

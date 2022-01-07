@@ -275,6 +275,7 @@ def seed_year_first_results(
 
         return direct_candidates[(row.Gebietsnummer, party_key)]
 
+    pd.options.mode.chained_assignment = None  # false positive in this file
     first_vote_results["direct_candidate_pk"] = first_vote_results.apply(
         candidate_pk,
         axis=1,

@@ -14,8 +14,12 @@ import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { JoblessnessBarChart } from './components/JoblessnessAnalysis';
+import { HelperLogin } from './components/Login';
+import { useState } from 'react';
 
 function App(): JSX.Element {
+
+  const [token, setToken] = useState<string|undefined>(undefined)
 
   return (
     <Router>
@@ -31,7 +35,7 @@ function App(): JSX.Element {
             <Nav.Link href="/wahlkreissieger">Wahlkreissieger</Nav.Link>
             <Nav.Link href="/koalitionen">Koalitionen</Nav.Link>
             <Nav.Link href="/arbeitslosigkeit">Arbeitslosigkeit und ideologische Tendenzen</Nav.Link>
-            <Nav.Link href="/stimmabgabe">Stimmabgabe</Nav.Link>
+            <Nav.Link href="/login">Login</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
@@ -46,6 +50,7 @@ function App(): JSX.Element {
           <Route path="/wahlkreissieger" element={<GewinnerView />} />
           <Route path="/koalitionen" element={<KoalitionenView />} />
           <Route path="/arbeitslosigkeit" element={<JoblessnessBarChart />} />
+          <Route path="/login" element={<HelperLogin setToken={setToken} />} />
           <Route path="/stimmabgabe" element={<Wahlzettel />} />
         </Routes>
       </Container>
