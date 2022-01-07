@@ -639,12 +639,13 @@ FROM kleinste_koalitionen kk;
 GRANT SELECT ON koalitionen TO web_anon;
 
 
-CREATE VIEW stimmzettel_erststimme(wahlkreis, kandidat_nachname, kandidat_vorname, partei_abk, partei_name, rank) AS
+CREATE VIEW stimmzettel_erststimme(wahlkreis, kandidat_nachname, kandidat_vorname, kandidat_beruf, partei_abk, partei_name, rank) AS
 (
-WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat, partei_abk, partei_name, rank) AS (
+WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat_nachname, kandidat_vorname , kandidat_beruf, partei_abk, partei_name, rank) AS (
     SELECT dk.wahlkreis,
-           k.nachnme,
+           k.nachname,
            k.vornamen,
+           k.beruf,
            p.kurzbezeichnung,
            p.name,
            RANK() OVER (PARTITION BY dk.wahlkreis ORDER BY ze.anzahl_stimmen DESC)
@@ -670,10 +671,11 @@ WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat, partei_abk, parte
          SELECT d.wahlkreis, MAX(d.rank)
          FROM direktkandidaten_mit_partein_ranking d
          group by d.wahlkreis
-     ), direktkandidaten_ohne_partein_ranking(wahlkreis,kandidat_nachname, kandidat_vorname, partei_abk, partei_name, rank) AS (
+     ), direktkandidaten_ohne_partein_ranking(wahlkreis,kandidat_nachname, kandidat_vorname,kandidat_beruf, partei_abk, partei_name, rank) AS (
          SELECT dk.wahlkreis,
                 k.nachname,
                 k.vornamen,
+                k.beruf,
                 p.kurzbezeichnung,
                 p.name,
                 mr.max_rank + RANK() OVER (PARTITION BY dk.wahlkreis ORDER BY k.nachname)
@@ -705,7 +707,7 @@ WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat, partei_abk, parte
 GRANT SELECT ON stimmzettel_erststimme TO web_anon;
 
 
-CREATE VIEW stimmzettel_zweitestimme(bundesland, partei_abk, partei_name, rank) AS
+CREATE VIEW stimmzettel_zweitstimme(bundesland, partei_abk, partei_name, rank) AS
 (
 WITH parteien_bereits_teilgenommen (bundesland, partei_abk, partei_name, rank) AS (
     SELECT l.bundesland,
@@ -745,7 +747,23 @@ WITH parteien_bereits_teilgenommen (bundesland, partei_abk, partei_name, rank) A
          FROM parteien_erstmal
     );
 
-GRANT SELECT ON stimmzettel_zweitestimme TO web_anon;
+GRANT SELECT ON stimmzettel_zweitstimme TO web_anon;
+
+
+CREATE VIEW LandeslistenKandidaten ( bundesland, partei_abk, kandidat_nachname, kandidat_vorname, listennummer) AS
+(
+SELECT sz.bundesland, sz.partei_abk, k.nachname, k.vornamen, lk.listennummer
+FROM stimmzettel_zweitstimme sz
+         JOIN parteien p ON sz.partei_abk = p.kurzbezeichnung
+         JOIN parteiKandidaturen pk ON pk.partei = p.id
+         JOIN landeslisten l ON l.partei = pk.id AND sz.bundesland = l.bundesland
+         JOIN listenkandidaten lk ON lk.landesliste = l.id
+         JOIN kandidaten k ON k.id = lk.kandidat
+WHERE pk.wahl = 1
+ORDER BY lk.listennummer
+    );
+
+GRANT SELECT ON LandeslistenKandidaten TO web_anon;
 
 
 

@@ -11,7 +11,7 @@ import {
   ParteiGewinner,
   Koalition,
   JoblessnessSummary,
-  JoblessnessDistricts
+  JoblessnessDistricts, Direktkandidat, Landesliste, LandeslistenKandidaten
 } from './models'
 
 export const URI = process.env.REACT_APP_URI
@@ -95,3 +95,16 @@ export async function getGewinner(bundesland: number): Promise<ParteiGewinner[]>
 export async function getKoalitionen(): Promise<Koalition[]> {
   return api('/koalitionen')
 }
+
+export async function getStimmzettel_Erststimme(wahlkreis: number): Promise<Direktkandidat[]> {
+  return api(`/stimmzettel_erststimme?wahlkreis=eq.${wahlkreis}`);
+}
+
+export async function getStimmzettel_Zweitstimme(bundesland: number): Promise<Landesliste[]> {
+  return api(`/stimmzettel_zweitstimme?bundesland=eq.${bundesland}`);
+}
+
+export async function getListenKandidaten_Zweitstimme(bundesland: number): Promise<LandeslistenKandidaten[]> {
+  return api(`/LandeslistenKandidaten?bundesland=eq.${bundesland}`);
+}
+

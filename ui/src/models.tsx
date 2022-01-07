@@ -103,3 +103,29 @@ export interface Koalition {
   koalition: string[];
   sitze: number;
 }
+
+export interface Direktkandidat {
+  wahlkreis: number;
+  kandidat_nachname: string;
+  kandidat_vorname: string;
+  partei_abk: string;
+  partei_name: string;
+  rank: number;
+}
+
+export interface Landesliste {
+  bundesland: number;
+  partei_abk: string;
+  partei_name: string;
+  rank: number;
+
+
+}
+
+export interface LandeslistenKandidaten {
+  bundesland: number;
+  partei_abk: string;
+  kandidat_nachname: string;
+  kandidat_vorname: string;
+  listennummer: number;
+}
