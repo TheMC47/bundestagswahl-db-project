@@ -101,7 +101,7 @@ export async function getStimmzettel_Erststimme(wahlkreis: number): Promise<Dire
 }
 
 export async function getStimmzettel_Zweitstimme(bundesland: number): Promise<Landesliste[]> {
-  return api(`/landeslistenKandidaten?bundesland=eq.${bundesland}`);
+  return api(`/landeslisten_kandidaten?bundesland=eq.${bundesland}`);
 }
 
 

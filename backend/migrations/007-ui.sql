@@ -753,7 +753,7 @@ WITH parteien_bereits_teilgenommen (bundesland, liste_id, partei_abk, partei_nam
 GRANT SELECT ON stimmzettel_zweitstimme TO web_anon;
 
 
-CREATE VIEW landeslistenKandidaten ( bundesland, liste_id, partei_abk, partei_name, rank, kandidaten) AS
+CREATE VIEW landeslisten_kandidaten ( bundesland, liste_id, partei_abk, partei_name, rank, kandidaten) AS
 (
 SELECT sz.bundesland, sz.liste_id, sz.partei_abk, sz.partei_name, sz.rank, string_agg(CONCAT(k.nachname , ' ', k.vornamen), ', ' ORDER BY lk.listennummer )
 FROM stimmzettel_zweitstimme sz
@@ -766,7 +766,7 @@ WHERE pk.wahl = 1
 GROUP BY sz.bundesland, sz.liste_id, sz.partei_abk, sz.partei_name, sz.rank
     );
 
-GRANT SELECT ON landeslistenKandidaten TO web_anon;
+GRANT SELECT ON landeslisten_kandidaten TO web_anon;
 
 
 
