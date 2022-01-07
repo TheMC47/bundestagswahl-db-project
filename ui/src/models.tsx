@@ -106,6 +106,7 @@ export interface Koalition {
 
 export interface Direktkandidat {
   wahlkreis: number;
+  kandidat_id: number;
   kandidat_nachname: string;
   kandidat_vorname: string;
   partei_abk: string;
@@ -115,17 +116,10 @@ export interface Direktkandidat {
 
 export interface Landesliste {
   bundesland: number;
+  liste_id: number;
   partei_abk: string;
   partei_name: string;
   rank: number;
+  kandidaten: string;
 
-
-}
-
-export interface LandeslistenKandidaten {
-  bundesland: number;
-  partei_abk: string;
-  kandidat_nachname: string;
-  kandidat_vorname: string;
-  listennummer: number;
 }

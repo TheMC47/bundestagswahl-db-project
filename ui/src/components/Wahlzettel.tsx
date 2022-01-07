@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Deputy, Direktkandidat, Landesliste, LandeslistenKandidaten, Party, Region, State } from '../models'
+import { Deputy, Direktkandidat, Landesliste, Party, Region, State } from '../models'
 import {
   getDeputies,
-  getListenKandidaten_Zweitstimme,
   getSitzVerteilung,
   getStimmzettel_Erststimme,
   getStimmzettel_Zweitstimme
@@ -73,20 +72,26 @@ export default function Wahlzettel(): JSX.Element {
 
     </Container>
   )
-
-
 }
 
 export interface ErststimmeZettelProps {
   wahlkreis: number;
 }
 
+interface Checkbox {
+  kandidat_id: number;
+  chedcked: boolean;
+}
+
 
 function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
   const [direktkandidaten, setdirektkandidaten] = useState<Direktkandidat[]>([]);
+  const [checkboxes, setCheckbox] = useState<Checkbox[]>([]);
+
   useEffect(() => {
     getStimmzettel_Erststimme(wahlkreis).then(d => setdirektkandidaten(d))
   }, [])
+
 
   return (
     <table className="table table-bordered table-hover">
@@ -96,7 +101,7 @@ function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
       <tr key={d.rank}>
         <th scope="row">{d.rank}</th>
         <td className="d-block">
-          <div className='d-flex justify-content-start'>
+          <div className='d-flex justify-content-start '>
             <div className="d-block " >
               <h5  className="d-flex" >{d.kandidat_vorname +" "+ d.kandidat_nachname}</h5>
               <p className="d-flex " >With supporting</p>
@@ -104,13 +109,13 @@ function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
           </div>
           <div className='d-flex justify-content-end'>
             <div className="d-block" >
-              <h5 className="d-flex justify-content-start">{d.partei_abk}</h5>
+              <h5 className="d-flex justify-content-start ">{d.partei_abk}</h5>
               <p className="d-flex justify-content-start">{d.partei_name}</p>
             </div>
           </div>
         </td>
         <td>
-          <input type="checkbox" className="form-check-input" id="exampleCheck1" />
+          <input type="checkbox" className="form-check-input" id={d.kandidat_vorname}/>
 
         </td>
       </tr>
@@ -128,43 +133,37 @@ export interface ZweitstimmeZettelProps {
 }
 function Zweitstimme({bundesland}: ZweitstimmeZettelProps): JSX.Element {
   const [landeslisten, setlandeslisten] = useState<Landesliste[]>([]);
-  const [listenKandidaten, setListenKandidaten] = useState<LandeslistenKandidaten[]>([]);
 
   useEffect(() => {
     getStimmzettel_Zweitstimme(bundesland).then(d => setlandeslisten(d))
+    console.log(landeslisten)
   }, [])
-
-  useEffect(
-    () => {
-      getListenKandidaten_Zweitstimme(bundesland).then ( d => setListenKandidaten(d))
-    }, []
-  )
 
   return (
     <table className="table table-bordered table-hover">
       <tbody className = "text-primary">
+      console.log(landeslisten)
+
       {
         landeslisten.map((d) =>
+
           <tr key={d.rank}>
             <td>
-              <input type="checkbox" className="form-check-input" id="exampleCheck1" />
-
+              <input type="checkbox" className="form-check-input" id= "id" />
             </td>
             <td className="d-block">
               <div className='d-flex justify-content-start'>
                 <div className="d-block " >
-                  <h5  className="d-flex" >{d.partei_abk}</h5>
-                  <p className="d-flex " >{d.partei_abk}</p>
+                  <h5  className="d-flex align-content-center" >{d.partei_abk}</h5>
                 </div>
               </div>
               <div className='d-flex justify-content-end'>
                 <div className="d-block" >
-
-                  <p className="d-flex justify-content-start">{d.partei_name}</p>
+                  <h5 className="d-flex justify-content-start ">{d.partei_name}</h5>
+                  <p className="d-flex justify-content-start">{d.kandidaten}</p>
                 </div>
               </div>
             </td>
-
             <th scope="row">{d.rank}</th>
           </tr>
         )}

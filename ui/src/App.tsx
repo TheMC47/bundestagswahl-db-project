@@ -9,6 +9,7 @@ import UeberhangsmandateView from './components/Ueberhangsmandate';
 import RegionViewSingleVotes from './components/RegionViewSingleVotes'
 import GewinnerView from './components/GewinnerParteien'
 import KoalitionenView from './components/Koalitionen'
+import Wahlzettel from './components/Wahlzettel'
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';

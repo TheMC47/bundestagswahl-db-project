@@ -639,10 +639,11 @@ FROM kleinste_koalitionen kk;
 GRANT SELECT ON koalitionen TO web_anon;
 
 
-CREATE VIEW stimmzettel_erststimme(wahlkreis, kandidat_nachname, kandidat_vorname, kandidat_beruf, partei_abk, partei_name, rank) AS
+CREATE VIEW stimmzettel_erststimme(wahlkreis, kandidat_id, kandidat_nachname, kandidat_vorname, kandidat_beruf, partei_abk, partei_name, rank) AS
 (
-WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat_nachname, kandidat_vorname , kandidat_beruf, partei_abk, partei_name, rank) AS (
+WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat_id,  kandidat_nachname, kandidat_vorname , kandidat_beruf, partei_abk, partei_name, rank) AS (
     SELECT dk.wahlkreis,
+           dk.id,
            k.nachname,
            k.vornamen,
            k.beruf,
@@ -671,8 +672,9 @@ WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat_nachname, kandidat
          SELECT d.wahlkreis, MAX(d.rank)
          FROM direktkandidaten_mit_partein_ranking d
          group by d.wahlkreis
-     ), direktkandidaten_ohne_partein_ranking(wahlkreis,kandidat_nachname, kandidat_vorname,kandidat_beruf, partei_abk, partei_name, rank) AS (
+     ), direktkandidaten_ohne_partein_ranking(wahlkreis,kandidat_id, kandidat_nachname, kandidat_vorname,kandidat_beruf, partei_abk, partei_name, rank) AS (
          SELECT dk.wahlkreis,
+                dk.id,
                 k.nachname,
                 k.vornamen,
                 k.beruf,
@@ -707,10 +709,11 @@ WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat_nachname, kandidat
 GRANT SELECT ON stimmzettel_erststimme TO web_anon;
 
 
-CREATE VIEW stimmzettel_zweitstimme(bundesland, partei_abk, partei_name, rank) AS
+CREATE VIEW stimmzettel_zweitstimme(bundesland, liste_id, partei_abk, partei_name, rank) AS
 (
-WITH parteien_bereits_teilgenommen (bundesland, partei_abk, partei_name, rank) AS (
+WITH parteien_bereits_teilgenommen (bundesland, liste_id, partei_abk, partei_name, rank) AS (
     SELECT l.bundesland,
+           l.id,
            p.kurzbezeichnung,
            p.name,
            RANK() OVER (PARTITION BY l.bundesland ORDER BY zl.zweitstimmen DESC)
@@ -726,8 +729,8 @@ WITH parteien_bereits_teilgenommen (bundesland, partei_abk, partei_name, rank) A
          SELECT bundesland, MAX(rank)
          FROM parteien_bereits_teilgenommen
          GROUP BY bundesland
-     ), parteien_erstmal (bundesland, partei_abk, partei_name, rank) AS (
-     SELECT l.bundesland, p.kurzbezeichnung, p.name, mr.max_rank + RANK() OVER (PARTITION BY l.bundesland ORDER BY p.name)
+     ), parteien_erstmal (bundesland, liste_id, partei_abk, partei_name, rank) AS (
+     SELECT l.bundesland, l.id, p.kurzbezeichnung, p.name, mr.max_rank + RANK() OVER (PARTITION BY l.bundesland ORDER BY p.name)
          FROM  landeslisten l JOIN parteiKandidaturen pk1 ON l.partei = pk1.id
                               JOIN parteien p ON pk1.partei = p.id
                               JOIN max_rank mr ON l.bundesland = mr.bundesland
@@ -750,9 +753,9 @@ WITH parteien_bereits_teilgenommen (bundesland, partei_abk, partei_name, rank) A
 GRANT SELECT ON stimmzettel_zweitstimme TO web_anon;
 
 
-CREATE VIEW LandeslistenKandidaten ( bundesland, partei_abk, kandidat_nachname, kandidat_vorname, listennummer) AS
+CREATE VIEW landeslistenKandidaten ( bundesland, liste_id, partei_abk, partei_name, rank, kandidaten) AS
 (
-SELECT sz.bundesland, sz.partei_abk, k.nachname, k.vornamen, lk.listennummer
+SELECT sz.bundesland, sz.liste_id, sz.partei_abk, sz.partei_name, sz.rank, string_agg(CONCAT(k.nachname , ' ', k.vornamen), ', ' ORDER BY lk.listennummer )
 FROM stimmzettel_zweitstimme sz
          JOIN parteien p ON sz.partei_abk = p.kurzbezeichnung
          JOIN parteiKandidaturen pk ON pk.partei = p.id
@@ -760,10 +763,10 @@ FROM stimmzettel_zweitstimme sz
          JOIN listenkandidaten lk ON lk.landesliste = l.id
          JOIN kandidaten k ON k.id = lk.kandidat
 WHERE pk.wahl = 1
-ORDER BY lk.listennummer
+GROUP BY sz.bundesland, sz.liste_id, sz.partei_abk, sz.partei_name, sz.rank
     );
 
-GRANT SELECT ON LandeslistenKandidaten TO web_anon;
+GRANT SELECT ON landeslistenKandidaten TO web_anon;
 
 
 
