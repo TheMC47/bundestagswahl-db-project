@@ -36,6 +36,7 @@ function App(): JSX.Element {
             <Nav.Link href="/koalitionen">Koalitionen</Nav.Link>
             <Nav.Link href="/arbeitslosigkeit">Arbeitslosigkeit und ideologische Tendenzen</Nav.Link>
             <Nav.Link href="/login">Login</Nav.Link>
+            <Nav.Link href="/stimmabgabe">Stimmabgabe</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
