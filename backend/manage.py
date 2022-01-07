@@ -298,7 +298,7 @@ def setup():
     run_script.callback("calculate-seats.sql")
     print("Done!")
     print("Refreshing schema...")
-    os.system("docker-compose kill -s SIGUSR1 server")
+    os.system("docker-compose kill -s SIGUSR1 server > /dev/null 2>&1")
     print("Done")
 
 
