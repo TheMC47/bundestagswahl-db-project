@@ -4,6 +4,8 @@ import pandas as pd
 
 from connection import Transaction
 
+pd.options.mode.chained_assignment = None  # false positive in this file
+
 def seed_unemployment(
         db: Transaction,
 ):
