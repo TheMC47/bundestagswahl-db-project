@@ -78,18 +78,19 @@ export interface ErststimmeZettelProps {
   wahlkreis: number;
 }
 
-interface Checkbox {
-  kandidat_id: number;
-  chedcked: boolean;
+interface ErststimmeErgebnisse {
+  direktkandidat: Direktkandidat;
+  checked: boolean;
 }
 
 
 function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
-  const [direktkandidaten, setdirektkandidaten] = useState<Direktkandidat[]>([]);
-  const [checkboxes, setCheckbox] = useState<Checkbox[]>([]);
+  const [direktkandidaten, setdirektkandidaten] = useState<ErststimmeErgebnisse[]>([]);
 
   useEffect(() => {
-    getStimmzettel_Erststimme(wahlkreis).then(d => setdirektkandidaten(d))
+    getStimmzettel_Erststimme(wahlkreis).then(d => {
+      setdirektkandidaten(d.map(l => ({direktkandidat: l, checked: false})));
+    })
   }, [])
 
 
@@ -98,24 +99,37 @@ function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
       <tbody className="text-secondary">
       {
         direktkandidaten.map((d) =>
-      <tr key={d.rank}>
-        <th scope="row">{d.rank}</th>
+      <tr key={d.direktkandidat.rank}>
+        <th scope="row">{d.direktkandidat.rank}</th>
         <td className="d-block">
           <div className='d-flex justify-content-start '>
             <div className="d-block " >
-              <h5  className="d-flex" >{d.kandidat_vorname +" "+ d.kandidat_nachname}</h5>
-              <p className="d-flex " >With supporting</p>
+              <h5  className="d-flex" >{d.direktkandidat.kandidat_vorname +" "+ d.direktkandidat.kandidat_nachname}</h5>
+              <p className="d-flex " > {d.direktkandidat.kandidat_beruf}</p>
             </div>
           </div>
           <div className='d-flex justify-content-end'>
             <div className="d-block" >
-              <h5 className="d-flex justify-content-start ">{d.partei_abk}</h5>
-              <p className="d-flex justify-content-start">{d.partei_name}</p>
+              <h5 className="d-flex justify-content-start ">{d.direktkandidat.partei_abk}</h5>
+              <p className="d-flex justify-content-start">{d.direktkandidat.partei_name}</p>
             </div>
           </div>
         </td>
         <td>
-          <input type="checkbox" className="form-check-input" id={d.kandidat_vorname}/>
+          <input type="checkbox" className="form-check-input" id="id" checked = {d.checked}
+          onChange = {() => {
+            setdirektkandidaten([...direktkandidaten].map(object => {
+              if(object.direktkandidat === d.direktkandidat) {
+                return {
+                  ...object,
+                  checked: !d.checked,
+                }
+              }
+              else return object;
+            }))
+          }}
+          />
+
 
         </td>
       </tr>
@@ -131,40 +145,57 @@ function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
 export interface ZweitstimmeZettelProps {
   bundesland: number;
 }
-function Zweitstimme({bundesland}: ZweitstimmeZettelProps): JSX.Element {
-  const [landeslisten, setlandeslisten] = useState<Landesliste[]>([]);
 
+interface ZweitstimmeErgebnisse {
+  landesliste: Landesliste;
+  checked: boolean;
+}
+
+function Zweitstimme({bundesland}: ZweitstimmeZettelProps): JSX.Element {
+  const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([]);
   useEffect(() => {
-    getStimmzettel_Zweitstimme(bundesland).then(d => setlandeslisten(d))
-    console.log(landeslisten)
+    getStimmzettel_Zweitstimme(bundesland).then(d => {
+      setlandeslisten(d.map(l => ({landesliste: l, checked: false})));
+    })
   }, [])
+
 
   return (
     <table className="table table-bordered table-hover">
       <tbody className = "text-primary">
-      console.log(landeslisten)
 
       {
         landeslisten.map((d) =>
 
-          <tr key={d.rank}>
+          <tr key={d.landesliste.rank}>
             <td>
-              <input type="checkbox" className="form-check-input" id= "id" />
+              <input type="checkbox" className="form-check-input" id= "id"  checked = {d.checked}
+                     onChange = {() => {
+                       setlandeslisten([...landeslisten].map(object => {
+                         if(object.landesliste === d.landesliste) {
+                           return {
+                             ...object,
+                             checked: !d.checked,
+                           }
+                         }
+                         else return object;
+                       }))
+                     }}/>
             </td>
             <td className="d-block">
               <div className='d-flex justify-content-start'>
                 <div className="d-block " >
-                  <h5  className="d-flex align-content-center" >{d.partei_abk}</h5>
+                  <h5  className="d-flex align-content-center" >{d.landesliste.partei_abk}</h5>
                 </div>
               </div>
               <div className='d-flex justify-content-end'>
                 <div className="d-block" >
-                  <h5 className="d-flex justify-content-start ">{d.partei_name}</h5>
-                  <p className="d-flex justify-content-start">{d.kandidaten}</p>
+                  <h5 className="d-flex justify-content-start ">{d.landesliste.partei_name}</h5>
+                  <p className="d-flex justify-content-start">{d.landesliste.kandidaten}</p>
                 </div>
               </div>
             </td>
-            <th scope="row">{d.rank}</th>
+            <th scope="row">{d.landesliste.rank}</th>
           </tr>
         )}
     </tbody>

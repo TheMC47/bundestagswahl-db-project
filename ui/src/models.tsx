@@ -109,6 +109,7 @@ export interface Direktkandidat {
   kandidat_id: number;
   kandidat_nachname: string;
   kandidat_vorname: string;
+  kandidat_beruf: string;
   partei_abk: string;
   partei_name: string;
   rank: number;
