@@ -8,13 +8,20 @@ import {
 } from '../api'
 import { Container, Table } from 'react-bootstrap';
 import { rank } from "d3";
+import jwt_decode from 'jwt-decode';
 
 
-
+interface WahlzettelProps {
+  token : string;
+}
 
 export default function Wahlzettel(): JSX.Element {
-  const [wahlkreis, setWahlkreis] = useState<number>(1);
   const [bundesland, setBundesland] = useState<number>(1);
+  const [wahlkreis, setwahlkreis ] = useState<number>(1);
+  const [direktkandidaten, setdirektkandidaten] = useState<ErststimmeErgebnisse[]>([]);
+  const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([]);
+
+
 
 
   return (
@@ -61,14 +68,14 @@ export default function Wahlzettel(): JSX.Element {
         </div>
       <div className="row">
         <div className="col-6" >
-          < Erststimme wahlkreis={wahlkreis} />
+          < Erststimme wahlkreis={wahlkreis} direktkandidaten = {direktkandidaten} setdirektkandidaten = {setdirektkandidaten}/>
         </div>
         <div className="col-6 d-flex justify-content-start">
-          <Zweitstimme  bundesland={bundesland} />
+          <Zweitstimme  bundesland={bundesland} landeslisten={ landeslisten} setlandeslisten = {setlandeslisten} />
         </div>
       </div>
 
-      <button type="button" className="btn btn-dark">Bestätigen</button>
+      <button type="button" className="btn btn-dark" >Bestätigen</button>
 
     </Container>
   )
@@ -76,6 +83,8 @@ export default function Wahlzettel(): JSX.Element {
 
 export interface ErststimmeZettelProps {
   wahlkreis: number;
+  direktkandidaten: ErststimmeErgebnisse[];
+  setdirektkandidaten:  (kandidaten:  ErststimmeErgebnisse[]) => void
 }
 
 interface ErststimmeErgebnisse {
@@ -84,8 +93,7 @@ interface ErststimmeErgebnisse {
 }
 
 
-function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
-  const [direktkandidaten, setdirektkandidaten] = useState<ErststimmeErgebnisse[]>([]);
+function Erststimme({wahlkreis, direktkandidaten, setdirektkandidaten  }: ErststimmeZettelProps): JSX.Element {
 
   useEffect(() => {
     getStimmzettel_Erststimme(wahlkreis).then(d => {
@@ -116,9 +124,17 @@ function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
           </div>
         </td>
         <td>
-          <input type="checkbox" className="form-check-input" id="id" checked = {d.checked}
-          onChange = {() => {
+          <input name = "direktkandidat" type="radio"  className="form-check-input" id="id"  checked = {d.checked}
+          onClick = {() => {
             setdirektkandidaten([...direktkandidaten].map(object => {
+              if(object.direktkandidat !== d.direktkandidat) {
+                return {
+                  ...object,
+                  checked: false,
+                }
+              }
+              else return object;
+            }).map(object => {
               if(object.direktkandidat === d.direktkandidat) {
                 return {
                   ...object,
@@ -129,21 +145,19 @@ function Erststimme({wahlkreis}: ErststimmeZettelProps): JSX.Element {
             }))
           }}
           />
-
-
         </td>
       </tr>
         )}
       </tbody>
     </table>
-
 )
 }
 
-
-
 export interface ZweitstimmeZettelProps {
   bundesland: number;
+  landeslisten: ZweitstimmeErgebnisse[];
+  setlandeslisten:  (kandidaten:  ZweitstimmeErgebnisse[]) => void
+
 }
 
 interface ZweitstimmeErgebnisse {
@@ -151,8 +165,7 @@ interface ZweitstimmeErgebnisse {
   checked: boolean;
 }
 
-function Zweitstimme({bundesland}: ZweitstimmeZettelProps): JSX.Element {
-  const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([]);
+function Zweitstimme({bundesland, landeslisten, setlandeslisten}: ZweitstimmeZettelProps): JSX.Element {
   useEffect(() => {
     getStimmzettel_Zweitstimme(bundesland).then(d => {
       setlandeslisten(d.map(l => ({landesliste: l, checked: false})));
@@ -169,9 +182,17 @@ function Zweitstimme({bundesland}: ZweitstimmeZettelProps): JSX.Element {
 
           <tr key={d.landesliste.rank}>
             <td>
-              <input type="checkbox" className="form-check-input" id= "id"  checked = {d.checked}
-                     onChange = {() => {
+              <input name = 'landesliste' type="radio" className="form-check-input" id= "id"  checked = {d.checked}
+                     onClick = {() => {
                        setlandeslisten([...landeslisten].map(object => {
+                         if(object.landesliste !== d.landesliste) {
+                           return {
+                             ...object,
+                             checked: false,
+                           }
+                         }
+                         else return object;
+                       }).map(object => {
                          if(object.landesliste === d.landesliste) {
                            return {
                              ...object,
