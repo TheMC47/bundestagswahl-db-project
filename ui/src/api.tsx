@@ -96,3 +96,16 @@ export async function getGewinner(bundesland: number): Promise<ParteiGewinner[]>
 export async function getKoalitionen(): Promise<Koalition[]> {
   return api('/koalitionen')
 }
+
+export async function login(content: {
+  key: string
+  helfer: string
+}): Promise<{ token: string }> {
+  return api('/rpc/helfer_login', {
+    method: 'POST',
+    body: JSON.stringify(content),
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+  })
+}
