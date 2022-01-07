@@ -46,7 +46,7 @@ CREATE OR REPLACE FUNCTION helfer_login(key text, helfer text) RETURNS jwt_token
       RAISE invalid_password USING message = 'Schlüssel ungültig';
     END IF;
     IF _key.aktiviert IS NOT NULL THEN
-      RAISE invalid_password USING message = 'Schlüssel aktiviert';
+      RAISE invalid_password USING message = 'Schlüssel schon aktiviert';
     END IF;
 
     UPDATE wahlkreis_keys SET aktiviert = _helfer.kennung
