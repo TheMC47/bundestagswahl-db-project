@@ -174,7 +174,7 @@ CREATE TABLE erststimmen
 CREATE TABLE zweitstimmen
 (
     id          SERIAL,
-    landesliste INT NOT NULL,
+    landesliste INT,
     wahlkreis   INT NOT NULL, -- A check constraint on wahlkreis.bundesland == landesliste.bundesland?
     PRIMARY KEY (id),
     FOREIGN KEY (landesliste) REFERENCES landeslisten (id) ON

@@ -94,7 +94,9 @@ CREATE OR REPLACE FUNCTION vote(direktkandidat int, landesliste int, waehlerSchl
   INTO _direktkandidat;
 
   IF _direktkandidat IS NULL THEN
-      RAISE invalid_password USING message = 'Direktkandidat ungültig';
+     INSERT INTO erststimmen(direktkandidat) VALUES (NULL);
+  ELSE
+    INSERT INTO erststimmen(direktkandidat) VALUES (direktkandidat);
   END IF;
 
   SELECT *
@@ -106,11 +108,11 @@ CREATE OR REPLACE FUNCTION vote(direktkandidat int, landesliste int, waehlerSchl
   INTO _landesliste;
 
   IF _landesliste IS NULL THEN
-      RAISE invalid_password USING message = 'Landesliste ungültig';
+     INSERT INTO zweitstimmen(landesliste, wahlkreis) VALUES (NULL, _wahlkreis);
+  ELSE
+    INSERT INTO zweitstimmen(landesliste, wahlkreis) VALUES (landesliste, _wahlkreis);
   END IF;
 
-  INSERT INTO erststimmen(direktkandidat) VALUES (direktkandidat);
-  INSERT INTO zweitstimmen(landesliste, wahlkreis) VALUES (landesliste, _wahlkreis);
 
   UPDATE waehler SET hat_abgestimmt = TRUE WHERE id::text = waehlerSchlussel ;
 
