@@ -49,7 +49,6 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
   const [wahlkreis, setwahlkreis ] = useState<number>(1 );
   const [direktkandidaten, setdirektkandidaten] = useState<ErststimmeErgebnisse[]>([]);
   const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([]);
-  const [_, setVote] = useState<boolean>(false);
   const [key, setkey] = useState<string>('')
   const [message, setMessage] = useState<string | undefined>(undefined)
   const [result, setResult] = useState<'success' | 'danger'>('success')
@@ -149,8 +148,7 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
           .catch((e: {message: string}) => {
           setMessage(e.message)
             setResult('danger')
-        });
-          setVote(true);
+        })
         }
         }
 
