@@ -1,5 +1,5 @@
-CREATE ROLE helfer;
-GRANT helfer TO authenticator;
+CREATE ROLE voter;
+GRANT voter TO authenticator;
 
 CREATE TABLE wahlkreishelfer
 (
@@ -57,7 +57,7 @@ CREATE OR REPLACE FUNCTION helfer_login(key text, helfer text) RETURNS jwt_token
     ) AS token
     FROM (
       SELECT
-        'helfer'::text as role,
+        'voter'::text as role,
         extract(epoch from now())::integer + 60*5*12*2 AS exp,
         _helfer.wahlkreis AS wahlkreis
     ) r
@@ -121,4 +121,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- By default, everyone can call the function
 REVOKE EXECUTE ON FUNCTION vote FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION vote TO helfer;
+GRANT EXECUTE ON FUNCTION vote TO voter;
