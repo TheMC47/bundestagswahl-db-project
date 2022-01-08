@@ -318,5 +318,18 @@ def setup():
     print("Done")
 
 
+@manage.command()
+def count_votes():
+    """
+    Computes the election results based on the loaded votes in the database.
+    """
+    print("Aggregating votes...")
+    run_script.callback("scripts/aggregate-votes.sql")
+    print("Done!")
+    print("Calculating seats...")
+    run_script.callback("scripts/calculate-seats.sql")
+    print("Done!")
+
+
 if __name__ == "__main__":
     manage()  # pylint: disable=no-value-for-parameter
