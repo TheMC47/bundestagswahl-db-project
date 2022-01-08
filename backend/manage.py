@@ -311,7 +311,7 @@ def setup():
     seed.callback()
     print("Done!")
     print("Calculating seats...")
-    run_script.callback("calculate-seats.sql")
+    run_script.callback("scripts/calculate-seats.sql")
     print("Done!")
     print("Refreshing schema...")
     os.system("docker-compose kill -s SIGUSR1 server > /dev/null 2>&1")
