@@ -140,7 +140,7 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
           direktkandidat: direktkandidaten.filter(d => d.checked)?  null: direktkandidaten.filter(d => d.checked)[0].direktkandidat.kandidat_id,
           landesliste: landeslisten.filter(d => d.checked)? null : landeslisten.filter(d => d.checked)[0] .landesliste.liste_id,
           waehlerSchlussel: key
-        }).then(resp => {
+        }, token ).then(resp => {
           setMessage('Ihre Abstimmung wurde erfolgreich geschickt.')
             setResult('success')
           setTimeout(() => ( window.location.href = '/' ), 3000)

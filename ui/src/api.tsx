@@ -18,8 +18,9 @@ export const URI = process.env.REACT_APP_URI
 
 
 async function api<T>(suffix: string, init?: RequestInit): Promise<T> {
-  const r = await fetch(URI + suffix, init);
-  return await r.json();
+  const r = await fetch(URI + suffix, init)
+  if (r.ok) return await r.json()
+  return await r.json().then(err => Promise.reject(err))
 }
 
 /* const yearToId = (year: number): number => year == 2021 ? 1 : 2; */
@@ -121,12 +122,13 @@ export async function submitVote(content: {
   direktkandidat: number |null
   landesliste: number |  null
   waehlerSchlussel: string
-}){
+}, token:string){
   api('/rpc/vote', {
     method: 'POST',
     body: JSON.stringify(content),
     headers: new Headers({
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
     }),
   });
 }
