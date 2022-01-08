@@ -52,7 +52,7 @@ function App(): JSX.Element {
           <Route path="/koalitionen" element={<KoalitionenView />} />
           <Route path="/arbeitslosigkeit" element={<JoblessnessBarChart />} />
           <Route path="/login" element={<HelperLogin setToken={(token:string) => localStorage.setItem("token", token)} />} />
-         <Route path="/stimmabgabe" element={<Wahlzettel  token = {localStorage.getItem("token") || ''} />} />
+         <Route path="/stimmabgabe" element={<Wahlzettel  token = {localStorage.getItem("token")} />} />
         </Routes>
       </Container>
     </Router>
