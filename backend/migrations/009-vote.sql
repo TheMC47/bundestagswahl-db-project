@@ -113,8 +113,7 @@ CREATE OR REPLACE FUNCTION vote(direktkandidat int, landesliste int, waehlerSchl
     INSERT INTO zweitstimmen(landesliste, wahlkreis) VALUES (landesliste, _wahlkreis);
   END IF;
 
-
-  UPDATE  SET hat_abgestimmt = TRUE WHERE id::text = waehlerSchlussel ;
+  UPDATE waehler SET hat_abgestimmt = TRUE WHERE id::text = waehlerSchlussel ;
 
   END
 $$ LANGUAGE plpgsql SECURITY DEFINER;

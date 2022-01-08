@@ -118,23 +118,26 @@ export async function getStimmzettel_Zweitstimme(bundesland: number): Promise<La
   return api(`/landeslisten_kandidaten?bundesland=eq.${bundesland}`);
 }
 
-export async function submitVote(content: {
-  direktkandidat: number |null
-  landesliste: number |  null
-  waehlerSchlussel: string
-}, token:string){
-  api('/rpc/vote', {
+export async function submitVote(
+  content: {
+    direktkandidat: number | null
+    landesliste: number | null
+    waehlerschlussel: string
+  },
+  token: string
+) : Promise<void> {
+  return api('/rpc/vote', {
     method: 'POST',
     body: JSON.stringify(content),
     headers: new Headers({
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     }),
-  });
+  })
 }
 
 export async function getbundesland(wahlkreis: number): Promise<Wahlkreis> {
-  return api(`/wahlkreise?id=eq.${wahlkreis}`);
+  return api(`/wahlkreise?id=eq.${wahlkreis}`)
 }
 
 
