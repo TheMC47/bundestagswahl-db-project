@@ -21,6 +21,7 @@ function App(): JSX.Element {
 
   const [token, setToken] = useState<string|undefined>(undefined)
 
+
   return (
     <Router>
       <Navbar bg="dark" variant="dark">
@@ -52,7 +53,7 @@ function App(): JSX.Element {
           <Route path="/koalitionen" element={<KoalitionenView />} />
           <Route path="/arbeitslosigkeit" element={<JoblessnessBarChart />} />
           <Route path="/login" element={<HelperLogin setToken={setToken} />} />
-          <Route path="/stimmabgabe" element={<Wahlzettel />} />
+         <Route path="/stimmabgabe" element={<Wahlzettel  token = {token} />} />
         </Routes>
       </Container>
     </Router>

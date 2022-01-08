@@ -6,6 +6,8 @@ import { login } from '../api'
 type ErrorState = { [index in 'helfer' | 'key']: boolean }
 type FormValues = { [index in 'helfer' | 'key']?: string }
 
+
+
 export function HelperLogin(props: {
   setToken: (token: string) => void
 }): JSX.Element {
@@ -48,7 +50,7 @@ export function HelperLogin(props: {
         setMessage('Aktivierung erfolgreich. Sie werden in Kürze umgeleitet.')
         setResult('success')
         props.setToken(resp.token)
-        setTimeout(() => (window.location.href = '/'), 3000)
+        setTimeout(() => (window.location.href = '/stimmabgabe'), 3000)
       })
       .catch((e: { message: string }) => {
         setMessage(e.message)
