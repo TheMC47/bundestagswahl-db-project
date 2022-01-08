@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Deputy, Direktkandidat, Landesliste, Party, Region, State } from '../models'
+import {Direktkandidat, Landesliste } from '../models'
 import {
   getbundesland,
 
   getStimmzettel_Erststimme,
   getStimmzettel_Zweitstimme
 } from '../api'
-import { Container, Form, Table } from 'react-bootstrap';
+import { Alert, Container, Form, Table } from 'react-bootstrap';
 import jwt_decode from 'jwt-decode';
 import {submitVote} from '../api'
 
@@ -49,10 +49,11 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
   const [wahlkreis, setwahlkreis ] = useState<number>(1 );
   const [direktkandidaten, setdirektkandidaten] = useState<ErststimmeErgebnisse[]>([]);
   const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([]);
-  const [vote, setVote] = useState<boolean>(false);
+  const [_, setVote] = useState<boolean>(false);
   const [key, setkey] = useState<string>('')
-  const [valid, setValid] = useState<boolean>(true);
   const [message, setMessage] = useState<string | undefined>(undefined)
+  const [result, setResult] = useState<'success' | 'danger'>('success')
+
 
   useEffect(() => {
     setwahlkreis((jwt_decode(token) as Token).wahlkreis)
@@ -137,15 +138,17 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
           <button type="button" className="btn btn-dark" onClick={
           () => {
           submitVote({
-          direktkandidat: direktkandidaten.filter(d => d.checked)[0].direktkandidat.kandidat_id,
-          landesliste: landeslisten.filter(d => d.checked)[0].landesliste.liste_id,
+          direktkandidat: direktkandidaten.filter(d => d.checked)?  null: direktkandidaten.filter(d => d.checked)[0].direktkandidat.kandidat_id,
+          landesliste: landeslisten.filter(d => d.checked)? null : landeslisten.filter(d => d.checked)[0] .landesliste.liste_id,
           waehlerSchlussel: key
         }).then(resp => {
-          setMessage('Ihre Stimme wurde erfolgreich geschickt.')
+          setMessage('Ihre Abstimmung wurde erfolgreich geschickt.')
+            setResult('success')
           setTimeout(() => ( window.location.href = '/' ), 3000)
         })
           .catch((e: {message: string}) => {
           setMessage(e.message)
+            setResult('danger')
         });
           setVote(true);
         }
@@ -153,11 +156,12 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
 
           >Stimme abgeben
           </button>
-
           </div>
         }
 
-      </Container>
+      {message && <Alert variant={result}> {message} </Alert>}
+
+    </Container>
 
   )
 }

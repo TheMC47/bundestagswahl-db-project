@@ -114,7 +114,7 @@ CREATE OR REPLACE FUNCTION vote(direktkandidat int, landesliste int, waehlerSchl
   END IF;
 
 
-  UPDATE waehler SET hat_abgestimmt = TRUE WHERE id::text = waehlerSchlussel ;
+  UPDATE  SET hat_abgestimmt = TRUE WHERE id::text = waehlerSchlussel ;
 
   END
 $$ LANGUAGE plpgsql SECURITY DEFINER;

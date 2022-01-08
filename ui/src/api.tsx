@@ -118,8 +118,8 @@ export async function getStimmzettel_Zweitstimme(bundesland: number): Promise<La
 }
 
 export async function submitVote(content: {
-  direktkandidat: number
-  landesliste: number
+  direktkandidat: number |null
+  landesliste: number |  null
   waehlerSchlussel: string
 }){
   api('/rpc/vote', {
