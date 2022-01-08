@@ -84,13 +84,21 @@ def generate_first_votes(db: Transaction, wkdaten: Wahlkreisdaten):
 
     for tup in first_vote_res:
         first_votesq = f"""
-        INSERT INTO erststimmen(direktkandidat) (
-            SELECT {tup[1]}
+        INSERT INTO erststimmen(direktkandidat, wahlkreis) (
+            SELECT {tup[1]}, {wkdaten.pk}
             FROM generate_series(1, {tup[2]})
         )
         """
 
         db.run_query(first_votesq, fetch=False)
+
+    invalid_first_votesq = f"""
+    INSERT INTO erststimmen(direktkandidat, wahlkreis) (
+        SELECT NULL, {wkdaten.pk}
+        FROM generate_series(1, {wkdaten.ungueltig_erste_stimme})
+    )
+    """
+    db.run_query(invalid_first_votesq, fetch=False)
 
 
 @with_logging("second votes")
@@ -111,6 +119,14 @@ def generate_second_votes(db: Transaction, wkdaten: Wahlkreisdaten):
         )
         """
         db.run_query(second_votesq, fetch=False)
+
+    invalid_second_votesq = f"""
+    INSERT INTO zweitstimmen(landesliste, wahlkreis) (
+        SELECT NULL, {wkdaten.pk}
+        FROM generate_series(1, {wkdaten.ungueltig_zweite_stimme})
+    )
+    """
+    db.run_query(invalid_second_votesq, fetch=False)
 
 
 def error(msg: str, panic: bool = False):

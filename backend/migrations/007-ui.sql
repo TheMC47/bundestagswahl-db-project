@@ -319,6 +319,7 @@ CREATE VIEW erststimmenergebenisse_einzelstimmen
 AS
 SELECT direktkandidat, COUNT(*)
 FROM erststimmen
+WHERE direktkandidat IS NOT NULL
 GROUP BY direktkandidat;
 
 CREATE VIEW zweitstimmenergebnisse_einzelstimmen
@@ -330,6 +331,7 @@ CREATE VIEW zweitstimmenergebnisse_einzelstimmen
 AS
 SELECT landesliste, wahlkreis, COUNT(*)
 FROM zweitstimmen
+WHERE landesliste IS NOT NULL
 GROUP BY landesliste, wahlkreis;
 
 CREATE VIEW summe_erststimmen_einzelstimmen
