@@ -124,3 +124,12 @@ export interface Landesliste {
   kandidaten: string;
 
 }
+
+
+export interface  Wahlkreis {
+  id         : number;
+  name       : string;
+  bundesland : number;
+  arbeitslosenquote: number;
+}
+

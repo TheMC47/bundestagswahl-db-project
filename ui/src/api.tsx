@@ -11,7 +11,7 @@ import {
   ParteiGewinner,
   Koalition,
   JoblessnessSummary,
-  JoblessnessDistricts, Direktkandidat, Landesliste
+  JoblessnessDistricts, Direktkandidat, Landesliste, Wahlkreis
 } from './models'
 
 export const URI = process.env.REACT_APP_URI
@@ -130,6 +130,11 @@ export async function submitVote(content: {
     }),
   });
 }
+
+export async function getbundesland(wahlkreis: number): Promise<Wahlkreis> {
+  return api(`/wahlkreise?id=eq.${wahlkreis}`);
+}
+
 
 
 

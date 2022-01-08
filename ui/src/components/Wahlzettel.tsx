@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Deputy, Direktkandidat, Landesliste, Party, Region, State } from '../models'
 import {
-  getDeputies,
-  getSitzVerteilung,
+  getbundesland,
+
   getStimmzettel_Erststimme,
   getStimmzettel_Zweitstimme
 } from '../api'
 import { Container, Form, Table } from 'react-bootstrap';
-import { rank } from "d3";
 import jwt_decode from 'jwt-decode';
 import {submitVote} from '../api'
-import validate from "uuid-validate";
 
 export interface ErststimmeZettelProps {
   wahlkreis: number;
@@ -35,14 +33,20 @@ interface ZweitstimmeErgebnisse {
   checked: boolean;
 }
 interface WahlzettelProps {
-  token?: string;
+  token: string;
 }
 
+interface Token {
+  exp: number;
+  role: string;
+  wahlkreis: number
+}
 
 
 export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
   const [bundesland, setBundesland] = useState<number>(1);
-  const [wahlkreis, setwahlkreis ] = useState<number>(1);
+
+  const [wahlkreis, setwahlkreis ] = useState<number>(1 );
   const [direktkandidaten, setdirektkandidaten] = useState<ErststimmeErgebnisse[]>([]);
   const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([]);
   const [vote, setVote] = useState<boolean>(false);
@@ -50,10 +54,21 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
   const [valid, setValid] = useState<boolean>(true);
   const [message, setMessage] = useState<string | undefined>(undefined)
 
+  useEffect(() => {
+    setwahlkreis((jwt_decode(token) as Token).wahlkreis)
+  }, [])
+
+  useEffect(() => {
+    getbundesland(wahlkreis).then(d => {
+      setBundesland(d.bundesland);
+    })
+  }, [])
+
+
+
 
   return (
-      <Container className="mb-4">
-        {token &&
+    <Container className="mb-4">
         <Form.Group className='mb-3'>
             <Form.Label>Geben Sie Ihren Stimm-Schlüssel ein</Form.Label>
             <Form.Control
@@ -64,8 +79,10 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
                 }}
             />
         </Form.Group>
-        }
-        { token && valid &&
+
+        {  token &&
+
+
           <div>
           <h1 className="mb-5">Sie haben <strong> 2 </strong> Stimmen</h1>
           <div className="row">
@@ -109,7 +126,7 @@ export default function Wahlzettel( {token }: WahlzettelProps): JSX.Element {
           </div>
           <div className="row">
           <div className="col-6">
-          < Erststimme wahlkreis={jwt_decode(token)} direktkandidaten={direktkandidaten}
+          < Erststimme wahlkreis={wahlkreis} direktkandidaten={direktkandidaten}
           setdirektkandidaten={setdirektkandidaten}/>
           </div>
           <div className="col-6 d-flex justify-content-start">
