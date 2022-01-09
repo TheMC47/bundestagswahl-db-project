@@ -166,8 +166,12 @@ CREATE TABLE erststimmen
 (
     id             SERIAL,
     direktkandidat INT,
+    wahlkreis      INT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (direktkandidat) REFERENCES direktkandidaten (id) ON
+        UPDATE CASCADE ON
+        DELETE CASCADE,
+    FOREIGN KEY (wahlkreis) REFERENCES wahlkreise (id) ON
         UPDATE CASCADE ON
         DELETE CASCADE
 );
