@@ -94,9 +94,9 @@ CREATE OR REPLACE FUNCTION vote(direktkandidat int, landesliste int, waehlerSchl
   INTO _direktkandidat;
 
   IF _direktkandidat IS NULL THEN
-     INSERT INTO erststimmen(direktkandidat) VALUES (NULL);
+     INSERT INTO erststimmen(direktkandidat, wahlkreis) VALUES (NULL, _wahlkreis);
   ELSE
-    INSERT INTO erststimmen(direktkandidat) VALUES (direktkandidat);
+    INSERT INTO erststimmen(direktkandidat, wahlkreis) VALUES (direktkandidat, _wahlkreis);
   END IF;
 
   SELECT *
@@ -113,7 +113,6 @@ CREATE OR REPLACE FUNCTION vote(direktkandidat int, landesliste int, waehlerSchl
     INSERT INTO zweitstimmen(landesliste, wahlkreis) VALUES (landesliste, _wahlkreis);
   END IF;
 
-
   UPDATE waehler SET hat_abgestimmt = TRUE WHERE id::text = waehlerSchlussel ;
 
   END
@@ -122,3 +121,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- By default, everyone can call the function
 REVOKE EXECUTE ON FUNCTION vote FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION vote TO voter;
+
+
+CREATE OR REPLACE FUNCTION ping() RETURNS TEXT AS $$
+  BEGIN
+     RETURN 'pong';
+  END
+$$ LANGUAGE plpgsql SECURITY DEFINER;

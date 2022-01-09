@@ -319,6 +319,7 @@ CREATE VIEW erststimmenergebenisse_einzelstimmen
 AS
 SELECT direktkandidat, COUNT(*)
 FROM erststimmen
+WHERE direktkandidat IS NOT NULL
 GROUP BY direktkandidat;
 
 CREATE VIEW zweitstimmenergebnisse_einzelstimmen
@@ -330,6 +331,7 @@ CREATE VIEW zweitstimmenergebnisse_einzelstimmen
 AS
 SELECT landesliste, wahlkreis, COUNT(*)
 FROM zweitstimmen
+WHERE landesliste IS NOT NULL
 GROUP BY landesliste, wahlkreis;
 
 CREATE VIEW summe_erststimmen_einzelstimmen
@@ -637,3 +639,138 @@ FROM kleinste_koalitionen kk;
 
 
 GRANT SELECT ON koalitionen TO web_anon;
+
+
+CREATE VIEW stimmzettel_erststimme(wahlkreis, kandidat_id, kandidat_nachname, kandidat_vorname, kandidat_beruf, partei_abk, partei_name, rank) AS
+(
+WITH direktkandidaten_mit_partein_ranking(wahlkreis, kandidat_id,  kandidat_nachname, kandidat_vorname , kandidat_beruf, partei_abk, partei_name, rank) AS (
+    SELECT dk.wahlkreis,
+           dk.id,
+           k.nachname,
+           k.vornamen,
+           k.beruf,
+           p.kurzbezeichnung,
+           p.name,
+           RANK() OVER (PARTITION BY dk.wahlkreis ORDER BY ze.anzahl_stimmen DESC)
+    FROM direktkandidaten dk
+             JOIN parteiKandidaturen pk1 ON dk.partei = pk1.id
+             JOIN parteien p ON pk1.partei = p.id
+             JOIN parteiKandidaturen pk2 ON pk2.partei = p.id
+             JOIN landeslisten l2 ON l2.partei = pk2.id
+             JOIN zweitstimmeErgebnisse ze ON ze.landesliste = l2.id AND ze.wahlkreis = dk.wahlkreis
+            JOIN kandidaten k ON dk.kandidat = k.id
+    WHERE pk1.wahl = 1
+      AND pk2.wahl = 2
+      AND p.is_echte_partei = 't'
+      AND EXISTS(
+            SELECT l1.*
+            FROM landeslisten l1,
+                 wahlkreise wk
+            WHERE l1.partei = pk1.id
+              AND dk.wahlkreis = wk.id
+              AND wk.bundesland = l1.bundesland
+        )
+), max_rank(wahlkreis, max_rank) AS (
+         SELECT d.wahlkreis, MAX(d.rank)
+         FROM direktkandidaten_mit_partein_ranking d
+         group by d.wahlkreis
+     ), direktkandidaten_ohne_partein_ranking(wahlkreis,kandidat_id, kandidat_nachname, kandidat_vorname,kandidat_beruf, partei_abk, partei_name, rank) AS (
+         SELECT dk.wahlkreis,
+                dk.id,
+                k.nachname,
+                k.vornamen,
+                k.beruf,
+                p.kurzbezeichnung,
+                p.name,
+                mr.max_rank + RANK() OVER (PARTITION BY dk.wahlkreis ORDER BY k.nachname)
+         FROM direktkandidaten dk
+                  JOIN parteiKandidaturen pk ON dk.partei = pk.id
+                  JOIN parteien p ON pk.partei = p.id
+                  JOIN kandidaten k ON dk.kandidat = k.id
+                  JOIN max_rank mr ON dk.wahlkreis = mr.wahlkreis
+         WHERE pk.wahl = 1
+             AND
+               p.is_echte_partei = 'f'
+            OR NOT EXISTS(
+                 SELECT l.*
+                 FROM landeslisten l,
+                      wahlkreise wk
+                 WHERE l.partei = pk.id
+                   AND dk.wahlkreis = wk.id
+                   AND wk.bundesland = l.bundesland
+             )
+     )
+     SELECT dpk.*
+     FROM direktkandidaten_mit_partein_ranking dpk
+     UNION ALL
+     SELECT dok.*
+     FROM direktkandidaten_ohne_partein_ranking dok
+
+    );
+
+GRANT SELECT ON stimmzettel_erststimme TO web_anon;
+
+
+CREATE VIEW stimmzettel_zweitstimme(bundesland, liste_id, partei_abk, partei_name, rank) AS
+(
+WITH parteien_bereits_teilgenommen (bundesland, liste_id, partei_abk, partei_name, rank) AS (
+    SELECT l.bundesland,
+           l.id,
+           p.kurzbezeichnung,
+           p.name,
+           RANK() OVER (PARTITION BY l.bundesland ORDER BY zl.zweitstimmen DESC)
+    FROM landeslisten l
+             JOIN parteiKandidaturen pk1 ON l.partei = pk1.id
+             JOIN parteiKandidaturen pk2 ON pk2.partei = pk1.partei
+             JOIN zweitstimmen_pro_partei_pro_land zl
+                  ON pk2.id = zl.partei AND pk2.wahl = zl.wahl AND zl.land = l.bundesland
+             JOIN parteien p ON pk1.partei = p.id
+    WHERE pk1.wahl = 1
+      AND pk2.wahl = 2
+), max_rank (bundesland, max_rank) AS (
+         SELECT bundesland, MAX(rank)
+         FROM parteien_bereits_teilgenommen
+         GROUP BY bundesland
+     ), parteien_erstmal (bundesland, liste_id, partei_abk, partei_name, rank) AS (
+     SELECT l.bundesland, l.id, p.kurzbezeichnung, p.name, mr.max_rank + RANK() OVER (PARTITION BY l.bundesland ORDER BY p.name)
+         FROM  landeslisten l JOIN parteiKandidaturen pk1 ON l.partei = pk1.id
+                              JOIN parteien p ON pk1.partei = p.id
+                              JOIN max_rank mr ON l.bundesland = mr.bundesland
+        where pk1.wahl = 1
+         AND NOT EXISTS  (
+             SELECT pk2.*
+             FROM parteiKandidaturen pk2
+             WHERE pk2.wahl = 2
+             AND pk2.partei = pk1.partei
+            )
+         )
+
+         SELECT *
+         FROM parteien_bereits_teilgenommen
+         UNION ALL
+         SELECT *
+         FROM parteien_erstmal
+    );
+
+GRANT SELECT ON stimmzettel_zweitstimme TO web_anon;
+
+
+CREATE VIEW landeslisten_kandidaten ( bundesland, liste_id, partei_abk, partei_name, rank, kandidaten) AS
+(
+SELECT sz.bundesland, sz.liste_id, sz.partei_abk, sz.partei_name, sz.rank, string_agg(CONCAT(k.nachname , ' ', k.vornamen), ', ' ORDER BY lk.listennummer )
+FROM stimmzettel_zweitstimme sz
+         JOIN parteien p ON sz.partei_abk = p.kurzbezeichnung
+         JOIN parteiKandidaturen pk ON pk.partei = p.id
+         JOIN landeslisten l ON l.partei = pk.id AND sz.bundesland = l.bundesland
+         JOIN listenkandidaten lk ON lk.landesliste = l.id
+         JOIN kandidaten k ON k.id = lk.kandidat
+WHERE pk.wahl = 1
+GROUP BY sz.bundesland, sz.liste_id, sz.partei_abk, sz.partei_name, sz.rank
+    );
+
+GRANT SELECT ON landeslisten_kandidaten TO web_anon;
+
+
+
+
+

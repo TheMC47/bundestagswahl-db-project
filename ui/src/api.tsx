@@ -11,7 +11,7 @@ import {
   ParteiGewinner,
   Koalition,
   JoblessnessSummary,
-  JoblessnessDistricts
+  JoblessnessDistricts, Direktkandidat, Landesliste, Wahlkreis
 } from './models'
 
 export const URI = process.env.REACT_APP_URI
@@ -20,7 +20,7 @@ export const URI = process.env.REACT_APP_URI
 async function api<T>(suffix: string, init?: RequestInit): Promise<T> {
   const r = await fetch(URI + suffix, init)
   if (r.ok) return await r.json()
-  return await r.json().then(err => Promise.reject(err))
+  return await r.json().then(err => Promise.reject([err, r.status]))
 }
 
 /* const yearToId = (year: number): number => year == 2021 ? 1 : 2; */
@@ -106,6 +106,47 @@ export async function login(content: {
     body: JSON.stringify(content),
     headers: new Headers({
       'Content-Type': 'application/json',
+    }),
+  })
+}
+
+export async function getStimmzettel_Erststimme(wahlkreis: number): Promise<Direktkandidat[]> {
+  return api(`/stimmzettel_erststimme?wahlkreis=eq.${wahlkreis}`);
+}
+
+export async function getStimmzettel_Zweitstimme(bundesland: number): Promise<Landesliste[]> {
+  return api(`/landeslisten_kandidaten?bundesland=eq.${bundesland}`);
+}
+
+export async function submitVote(
+  content: {
+    direktkandidat: number | null
+    landesliste: number | null
+    waehlerschlussel: string
+  },
+  token: string
+) : Promise<void> {
+  return api('/rpc/vote', {
+    method: 'POST',
+    body: JSON.stringify(content),
+    headers: new Headers({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    }),
+  })
+}
+
+export async function getbundesland(wahlkreis: number): Promise<Wahlkreis> {
+  return api(`/wahlkreise?id=eq.${wahlkreis}`)
+}
+
+export async function ping(
+  token: string
+) : Promise<void> {
+  return api('/rpc/ping', {
+    method: 'GET',
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
     }),
   })
 }
