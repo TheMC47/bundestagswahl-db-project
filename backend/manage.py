@@ -84,13 +84,21 @@ def generate_first_votes(db: Transaction, wkdaten: Wahlkreisdaten):
 
     for tup in first_vote_res:
         first_votesq = f"""
-        INSERT INTO erststimmen(direktkandidat) (
-            SELECT {tup[1]}
+        INSERT INTO erststimmen(direktkandidat, wahlkreis) (
+            SELECT {tup[1]}, {wkdaten.pk}
             FROM generate_series(1, {tup[2]})
         )
         """
 
         db.run_query(first_votesq, fetch=False)
+
+    invalid_first_votesq = f"""
+    INSERT INTO erststimmen(direktkandidat, wahlkreis) (
+        SELECT NULL, {wkdaten.pk}
+        FROM generate_series(1, {wkdaten.ungueltig_erste_stimme})
+    )
+    """
+    db.run_query(invalid_first_votesq, fetch=False)
 
 
 @with_logging("second votes")
@@ -111,6 +119,14 @@ def generate_second_votes(db: Transaction, wkdaten: Wahlkreisdaten):
         )
         """
         db.run_query(second_votesq, fetch=False)
+
+    invalid_second_votesq = f"""
+    INSERT INTO zweitstimmen(landesliste, wahlkreis) (
+        SELECT NULL, {wkdaten.pk}
+        FROM generate_series(1, {wkdaten.ungueltig_zweite_stimme})
+    )
+    """
+    db.run_query(invalid_second_votesq, fetch=False)
 
 
 def error(msg: str, panic: bool = False):
@@ -231,6 +247,62 @@ def migrate():
 
 
 @manage.command()
+@click.option("-w", "--wahlkreis", type=int, required=True)
+@click.option("-n", "--number", type=int, required=True)
+def create_voters(wahlkreis, number):
+    # Get first vote results
+    db = Transaction()
+
+    query = f"""
+        INSERT INTO waehler(wahl,wahlkreis,hat_abgestimmt) (
+            SELECT 1, {wahlkreis}, false
+            FROM generate_series(1, {number})
+        ) RETURNING id;
+    """
+    data = db.run_query(query)
+    print('\n'.join([d[0] for d in data]))
+    db.commit()
+
+
+@manage.command()
+@click.option("-w", "--wahlkreis", type=int, required=True)
+@click.option("-n", "--number", type=int, required=True)
+def create_keys(wahlkreis, number):
+    # Get first vote results
+    db = Transaction()
+
+    query = f"""
+        INSERT INTO wahlkreis_keys(wahlkreis) (
+            SELECT {wahlkreis}
+            FROM generate_series(1, {number})
+        ) RETURNING *;
+    """
+    data = db.run_query(query)
+    print('\n'.join([d[0] for d in data]))
+    db.commit()
+
+
+@manage.command()
+@click.option("-w", "--wahlkreis", type=int, required=True)
+@click.option("-f", "--first-name", type=str, required=True)
+@click.option("-l", "--last-name", type=str, required=True)
+def add_helper(wahlkreis, first_name, last_name):
+    # Get first vote results
+    db = Transaction()
+
+    query = f"""
+        INSERT INTO wahlkreishelfer(wahlkreis,nachname,vornamen)
+        VALUES ({wahlkreis}, '{last_name}', '{first_name}')
+        RETURNING kennung;
+    """
+
+    data = db.run_query(query)
+    print(f"Key: {data[0][0]}")
+
+    db.commit()
+
+
+@manage.command()
 def setup():
     print("Migrating...")
     migrate.callback()
@@ -239,11 +311,24 @@ def setup():
     seed.callback()
     print("Done!")
     print("Calculating seats...")
-    run_script.callback("calculate-seats.sql")
+    run_script.callback("scripts/calculate-seats.sql")
     print("Done!")
     print("Refreshing schema...")
-    os.system("docker-compose kill -s SIGUSR1 server")
+    os.system("docker-compose kill -s SIGUSR1 server > /dev/null 2>&1")
     print("Done")
+
+
+@manage.command()
+def count_votes():
+    """
+    Computes the election results based on the loaded votes in the database.
+    """
+    print("Aggregating votes...")
+    run_script.callback("scripts/aggregate-votes.sql")
+    print("Done!")
+    print("Calculating seats...")
+    run_script.callback("scripts/calculate-seats.sql")
+    print("Done!")
 
 
 if __name__ == "__main__":

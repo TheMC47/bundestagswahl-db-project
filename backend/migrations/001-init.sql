@@ -166,15 +166,19 @@ CREATE TABLE erststimmen
 (
     id             SERIAL,
     direktkandidat INT,
+    wahlkreis      INT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (direktkandidat) REFERENCES direktkandidaten (id) ON
+        UPDATE CASCADE ON
+        DELETE CASCADE,
+    FOREIGN KEY (wahlkreis) REFERENCES wahlkreise (id) ON
         UPDATE CASCADE ON
         DELETE CASCADE
 );
 CREATE TABLE zweitstimmen
 (
     id          SERIAL,
-    landesliste INT NOT NULL,
+    landesliste INT,
     wahlkreis   INT NOT NULL, -- A check constraint on wahlkreis.bundesland == landesliste.bundesland?
     PRIMARY KEY (id),
     FOREIGN KEY (landesliste) REFERENCES landeslisten (id) ON
