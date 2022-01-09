@@ -20,7 +20,7 @@ export const URI = process.env.REACT_APP_URI
 async function api<T>(suffix: string, init?: RequestInit): Promise<T> {
   const r = await fetch(URI + suffix, init)
   if (r.ok) return await r.json()
-  return await r.json().then(err => Promise.reject(err))
+  return await r.json().then(err => Promise.reject([err, r.status]))
 }
 
 /* const yearToId = (year: number): number => year == 2021 ? 1 : 2; */
@@ -140,6 +140,13 @@ export async function getbundesland(wahlkreis: number): Promise<Wahlkreis> {
   return api(`/wahlkreise?id=eq.${wahlkreis}`)
 }
 
-
-
-
+export async function ping(
+  token: string
+) : Promise<void> {
+  return api('/rpc/ping', {
+    method: 'GET',
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+    }),
+  })
+}

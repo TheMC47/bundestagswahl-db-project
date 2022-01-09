@@ -5,7 +5,7 @@ import {
   getStimmzettel_Erststimme,
   getStimmzettel_Zweitstimme,
 } from '../api'
-import { Alert, Container, Form, Table } from 'react-bootstrap'
+import { Alert, Container, Form } from 'react-bootstrap'
 import jwt_decode from 'jwt-decode'
 import { submitVote } from '../api'
 
@@ -32,6 +32,7 @@ interface ZweitstimmeErgebnisse {
 }
 interface WahlzettelProps {
   token: string | null
+  setToken: (token: string | undefined) => void
 }
 
 interface Token {
@@ -40,22 +41,27 @@ interface Token {
   wahlkreis: number
 }
 
-export default function Wahlzettel({ token }: WahlzettelProps): JSX.Element {
+export default function Wahlzettel({ token, setToken }: WahlzettelProps): JSX.Element {
+  if (!token)
+    return (
+      <Alert variant='danger'>
+        Die Machine ist nicht <a href='/login'>aktiviert </a>.
+      </Alert>
+    )
+
   const [bundesland, setBundesland] = useState<number>(1)
 
   const [wahlkreis, setwahlkreis] = useState<number>(1)
   const [direktkandidaten, setdirektkandidaten] = useState<
     ErststimmeErgebnisse[]
-    >([])
+  >([])
   const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([])
   const [key, setkey] = useState<string>('')
   const [message, setMessage] = useState<string | undefined>(undefined)
   const [result, setResult] = useState<'success' | 'danger'>('success')
 
   useEffect(() => {
-    if (token) {
-      setwahlkreis(( jwt_decode(token) as Token ).wahlkreis)
-    }
+    setwahlkreis((jwt_decode(token) as Token).wahlkreis)
   }, [])
 
   useEffect(() => {
@@ -65,10 +71,8 @@ export default function Wahlzettel({ token }: WahlzettelProps): JSX.Element {
   }, [])
 
   return (
-
     <Container className='mb-4'>
-
-      { token && (
+      {token && (
         <div>
           <Form.Group className='mb-3'>
             <Form.Label>Geben Sie Ihren Stimm-Schlüssel ein</Form.Label>
@@ -112,8 +116,8 @@ export default function Wahlzettel({ token }: WahlzettelProps): JSX.Element {
               <div className='col-6 d-flex justify-content-end' />
 
               <div className='col-6 d-flex justify-content-lg-start text-primary'>
-                - maßgebende Stimme für die Verteilung der Sitze insgesamt auf die
-                einzelnen Parteien-
+                - maßgebende Stimme für die Verteilung der Sitze insgesamt auf
+                die einzelnen Parteien-
               </div>
             </div>
             <div className='row'>
@@ -149,23 +153,30 @@ export default function Wahlzettel({ token }: WahlzettelProps): JSX.Element {
                   {
                     direktkandidat: direktkandidaten.filter(d => d.checked)
                       ? null
-                      : direktkandidaten.filter(d => d.checked)[0].direktkandidat
-                        .kandidat_id,
+                      : direktkandidaten.filter(d => d.checked)[0]
+                          .direktkandidat.kandidat_id,
                     landesliste: landeslisten.filter(d => d.checked)
                       ? null
                       : landeslisten.filter(d => d.checked)[0].landesliste
-                        .liste_id,
+                          .liste_id,
                     waehlerschlussel: key,
                   },
                   token
                 )
                   .then(() => {
-                    setMessage('Ihre Abstimmung wurde erfolgreich geschickt.')
+                    setMessage('Ihre Stimme wurde erfolgreich geschickt.')
                     setResult('success')
-                    {/* setTimeout(() => (window.location.href = '/'), 3000) */ }
+                    setTimeout(() => window.location.reload(), 3000)
                   })
-                  .catch((e: { message: string }) => {
-                    setMessage(e.message)
+                  .catch(([err, status]) => {
+                    if (status == 401) {
+                      setMessage('Die Sitzung ist abgelaufen. Sie werden umgeleitet.')
+                      setResult('danger')
+                      setToken(undefined)
+                      setTimeout(() => window.location.href = '/login', 3000)
+                      return;
+                    }
+                    setMessage(err.message)
                     setResult('danger')
                   })
               }}
@@ -182,10 +193,10 @@ export default function Wahlzettel({ token }: WahlzettelProps): JSX.Element {
 }
 
 function Erststimme({
-                      wahlkreis,
-                      direktkandidaten,
-                      setdirektkandidaten,
-                    }: ErststimmeZettelProps): JSX.Element {
+  wahlkreis,
+  direktkandidaten,
+  setdirektkandidaten,
+}: ErststimmeZettelProps): JSX.Element {
   useEffect(() => {
     getStimmzettel_Erststimme(wahlkreis).then(d => {
       setdirektkandidaten(d.map(l => ({ direktkandidat: l, checked: false })))
@@ -195,73 +206,73 @@ function Erststimme({
   return (
     <table className='table table-bordered table-hover'>
       <tbody className='text-secondary'>
-      {direktkandidaten.map(d => (
-        <tr key={d.direktkandidat.rank}>
-          <th scope='row'>{d.direktkandidat.rank}</th>
-          <td className='d-block'>
-            <div className='d-flex justify-content-start '>
-              <div className='d-block '>
-                <h5 className='d-flex'>
-                  {d.direktkandidat.kandidat_vorname +
-                  ' ' +
-                  d.direktkandidat.kandidat_nachname}
-                </h5>
-                <p className='d-flex '> {d.direktkandidat.kandidat_beruf}</p>
+        {direktkandidaten.map(d => (
+          <tr key={d.direktkandidat.rank}>
+            <th scope='row'>{d.direktkandidat.rank}</th>
+            <td className='d-block'>
+              <div className='d-flex justify-content-start '>
+                <div className='d-block '>
+                  <h5 className='d-flex'>
+                    {d.direktkandidat.kandidat_vorname +
+                      ' ' +
+                      d.direktkandidat.kandidat_nachname}
+                  </h5>
+                  <p className='d-flex '> {d.direktkandidat.kandidat_beruf}</p>
+                </div>
               </div>
-            </div>
-            <div className='d-flex justify-content-end'>
-              <div className='d-block'>
-                <h5 className='d-flex justify-content-start '>
-                  {d.direktkandidat.partei_abk}
-                </h5>
-                <p className='d-flex justify-content-start'>
-                  {d.direktkandidat.partei_name}
-                </p>
+              <div className='d-flex justify-content-end'>
+                <div className='d-block'>
+                  <h5 className='d-flex justify-content-start '>
+                    {d.direktkandidat.partei_abk}
+                  </h5>
+                  <p className='d-flex justify-content-start'>
+                    {d.direktkandidat.partei_name}
+                  </p>
+                </div>
               </div>
-            </div>
-          </td>
-          <td>
-            <input
-              name='direktkandidat'
-              type='radio'
-              className='form-check-input'
-              id='id'
-              checked={d.checked}
-              onClick={() => {
-                setdirektkandidaten(
-                  [...direktkandidaten]
-                    .map(object => {
-                      if (object.direktkandidat !== d.direktkandidat) {
-                        return {
-                          ...object,
-                          checked: false,
-                        }
-                      } else return object
-                    })
-                    .map(object => {
-                      if (object.direktkandidat === d.direktkandidat) {
-                        return {
-                          ...object,
-                          checked: !d.checked,
-                        }
-                      } else return object
-                    })
-                )
-              }}
-            />
-          </td>
-        </tr>
-      ))}
+            </td>
+            <td>
+              <input
+                name='direktkandidat'
+                type='radio'
+                className='form-check-input'
+                id='id'
+                checked={d.checked}
+                onClick={() => {
+                  setdirektkandidaten(
+                    [...direktkandidaten]
+                      .map(object => {
+                        if (object.direktkandidat !== d.direktkandidat) {
+                          return {
+                            ...object,
+                            checked: false,
+                          }
+                        } else return object
+                      })
+                      .map(object => {
+                        if (object.direktkandidat === d.direktkandidat) {
+                          return {
+                            ...object,
+                            checked: !d.checked,
+                          }
+                        } else return object
+                      })
+                  )
+                }}
+              />
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   )
 }
 
 function Zweitstimme({
-                       bundesland,
-                       landeslisten,
-                       setlandeslisten,
-                     }: ZweitstimmeZettelProps): JSX.Element {
+  bundesland,
+  landeslisten,
+  setlandeslisten,
+}: ZweitstimmeZettelProps): JSX.Element {
   useEffect(() => {
     getStimmzettel_Zweitstimme(bundesland).then(d => {
       setlandeslisten(d.map(l => ({ landesliste: l, checked: false })))
@@ -271,60 +282,60 @@ function Zweitstimme({
   return (
     <table className='table table-bordered table-hover'>
       <tbody className='text-primary'>
-      {landeslisten.map(d => (
-        <tr key={d.landesliste.rank}>
-          <td>
-            <input
-              name='landesliste'
-              type='radio'
-              className='form-check-input'
-              id='id'
-              checked={d.checked}
-              onClick={() => {
-                setlandeslisten(
-                  [...landeslisten]
-                    .map(object => {
-                      if (object.landesliste !== d.landesliste) {
-                        return {
-                          ...object,
-                          checked: false,
-                        }
-                      } else return object
-                    })
-                    .map(object => {
-                      if (object.landesliste === d.landesliste) {
-                        return {
-                          ...object,
-                          checked: !d.checked,
-                        }
-                      } else return object
-                    })
-                )
-              }}
-            />
-          </td>
-          <td className='d-block'>
-            <div className='d-flex justify-content-start'>
-              <div className='d-block '>
-                <h5 className='d-flex align-content-center'>
-                  {d.landesliste.partei_abk}
-                </h5>
+        {landeslisten.map(d => (
+          <tr key={d.landesliste.rank}>
+            <td>
+              <input
+                name='landesliste'
+                type='radio'
+                className='form-check-input'
+                id='id'
+                checked={d.checked}
+                onClick={() => {
+                  setlandeslisten(
+                    [...landeslisten]
+                      .map(object => {
+                        if (object.landesliste !== d.landesliste) {
+                          return {
+                            ...object,
+                            checked: false,
+                          }
+                        } else return object
+                      })
+                      .map(object => {
+                        if (object.landesliste === d.landesliste) {
+                          return {
+                            ...object,
+                            checked: !d.checked,
+                          }
+                        } else return object
+                      })
+                  )
+                }}
+              />
+            </td>
+            <td className='d-block'>
+              <div className='d-flex justify-content-start'>
+                <div className='d-block '>
+                  <h5 className='d-flex align-content-center'>
+                    {d.landesliste.partei_abk}
+                  </h5>
+                </div>
               </div>
-            </div>
-            <div className='d-flex justify-content-end'>
-              <div className='d-block'>
-                <h5 className='d-flex justify-content-start '>
-                  {d.landesliste.partei_name}
-                </h5>
-                <p className='d-flex justify-content-start'>
-                  {d.landesliste.kandidaten}
-                </p>
+              <div className='d-flex justify-content-end'>
+                <div className='d-block'>
+                  <h5 className='d-flex justify-content-start '>
+                    {d.landesliste.partei_name}
+                  </h5>
+                  <p className='d-flex justify-content-start'>
+                    {d.landesliste.kandidaten}
+                  </p>
+                </div>
               </div>
-            </div>
-          </td>
-          <th scope='row'>{d.landesliste.rank}</th>
-        </tr>
-      ))}
+            </td>
+            <th scope='row'>{d.landesliste.rank}</th>
+          </tr>
+        ))}
       </tbody>
     </table>
   )

@@ -9,7 +9,7 @@ type FormValues = { [index in 'helfer' | 'key']?: string }
 
 
 export function HelperLogin(props: {
-  setToken: (token: string) => void
+  setToken: (token: string | undefined) => void
 }): JSX.Element {
   const [form, setForm] = useState<FormValues>({})
   const [errors, setErrors] = useState<ErrorState>({
@@ -52,8 +52,8 @@ export function HelperLogin(props: {
         props.setToken(resp.token)
         setTimeout(() => (window.location.href = '/stimmabgabe'), 3000)
       })
-      .catch((e: { message: string }) => {
-        setMessage(e.message)
+      .catch(([err, _status]) => {
+        setMessage(err.message)
         setResult('danger')
         setDisabled(false)
       })

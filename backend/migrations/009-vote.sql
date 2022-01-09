@@ -121,3 +121,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- By default, everyone can call the function
 REVOKE EXECUTE ON FUNCTION vote FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION vote TO helfer;
+
+
+CREATE OR REPLACE FUNCTION ping() RETURNS TEXT AS $$
+  BEGIN
+     RETURN 'pong';
+  END
+$$ LANGUAGE plpgsql SECURITY DEFINER;
