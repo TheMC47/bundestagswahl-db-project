@@ -199,6 +199,7 @@ $$
     END;
 $$;
 
+TRUNCATE TABLE bundestagsmandaten;
 
 INSERT INTO bundestagsmandaten(kandidat, partei, bundesland, direktmandat, wahl)
 WITH

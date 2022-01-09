@@ -94,9 +94,9 @@ CREATE OR REPLACE FUNCTION vote(direktkandidat int, landesliste int, waehlerSchl
   INTO _direktkandidat;
 
   IF _direktkandidat IS NULL THEN
-     INSERT INTO erststimmen(direktkandidat) VALUES (NULL);
+     INSERT INTO erststimmen(direktkandidat, wahlkreis) VALUES (NULL, _wahlkreis);
   ELSE
-    INSERT INTO erststimmen(direktkandidat) VALUES (direktkandidat);
+    INSERT INTO erststimmen(direktkandidat, wahlkreis) VALUES (direktkandidat, _wahlkreis);
   END IF;
 
   SELECT *
