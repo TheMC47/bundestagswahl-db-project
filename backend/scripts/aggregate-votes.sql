@@ -32,10 +32,31 @@ FROM zweitstimmen
 WHERE landesliste IS NOT NULL
 GROUP BY landesliste, wahlkreis;
 
+WITH waehlende_agg(anzahl, wahlkreis)
+AS (
+   SELECT COUNT(w), wk.id
+   FROM wahlkreise wk
+        LEFT OUTER JOIN waehler w ON wk.id = w.wahlkreis AND w.hat_abgestimmt = TRUE
+   GROUP BY wk.id
+),
+ungueltig_erste_stimme_agg(anzahl, wahlkreis)
+AS (
+   SELECT COUNT(e), wk.id
+   FROM wahlkreise wk
+        LEFT OUTER JOIN erststimmen e ON wk.id = e.wahlkreis AND e.direktkandidat IS NULL
+   GROUP BY wk.id
+),
+ungueltig_zweite_stimme_agg(anzahl, wahlkreis)
+AS (
+   SELECT COUNT(z), wk.id
+   FROM wahlkreise wk
+        LEFT OUTER JOIN zweitstimmen z ON wk.id = z.wahlkreis AND z.landesliste IS NULL
+   GROUP BY wk.id
+)
 UPDATE wahlkreiswahldaten wk
-SET waehlende = (SELECT COUNT(*) FROM waehler WHERE hat_abgestimmt = TRUE AND wahlkreis = wk.id),
-    ungueltig_erste_stimme = (SELECT COUNT(*) FROM erststimmen WHERE direktkandidat IS NULL AND wahlkreis = wk.id),
-    ungueltig_zweite_stimme = (SELECT COUNT(*) FROM zweitstimmen WHERE landesliste IS NULL AND wahlkreis = wk.id)
+SET waehlende = (SELECT anzahl FROM waehlende_agg WHERE wahlkreis = wk.id),
+    ungueltig_erste_stimme = (SELECT anzahl FROM ungueltig_erste_stimme_agg WHERE wahlkreis = wk.id),
+    ungueltig_zweite_stimme = (SELECT anzahl FROM ungueltig_zweite_stimme_agg WHERE wahlkreis = wk.id)
 WHERE wahl = 1;
 
 
