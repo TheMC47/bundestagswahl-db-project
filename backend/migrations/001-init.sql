@@ -214,3 +214,7 @@ CREATE TABLE zweitstimmeErgebnisse
         DELETE CASCADE,
     UNIQUE (landesliste, wahlkreis)
 );
+
+CREATE INDEX erstsimmen_wahlkreis_idx ON erststimmen (wahlkreis);
+CREATE INDEX zweitstimmen_wahlkreis_idx ON zweitstimmen (wahlkreis);
+CREATE INDEX waehler_wahlkreis_idx ON waehler (wahlkreis);
