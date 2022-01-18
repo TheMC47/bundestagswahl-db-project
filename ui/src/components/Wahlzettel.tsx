@@ -41,7 +41,10 @@ interface Token {
   wahlkreis: number
 }
 
-export default function Wahlzettel({ token, setToken }: WahlzettelProps): JSX.Element {
+export default function Wahlzettel({
+  token,
+  setToken,
+}: WahlzettelProps): JSX.Element {
   if (!token)
     return (
       <Alert variant='danger'>
@@ -49,9 +52,8 @@ export default function Wahlzettel({ token, setToken }: WahlzettelProps): JSX.El
       </Alert>
     )
 
-  const [bundesland, setBundesland] = useState<number>(1)
-
-  const [wahlkreis, setwahlkreis] = useState<number>(1)
+  const [bundesland, setBundesland] = useState<number | undefined>(undefined)
+  const wahlkreis: number = (jwt_decode(token) as Token).wahlkreis
   const [direktkandidaten, setdirektkandidaten] = useState<
     ErststimmeErgebnisse[]
   >([])
@@ -61,18 +63,27 @@ export default function Wahlzettel({ token, setToken }: WahlzettelProps): JSX.El
   const [result, setResult] = useState<'success' | 'danger'>('success')
 
   useEffect(() => {
-    setwahlkreis((jwt_decode(token) as Token).wahlkreis)
-  }, [])
-
-  useEffect(() => {
     getbundesland(wahlkreis).then(d => {
       setBundesland(d.bundesland)
     })
   }, [])
 
+  useEffect(() => {
+    getStimmzettel_Erststimme(wahlkreis).then(d => {
+      setdirektkandidaten(d.map(l => ({ direktkandidat: l, checked: false })))
+    })
+  }, [])
+
+  useEffect(() => {
+    if (bundesland)
+      getStimmzettel_Zweitstimme(bundesland).then(d => {
+        setlandeslisten(d.map(l => ({ landesliste: l, checked: false })))
+      })
+  }, [bundesland])
+
   return (
     <Container className='mb-4'>
-      {token && (
+      {bundesland && (
         <div>
           <Form.Group className='mb-3'>
             <Form.Label>Geben Sie Ihren Stimm-Schlüssel ein</Form.Label>
@@ -149,16 +160,14 @@ export default function Wahlzettel({ token, setToken }: WahlzettelProps): JSX.El
               type='button'
               className='btn btn-dark mb-3'
               onClick={() => {
+                const gewahlt_direkt = direktkandidaten.find(d => d.checked)
+                  ?.direktkandidat.kandidat_id
+                const gewahlt_liste = landeslisten.find(d => d.checked)
+                  ?.landesliste.liste_id
                 submitVote(
                   {
-                    direktkandidat: direktkandidaten.filter(d => d.checked)
-                      ? null
-                      : direktkandidaten.filter(d => d.checked)[0]
-                          .direktkandidat.kandidat_id,
-                    landesliste: landeslisten.filter(d => d.checked)
-                      ? null
-                      : landeslisten.filter(d => d.checked)[0].landesliste
-                          .liste_id,
+                    direktkandidat: gewahlt_direkt || null,
+                    landesliste: gewahlt_liste || null,
                     waehlerschlussel: key,
                   },
                   token
@@ -166,15 +175,19 @@ export default function Wahlzettel({ token, setToken }: WahlzettelProps): JSX.El
                   .then(() => {
                     setMessage('Ihre Stimme wurde erfolgreich geschickt.')
                     setResult('success')
-                    setTimeout(() => window.location.reload(), 3000)
+                    {
+                      /* setTimeout(() => window.location.reload(), 3000) */
+                    }
                   })
                   .catch(([err, status]) => {
                     if (status == 401) {
-                      setMessage('Die Sitzung ist abgelaufen. Sie werden umgeleitet.')
+                      setMessage(
+                        'Die Sitzung ist abgelaufen. Sie werden umgeleitet.'
+                      )
                       setResult('danger')
                       setToken(undefined)
-                      setTimeout(() => window.location.href = '/login', 3000)
-                      return;
+                      setTimeout(() => (window.location.href = '/login'), 3000)
+                      return
                     }
                     setMessage(err.message)
                     setResult('danger')
@@ -193,16 +206,9 @@ export default function Wahlzettel({ token, setToken }: WahlzettelProps): JSX.El
 }
 
 function Erststimme({
-  wahlkreis,
   direktkandidaten,
   setdirektkandidaten,
 }: ErststimmeZettelProps): JSX.Element {
-  useEffect(() => {
-    getStimmzettel_Erststimme(wahlkreis).then(d => {
-      setdirektkandidaten(d.map(l => ({ direktkandidat: l, checked: false })))
-    })
-  }, [])
-
   return (
     <table className='table table-bordered table-hover'>
       <tbody className='text-secondary'>
@@ -240,23 +246,10 @@ function Erststimme({
                 checked={d.checked}
                 onClick={() => {
                   setdirektkandidaten(
-                    [...direktkandidaten]
-                      .map(object => {
-                        if (object.direktkandidat !== d.direktkandidat) {
-                          return {
-                            ...object,
-                            checked: false,
-                          }
-                        } else return object
-                      })
-                      .map(object => {
-                        if (object.direktkandidat === d.direktkandidat) {
-                          return {
-                            ...object,
-                            checked: !d.checked,
-                          }
-                        } else return object
-                      })
+                    direktkandidaten.map(object => ({
+                      ...object,
+                      checked: object.direktkandidat === d.direktkandidat,
+                    }))
                   )
                 }}
               />
@@ -269,16 +262,9 @@ function Erststimme({
 }
 
 function Zweitstimme({
-  bundesland,
   landeslisten,
   setlandeslisten,
 }: ZweitstimmeZettelProps): JSX.Element {
-  useEffect(() => {
-    getStimmzettel_Zweitstimme(bundesland).then(d => {
-      setlandeslisten(d.map(l => ({ landesliste: l, checked: false })))
-    })
-  }, [])
-
   return (
     <table className='table table-bordered table-hover'>
       <tbody className='text-primary'>
@@ -293,23 +279,10 @@ function Zweitstimme({
                 checked={d.checked}
                 onClick={() => {
                   setlandeslisten(
-                    [...landeslisten]
-                      .map(object => {
-                        if (object.landesliste !== d.landesliste) {
-                          return {
-                            ...object,
-                            checked: false,
-                          }
-                        } else return object
-                      })
-                      .map(object => {
-                        if (object.landesliste === d.landesliste) {
-                          return {
-                            ...object,
-                            checked: !d.checked,
-                          }
-                        } else return object
-                      })
+                    landeslisten.map(object => ({
+                      ...object,
+                      checked: object.landesliste === d.landesliste,
+                    }))
                   )
                 }}
               />

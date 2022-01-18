@@ -137,7 +137,11 @@ export async function submitVote(
 }
 
 export async function getbundesland(wahlkreis: number): Promise<Wahlkreis> {
-  return api(`/wahlkreise?id=eq.${wahlkreis}`)
+  return api(`/wahlkreise?id=eq.${wahlkreis}`, {
+    headers: new Headers({
+      Accept: 'application/vnd.pgrst.object+json',
+    }),
+  })
 }
 
 export async function ping(
