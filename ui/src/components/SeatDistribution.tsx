@@ -1,11 +1,21 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Col, Container, Form, Row, Table } from 'react-bootstrap';
 import { Doughnut } from 'react-chartjs-2';
 import { getSitzVerteilung } from '../api'
 import { useEffect, useState } from 'react';
 import { ElectionResult } from '../models'
+import Header from "./Header/header";
 
-
+import {
+  Box, Container,
+  FormControl,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem, Paper,
+  Select,
+  SelectChangeEvent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Typography
+} from "@mui/material";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface SeatDistributionProps {
@@ -27,40 +37,71 @@ export default function SeatDistribution(): JSX.Element {
     setYear(+e.currentTarget.value)
   }
 
-  return (
-    <Container>
-      <h2 className="mb-5">Sitzverteilung</h2>
-      <Row>
-        <Col>
-          <SeatDistributionChart year={year} data={data} />
-        </Col>
-        <Col>
-          <Form.Select onChange={handleYearChange}>
-            <option value="1">2021</option>
-            <option value="2">2017</option>
-          </Form.Select>
+  const handleChange = (event: SelectChangeEvent<number>) => {
+    setYear(event.target.value as number);
+  };
 
-          <Table>
-            <thead>
-              <tr>
-                <th>Partei</th>
-                <th>Anzahl Sitze</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                data.filter(d => d.wahl == year).map((d) =>
-                  <tr key={d.kurzbezeichnung}>
-                    <td>{d.kurzbezeichnung}</td>
-                    <td>{d.sitze}</td>
-                  </tr>
-                )
-              }
-            </tbody>
-          </Table>
-        </Col>
-      </Row>
-    </Container>
+  return (
+    <>
+      <Header />
+      <div style={{alignContent: 'center', justifyContent: 'center', paddingTop: "50px", paddingBottom: "50px",  display: "flex"}}>
+      <Typography
+        fontWeight='600'
+        color = '#343a40'
+        variant='h3'
+        component='h3'
+        >
+        Sitzverteilung
+      </Typography>
+      </div>
+      <div style={{alignContent: 'end', justifyContent: 'end',paddingRight: "50px", paddingTop: "5px", paddingBottom: "40px", display: "flex"}}>
+        <FormControl sx={{ width: 120 }}>
+          <InputLabel id="demo-simple-select-label">Jahr</InputLabel>
+          <Select
+            value={year}
+            label="Jahr"
+            onChange={handleChange}
+          >
+            <MenuItem value="1">2021</MenuItem>
+            <MenuItem value="2">2017</MenuItem>
+          </Select>
+        </FormControl>
+      </div>
+
+      < div style={{flexGrow: 1}}>
+
+      <Grid container spacing={50}  direction='row' justifyContent="center">
+        <Grid item  xs={6}>
+          <SeatDistributionChart year={year} data={data} />
+        </Grid>
+
+  <Grid item xs={4}>
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 200 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell align="center">Partei</TableCell>
+            <TableCell align="center">Anzahl Sitze</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {
+            data.filter(d => d.wahl == year).map((row) => (
+              <TableRow
+                key={row.kurzbezeichnung}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
+                <TableCell align="center">{row.kurzbezeichnung}</TableCell>
+                <TableCell align="center">{row.sitze}</TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </Grid>
+      </Grid>
+     </div>
+    </>
   );
 
 }
@@ -119,3 +160,6 @@ export function SeatDistributionChart({ data, year }: SeatDistributionProps): JS
     <Doughnut data={chartData} options={options} />
   )
 }
+
+
+
