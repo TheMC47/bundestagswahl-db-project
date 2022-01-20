@@ -172,24 +172,25 @@ def generate_votes(wahlkreis, year):
     # Get first vote results
     db = Transaction()
 
-    db.disable_constraints('erststimmen')
-    db.disable_constraints('zweitstimmen')
-    db.disable_constraints('wahlkreise')
+    db.disable_constraints("erststimmen")
+    db.disable_constraints("zweitstimmen")
+    db.disable_constraints("wahlkreise")
 
     if wahlkreis is not None:
         generate_wahlkreis(db, wahlkreis, year, True)
-        db.enable_constraints('erststimmen')
-        db.enable_constraints('zweitstimmen')
-        db.enable_constraints('wahlkreise')
+        db.enable_constraints("erststimmen")
+        db.enable_constraints("zweitstimmen")
+        db.enable_constraints("wahlkreise")
         db.commit()
         return
 
     for w in db.select_all("wahlkreise"):
         generate_wahlkreis(db, w[0], year)
 
-    db.enable_constraints('erststimmen')
-    db.enable_constraints('zweitstimmen')
-    db.enable_constraints('wahlkreise')
+    db.enable_constraints("erststimmen")
+    db.enable_constraints("zweitstimmen")
+    db.enable_constraints("wahlkreise")
+
     db.commit()
 
 
@@ -361,7 +362,7 @@ def create_voter_keys(wahlkreis, number):
         ) RETURNING id;
     """
     data = db.run_query(query)
-    print('\n'.join([d[0] for d in data]))
+    print("\n".join([d[0] for d in data]))
     db.commit()
 
 
@@ -394,7 +395,7 @@ def create_activation_keys(wahlkreis, number):
         ) RETURNING *;
     """
     data = db.run_query(query)
-    print('\n'.join([d[0] for d in data]))
+    print("\n".join([d[0] for d in data]))
     db.commit()
 
 
