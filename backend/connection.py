@@ -57,14 +57,19 @@ class Transaction:
         return self.run_query(f"SELECT * FROM {table}", dataklass)
 
     def __normalize_val(self, attr) -> str:
+        if attr is None:
+            return "NULL"
         if isinstance(attr, str):
             if attr == "":
                 return "NULL"
             return "'" + attr.replace("'", "''") + "'"
         return str(attr)
 
+    def __normalize_vals(self, tup: tuple) -> str:
+        return f"{','.join(map(self.__normalize_val, tup))}"
+
     def __normalize_tuple(self, tup: tuple) -> str:
-        return f"({','.join(map(self.__normalize_val, tup))})"
+        return f"({self.__normalize_vals(tup)})"
 
     def __normalize_attr(self, attr: str) -> str:
         return attr  # Hmmmm?
@@ -90,6 +95,21 @@ class Transaction:
             f"INSERT INTO {table}{attr_str} VALUES {values} RETURNING *;",
             dataklass,
         )
+
+    def __replicate_tuple(self, tup: tuple, n: int) -> str:
+        vals: str = self.__normalize_tuple(tup)
+        return (vals + ",") * (n - 1) + vals
+
+    def insert_bulk(
+        self, table: str, attrs: list[str], tup: tuple, number: int
+    ):
+        attr_str: str = self.__normalize_attrs(attrs)
+        vals: str = self.__normalize_vals(tup)
+        query = f"""INSERT INTO {table}{attr_str} (
+            SELECT {vals}
+            FROM generate_series(1, {number})
+        )"""
+        self.run_query(query, fetch=False)
 
     def rollback(self):
         self.__cursor.rollback()
