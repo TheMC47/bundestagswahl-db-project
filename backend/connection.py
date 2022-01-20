@@ -33,6 +33,9 @@ class Transaction:
             return ts
         return [dataklass(*t) for t in ts]
 
+    def do(self, fun: str):
+        self.run_query(f"SELECT {fun};", fetch=False)
+
     def healthcheck(self):
         self.run_query("SELECT version()")
         return self.__cursor.fetchone()

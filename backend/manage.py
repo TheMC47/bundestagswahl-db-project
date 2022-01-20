@@ -142,6 +142,7 @@ def generate_wahlkreis(
     wk: int,
     year: int,
     panic: bool = False,
+    voters: bool = False,
 ):
     print(f"Processing: {wk}")
     wahlid = 1 if year == 2021 else 2
@@ -163,6 +164,8 @@ def generate_wahlkreis(
     wkdaten = Wahlkreisdaten(*data[0])
     generate_first_votes(db, wkdaten)
     generate_second_votes(db, wkdaten)
+    if voters:
+        generate_voters(db, wkdaten)
 
 
 @manage.command()
@@ -193,13 +196,92 @@ def generate_votes(wahlkreis, year):
     db.enable_constraints('erststimmen')
     db.enable_constraints('zweitstimmen')
     db.enable_constraints('wahlkreise')
+    db.commit()
+
+
+@manage.command()
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+@click.option("-y", "--year", type=int, required=True)
+def deaggregate(year, wahlkreis):
+    """
+    Create votes and voter keys from aggregated data
+    """
+    db = Transaction()
+
+    db.disable_constraints("erststimmen")
+    db.disable_constraints("zweitstimmen")
+    db.disable_constraints("wahlkreise")
+    db.disable_constraints("waehler")
+
+    generate_wahlkreis(db, wahlkreis, year, panic=True, voters=True)
+
+    db.enable_constraints("erststimmen")
+    db.enable_constraints("zweitstimmen")
+    db.enable_constraints("wahlkreise")
+    db.enable_constraints("waehler")
 
     db.commit()
 
 
 @manage.command()
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+def demo(wahlkreis: int):
+    deaggregate.callback(2021, wahlkreis)
+
+    print("Helper ", end="")
+    add_helper.callback(wahlkreis, "Max", "Mustermann")
+
+    print("Activation keys:")
+    create_activation_keys.callback(wahlkreis, 5)
+
+    print("Voter keys:")
+    create_voter_keys.callback(wahlkreis, 5)
+
+
+@manage.command()
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+def aggregate(wahlkreis):
+    """
+    Refresh polling-station aggregates
+    """
+    db = Transaction()
+
+    db.do(f"refresh_aggregates({wahlkreis})")
+
+    db.commit()
+
+
+@manage.command()
+def calculate_results():
+    """
+    Calculates election results
+    """
+    run_script.callback("scripts/calculate-seats.sql")
+
+
+@manage.command()
 def seed():
-    """Load data from csv files into the database"""
+    """
+    Load data from csv files into the database
+    """
     db = Transaction()
     seed_parties_res = seed_parties(db)
     seed_wahldaten(2021, db=db)
@@ -370,7 +452,7 @@ def setup():
     seed.callback()
     print("Done!")
     print("Calculating seats...")
-    run_script.callback("scripts/calculate-seats.sql")
+    calculate_results.callback()
     print("Done!")
     print("Refreshing schema...")
     os.system("docker-compose kill -s SIGUSR1 server > /dev/null 2>&1")
