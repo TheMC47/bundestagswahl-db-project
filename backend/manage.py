@@ -166,9 +166,12 @@ def generate_wahlkreis(
 
 
 @manage.command()
-@click.option("-w", "--wahlkreis", type=int)
+@click.option("-w", "--wahlkreis", type=int, help="ID of the polling station")
 @click.option("-y", "--year", type=int, required=True)
 def generate_votes(wahlkreis, year):
+    """
+    Generate votes based on aggregated results
+    """
     # Get first vote results
     db = Transaction()
 
@@ -224,6 +227,9 @@ def seed():
 @manage.command()
 @click.argument("script")
 def run_script(script):
+    """
+    Run an SQL script
+    """
     db = Transaction()
     db.run_script(script)
     db.commit()
@@ -231,6 +237,10 @@ def run_script(script):
 
 @manage.command()
 def migrate():
+    """
+    Load the database schema
+    """
+
     MIGRATIONS_DIR = "migrations"
     migrations = sorted(
         [
@@ -247,10 +257,25 @@ def migrate():
 
 
 @manage.command()
-@click.option("-w", "--wahlkreis", type=int, required=True)
-@click.option("-n", "--number", type=int, required=True)
-def create_voters(wahlkreis, number):
-    # Get first vote results
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+@click.option(
+    "-n",
+    "--number",
+    type=int,
+    required=True,
+    help="Number of keys to be created",
+)
+def create_voter_keys(wahlkreis, number):
+    """
+    Create voter keys
+    """
+
     db = Transaction()
 
     query = f"""
@@ -265,10 +290,25 @@ def create_voters(wahlkreis, number):
 
 
 @manage.command()
-@click.option("-w", "--wahlkreis", type=int, required=True)
-@click.option("-n", "--number", type=int, required=True)
-def create_keys(wahlkreis, number):
-    # Get first vote results
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+@click.option(
+    "-n",
+    "--number",
+    type=int,
+    required=True,
+    help="Number of keys to be created",
+)
+def create_activation_keys(wahlkreis, number):
+    """
+    Create activation keys
+    """
+
     db = Transaction()
 
     query = f"""
@@ -283,11 +323,27 @@ def create_keys(wahlkreis, number):
 
 
 @manage.command()
-@click.option("-w", "--wahlkreis", type=int, required=True)
-@click.option("-f", "--first-name", type=str, required=True)
-@click.option("-l", "--last-name", type=str, required=True)
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+@click.option(
+    "-f",
+    "--first-name",
+    type=str,
+    required=True,
+    help="Firstname of the helper",
+)
+@click.option(
+    "-l", "--last-name", type=str, required=True, help="Lastname of the helper"
+)
 def add_helper(wahlkreis, first_name, last_name):
-    # Get first vote results
+    """
+    Add helpers for a polling station
+    """
     db = Transaction()
 
     query = f"""
@@ -304,6 +360,9 @@ def add_helper(wahlkreis, first_name, last_name):
 
 @manage.command()
 def setup():
+    """
+    Prepare and populate the database
+    """
     print("Migrating...")
     migrate.callback()
     print("Done!")
@@ -321,7 +380,7 @@ def setup():
 @manage.command()
 def count_votes():
     """
-    Computes the election results based on the loaded votes in the database.
+    Aggregate votes and compute results
     """
     print("Aggregating votes...")
     run_script.callback("scripts/aggregate-votes.sql")
