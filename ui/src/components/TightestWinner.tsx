@@ -1,8 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Party, TightestWinner } from '../models'
 import { getParties, getTightestWinner } from '../api'
-import { Container, Form, Row, Table } from 'react-bootstrap';
-import { Col } from 'react-bootstrap';
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography
+} from "@mui/material";
 
 
 export interface PartyProps {
@@ -20,35 +31,74 @@ export default function TightestWinnerView(): JSX.Element {
     getParties().then((p) => setParties(p))
   })
 
-  const handlePartyChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setParty(parties.find((p) => p.id == +e.currentTarget.value))
+  const handlePartyChange = (e: SelectChangeEvent<number>) => {
+    setParty(parties.find((p) => p.id == e.target.value))
   }
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setYear(+e.currentTarget.value)
-  }
+
+
+  const handleYearChange = (event: SelectChangeEvent<number>) => {
+    setYear(event.target.value as number);
+  };
   return (
-    <Container>
-      <Row>
-        <Col>
-          <Form.Select onChange={handleYearChange}>
-            <option value="" selected disabled>Jahr...</option>
-            <option value="1">2021</option>
-            <option value="2">2017</option>
-          </Form.Select>
-        </Col>
-        <Col>
-        {year &&
-          <Form.Select onChange={handlePartyChange} value={party?.id}>
-            <option value="" selected disabled>Partei...</option>
-            {parties.map(p =>
-              <option value={p.id} key={p.id}>{(p.kurzbezeichnung != '') ? p.kurzbezeichnung : p.name}</option>
-            )}
-          </Form.Select>
+    <>
+      <div style={{
+        alignContent: 'center',
+        justifyContent: 'center',
+        paddingTop: "50px",
+        paddingBottom: "50px",
+        display: "flex"
+      }}>
+        <Typography
+          fontWeight='600'
+          color='#343a40'
+          variant='h3'
+          component='h3'
+        >
+          Top knappste Siege
+        </Typography>
+
+      </div>
+
+      <div style={{
+        justifyContent: 'start',
+        paddingRight: ' 25px',
+        paddingTop: "5px",
+        paddingBottom: "40px",
+        display: "flex"
+      }}>
+        <FormControl sx={{ width: 120, margin: 4 }}>
+          <InputLabel id="demo-simple-select-label">Jahr</InputLabel>
+          <Select
+            value={year}
+            label="Jahr"
+            onChange={handleYearChange}
+          >
+            <MenuItem value="1">2021</MenuItem>
+            <MenuItem value="2">2017</MenuItem>
+          </Select>
+        </FormControl>
+
+
+        {year && <FormControl sx={{ width: 250, margin: 4 }}>
+            <InputLabel id="demo-simple-select-label">Partei</InputLabel>
+            <Select
+                value={party?.id || 0}
+                label="Partei"
+                onChange={handlePartyChange}
+                type='number'
+            >
+
+              {parties.map(r =>
+                <MenuItem value={r.id} key={r.id}>{( r.kurzbezeichnung != '' ) ? r.kurzbezeichnung : r.name}</MenuItem>
+              )}
+            </Select>
+        </FormControl>
         }
-        </Col>
-      </Row>
-      {year && party && <PerPartyResults party={party} year={year} />}
-    </Container>
+
+
+      </div>
+      {year && party && <PerPartyResults party={party} year={year}/>}
+    </>
   );
 }
 
@@ -62,32 +112,33 @@ export function PerPartyResults({ party, year }: PartyProps): JSX.Element {
   }, [party])
 
   return (
-    <Container className="mt-5">
-      <Row>
-        <div>
-          <h2> Top knappste {results[0] && results[0].siege ? 'Siege' : 'Besiegte'}</h2>
-        </div>
-      </Row>
-      <Table>
-        <thead>
-          <tr>
-            <th> Rank</th>
-            <th> Wahlkreise</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div style={{
+      alignContent: 'center',
+      justifyContent: 'center',
+      paddingRight: "50px",
+      paddingTop: "5px",
+      paddingBottom: "40px",
+      display: "flex"
+    }}>
+      <Table sx={{ width: 500 }}>
+        <TableHead>
+          <TableCell> Rank</TableCell>
+          <TableCell> Wahlkreise</TableCell>
+        </TableHead>
+        <TableBody>
           {
 
             results.map((d, i) =>
-              <tr key={i}>
-                <td>{d.rank}</td>
-                <td>{d.wahlkreis}</td>
-              </tr>
+              <TableRow key={i}>
+                <TableCell>{d.rank}</TableCell>
+                <TableCell>{d.wahlkreis}</TableCell>
+              </TableRow>
             )
           }
-        </tbody>
+        </TableBody>
       </Table>
-    </Container>
+    </div>
+
   );
 
 }

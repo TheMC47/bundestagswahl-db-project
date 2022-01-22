@@ -1,21 +1,26 @@
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { getSitzVerteilung } from '../api'
 import { useEffect, useState } from 'react';
 import { ElectionResult } from '../models'
-import Header from "./Header/header";
 
 import {
-  Box, Container,
   FormControl,
-  FormHelperText,
   Grid,
   InputLabel,
-  MenuItem, Paper,
+  MenuItem,
+  Paper,
   Select,
-  SelectChangeEvent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  SelectChangeEvent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography
 } from "@mui/material";
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface SeatDistributionProps {
@@ -33,33 +38,42 @@ export default function SeatDistribution(): JSX.Element {
     getSitzVerteilung().then(d => setData(d))
   }, [])
 
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setYear(+e.currentTarget.value)
-  }
-
-  const handleChange = (event: SelectChangeEvent<number>) => {
+  const handleYearChange = (event: SelectChangeEvent<number>) => {
     setYear(event.target.value as number);
   };
 
   return (
     <>
-      <div style={{alignContent: 'center', justifyContent: 'center', paddingTop: "50px", paddingBottom: "50px",  display: "flex"}}>
-      <Typography
-        fontWeight='600'
-        color = '#343a40'
-        variant='h3'
-        component='h3'
+      <div style={{
+        alignContent: 'center',
+        justifyContent: 'center',
+        paddingTop: "50px",
+        paddingBottom: "50px",
+        display: "flex"
+      }}>
+        <Typography
+          fontWeight='600'
+          color='#343a40'
+          variant='h3'
+          component='h3'
         >
-        Sitzverteilung
-      </Typography>
+          Sitzverteilung
+        </Typography>
       </div>
-      <div style={{alignContent: 'end', justifyContent: 'end',paddingRight: "50px", paddingTop: "5px", paddingBottom: "40px", display: "flex"}}>
+      <div style={{
+        alignContent: 'end',
+        justifyContent: 'end',
+        paddingRight: "50px",
+        paddingTop: "5px",
+        paddingBottom: "40px",
+        display: "flex"
+      }}>
         <FormControl sx={{ width: 120 }}>
           <InputLabel id="demo-simple-select-label">Jahr</InputLabel>
           <Select
             value={year}
             label="Jahr"
-            onChange={handleChange}
+            onChange={handleYearChange}
           >
             <MenuItem value="1">2021</MenuItem>
             <MenuItem value="2">2017</MenuItem>
@@ -67,39 +81,39 @@ export default function SeatDistribution(): JSX.Element {
         </FormControl>
       </div>
 
-      < div style={{flexGrow: 1}}>
+      < div style={{ flexGrow: 1 }}>
 
-      <Grid container spacing={50}  direction='row' justifyContent="center">
-        <Grid item  xs={6}>
-          <SeatDistributionChart year={year} data={data} />
+        <Grid container spacing={50} direction='row' justifyContent="center">
+          <Grid item xs={6}>
+            <SeatDistributionChart year={year} data={data}/>
+          </Grid>
+
+          <Grid item xs={4}>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 200 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">Partei</TableCell>
+                    <TableCell align="center">Anzahl Sitze</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {
+                    data.filter(d => d.wahl == year).map((row) => (
+                      <TableRow
+                        key={row.kurzbezeichnung}
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                      >
+                        <TableCell align="center">{row.kurzbezeichnung}</TableCell>
+                        <TableCell align="center">{row.sitze}</TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
         </Grid>
-
-  <Grid item xs={4}>
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 200 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell align="center">Partei</TableCell>
-            <TableCell align="center">Anzahl Sitze</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {
-            data.filter(d => d.wahl == year).map((row) => (
-              <TableRow
-                key={row.kurzbezeichnung}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell align="center">{row.kurzbezeichnung}</TableCell>
-                <TableCell align="center">{row.sitze}</TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Grid>
-      </Grid>
-     </div>
+      </div>
     </>
   );
 
@@ -156,7 +170,7 @@ export function SeatDistributionChart({ data, year }: SeatDistributionProps): JS
   };
 
   return (
-    <Doughnut data={chartData} options={options} />
+    <Doughnut data={chartData} options={options}/>
   )
 }
 
