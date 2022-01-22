@@ -15,7 +15,6 @@ import { Image } from "react-bootstrap";
 export default function LandingPage(): JSX.Element {
   return (
     <>
-    <Header />
     <div
       style={{
         width: '100%',

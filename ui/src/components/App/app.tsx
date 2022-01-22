@@ -18,6 +18,7 @@ import GewinnerView from "../GewinnerParteien";
 import KoalitionenView from "../Koalitionen";
 import { JoblessnessBarChart } from "../JoblessnessAnalysis";
 import UeberhangsmandateView from "../Ueberhangsmandate";
+import Abgeordnete from "../abgeordnete";
 
 
 
@@ -30,12 +31,13 @@ class App extends React.Component<unknown> {
       <Router>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <Header />
         <Routes>
           <Route path='/' element={<LandingPage />} />
           <Route path='/sitzverteilung' element={<SeatDistribution />} />
           <Route path='/knappste-sieger' element={<TightestWinnerView />} />
           <Route path='/wahlkreisuebersicht' element={<RegionView />} />
-          <Route path='/abgeordnete' element={<Deputies />} />
+          <Route path='/abgeordnete' element={<Abgeordnete />} />
           <Route path='/ueberhangsmandate' element={<UeberhangsmandateView />} />
           <Route path='/wahlkreissieger' element={<GewinnerView />} />
           <Route path='/koalitionen' element={<KoalitionenView />} />

@@ -46,6 +46,7 @@ export default function Header(): JSX.Element {
       }}
     >
       <Toolbar variant={ 'dense'}>
+        <div style = {{alignContent: "center" , display: "flex"}}>
         <Box
           component="img"
           sx={{
@@ -63,13 +64,12 @@ export default function Header(): JSX.Element {
           sx={{
             cursor: 'pointer',
             position: 'absolute',
-            left: '5.25%',
-            display: { xs: 'flex', md: 'flex' },
           }}
         >
 
           Bundestagswahl
         </Typography>
+        </div>
  <HeaderLarge />
       </Toolbar>
 

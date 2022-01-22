@@ -43,7 +43,6 @@ export default function SeatDistribution(): JSX.Element {
 
   return (
     <>
-      <Header />
       <div style={{alignContent: 'center', justifyContent: 'center', paddingTop: "50px", paddingBottom: "50px",  display: "flex"}}>
       <Typography
         fontWeight='600'
