@@ -9,50 +9,66 @@ export default function KoalitionenView(): JSX.Element {
 
 
   const [koalitionen, setKoalitionen] = useState<Koalition[]>([]);
+  const [seats, setSeats] = useState<ElectionResult[]>([]);
+
 
   useEffect(() => {
-    getKoalitionen().then((d) => setKoalitionen(d))
+    getKoalitionen().then((d) => {
+      setKoalitionen(d)
+      const newParties = d.map((k) => k.koalition).flat().filter(function (elem, index, self) {
+        return index === self.indexOf(elem);
+      })
+      getSitzVerteilung().then(d => setSeats(d.filter(res => res.wahl == 1).filter(s => newParties.indexOf(s.kurzbezeichnung) > -1)))
+
+    })
+
   }, [])
 
 
   return (
     <>
-    <div style={{alignContent: 'center', justifyContent: 'center', paddingTop: "50px", paddingBottom: "50px",  display: "flex"}}>
-      <Typography
-        fontWeight='600'
-        color = '#343a40'
-        variant='h3'
-        component='h3'
-      >
-        Mögliche Koalitionen
-      </Typography>
+      <div style={{
+        alignContent: 'center',
+        justifyContent: 'center',
+        paddingTop: "50px",
+        paddingBottom: "50px",
+        display: "flex"
+      }}>
+        <Typography
+          fontWeight='600'
+          color='#343a40'
+          variant='h3'
+          component='h3'
+        >
+          Mögliche Koalitionen
+        </Typography>
 
-    </div>
-      <Grid container spacing={30}  direction='row' justifyContent="center">
-        <Grid item  xs={4}>
+      </div>
+      <Grid container spacing={30} direction='row' justifyContent="center">
+        <Grid item xs={4}>
           <Table>
             <TableHead>
-              <TableCell > Koalition Nr </TableCell>
-              <TableCell > Parteien </TableCell>
-              <TableCell > Sitze </TableCell>
+              <TableCell> Koalition Nr </TableCell>
+              <TableCell> Parteien </TableCell>
+              <TableCell> Sitze </TableCell>
 
             </TableHead>
             <TableBody>
-            {
-              koalitionen.map((d, i) =>
-                <TableRow key={i}>
-                  <TableCell >{i + 1}</TableCell>
-                  <TableCell >{d.koalition.join(', ')}</TableCell>
-                  <TableCell >{d.sitze}</TableCell>
-                </TableRow>
-              )
-            }
+              {
+                koalitionen.map((d, i) =>
+                  <TableRow key={i}>
+                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>{d.koalition.join(', ')}</TableCell>
+                    <TableCell>{d.sitze}</TableCell>
+                  </TableRow>
+                )
+              }
             </TableBody>
           </Table>
         </Grid>
 
         <Grid item xs={7}>
-          <KoalitionenViewChart />
+          <KoalitionenViewChart koalitionen={koalitionen} seats={seats}/>
         </Grid>
       </Grid>
 
@@ -60,34 +76,15 @@ export default function KoalitionenView(): JSX.Element {
   );
 }
 
-interface DataSet {
-  label: string
-  dataset: number[]
-  backgroundColor: string
+interface ChartProps {
+  koalitionen: Koalition[];
+  seats: ElectionResult[];
 }
 
-export  function KoalitionenViewChart(): JSX.Element {
+export function KoalitionenViewChart({ koalitionen, seats }: ChartProps): JSX.Element {
 
 
-  const [koalitionen, setKoalitionen] = useState<Koalition[]>([]);
-  const [seats, setSeats] = useState<ElectionResult[]>([]);
-  const [parties, setParties] = useState<string[]>([]);
-
-  useEffect(() => {
-    getKoalitionen().then((d) => {
-      setKoalitionen(d)
-      setParties(d.map((k) => k.koalition).flat().filter(function(elem, index, self) {
-        return index === self.indexOf(elem);
-      }))
-    })
-  }, [])
-
-  useEffect(() => {
-    getSitzVerteilung().then(d => setSeats(d.filter(res => res.wahl == 1).filter(s => parties.indexOf(s.kurzbezeichnung) > -1)))
-  }, [])
-
-
-  const title ="Koalitionen"
+  const title = "Koalitionen"
   const options = {
     scales: {
       x: {
@@ -127,14 +124,18 @@ export  function KoalitionenViewChart(): JSX.Element {
 
 
   const barData = {
-    labels: koalitionen.map((d, index) => "koalition " + ( index + 1)  as string ),
+    labels: koalitionen.map((d, index) => "koalition " + ( index + 1 ) as string),
     datasets: seats.map(p => (
-        { label: p.kurzbezeichnung,  data:  koalitionen.map(k => k.koalition.indexOf(p.kurzbezeichnung) > -1 ? p.sitze : 0 ) , backgroundColor: colorMap[p.kurzbezeichnung] }
+        {
+          label: p.kurzbezeichnung,
+          data: koalitionen.map(k => k.koalition.indexOf(p.kurzbezeichnung) > -1 ? p.sitze : 0),
+          backgroundColor: colorMap[p.kurzbezeichnung]
+        }
       )
     )
   };
 
   return (
-    <Bar data={barData} options={options} />
+    <Bar data={barData} options={options}/>
   );
 }
