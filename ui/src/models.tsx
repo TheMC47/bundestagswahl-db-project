@@ -15,6 +15,7 @@ export interface TightestWinner {
   wahlkreis: string;
   rank: number;
   siege: boolean;
+  vorsprung: number;
 }
 
 export interface ElectionRegionResult {
@@ -56,6 +57,7 @@ export interface JoblessnessDistricts {
   rank: number;
 
 }
+
 export interface JoblessnessSummary {
   ideologie: string;
   bundesland: string;
@@ -126,10 +128,10 @@ export interface Landesliste {
 }
 
 
-export interface  Wahlkreis {
-  id         : number;
-  name       : string;
-  bundesland : number;
+export interface Wahlkreis {
+  id: number;
+  name: string;
+  bundesland: number;
   arbeitslosenquote: number;
 }
 

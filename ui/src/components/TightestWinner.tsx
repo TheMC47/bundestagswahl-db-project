@@ -124,6 +124,7 @@ export function PerPartyResults({ party, year }: PartyProps): JSX.Element {
         <TableHead>
           <TableCell> Rank</TableCell>
           <TableCell> Wahlkreise</TableCell>
+          <TableCell> Differenz</TableCell>
         </TableHead>
         <TableBody>
           {
@@ -132,6 +133,11 @@ export function PerPartyResults({ party, year }: PartyProps): JSX.Element {
               <TableRow key={i}>
                 <TableCell>{d.rank}</TableCell>
                 <TableCell>{d.wahlkreis}</TableCell>
+                <TableCell>
+                  <Typography sx={{ color: d.siege ? 'rgb(0,118,0)' : '#cc0000' }}>
+                    {( d.siege ? '+' : '-' ) + d.vorsprung}
+                  </Typography></TableCell>
+
               </TableRow>
             )
           }
