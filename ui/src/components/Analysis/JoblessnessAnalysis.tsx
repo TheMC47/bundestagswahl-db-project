@@ -1,18 +1,18 @@
 import { Bar } from 'react-chartjs-2';
-import { JoblessnessDistricts, JoblessnessSummary } from '../models';
+import { JoblessnessDistricts, JoblessnessSummary } from '../../models';
 import { useEffect, useState } from 'react';
-import { getDistricts, getJoblessnessAnalysis } from '../api';
+import { getDistricts, getJoblessnessAnalysis } from '../../api';
 
 import {
+  BarController,
+  BarElement,
+  CategoryScale,
   Chart,
+  LinearScale,
   LineController,
   LineElement,
   PointElement,
-  LinearScale,
-  Title,
-  CategoryScale,
-  BarController,
-  BarElement
+  Title
 } from 'chart.js';
 import { Grid, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 
@@ -48,10 +48,16 @@ export function JoblessnessBarChart(): JSX.Element {
 
   return (
     <>
-      <div style={{alignContent: 'center', justifyContent: 'center', paddingTop: "50px", paddingBottom: "50px",  display: "flex"}}>
+      <div style={{
+        alignContent: 'center',
+        justifyContent: 'center',
+        paddingTop: "50px",
+        paddingBottom: "50px",
+        display: "flex"
+      }}>
         <Typography
           fontWeight='600'
-          color = '#343a40'
+          color='#343a40'
           variant='h3'
           component='h3'
         >
@@ -61,24 +67,24 @@ export function JoblessnessBarChart(): JSX.Element {
       </div>
 
 
-      <Grid container spacing={30}  direction='row' justifyContent="center">
-        <Grid item  xs={4}>
+      <Grid container spacing={30} direction='row' justifyContent="center">
+        <Grid item xs={4}>
           <Table>
             <TableHead>
-              <TableCell > Rank nack Arbeitslosigkeitquote </TableCell>
-              <TableCell > Bundesland </TableCell>
-              <TableCell > Linke </TableCell>
-              <TableCell > Rechte </TableCell>
+              <TableCell> Rank nack Arbeitslosigkeitquote </TableCell>
+              <TableCell> Bundesland </TableCell>
+              <TableCell> Linke </TableCell>
+              <TableCell> Rechte </TableCell>
 
             </TableHead>
             <TableBody>
               {
                 districts.map((d, i) =>
                   <TableRow key={i}>
-                    <TableCell >{d.rank}</TableCell>
-                    <TableCell >{d.land}</TableCell>
-                    <TableCell >{(dataLinks[i]?.anzahlstimmen * 100).toFixed( 2)|| 0}</TableCell>
-                    <TableCell >{(dataRechts[i]?.anzahlstimmen * 100).toFixed( 2)|| 0}</TableCell>
+                    <TableCell>{d.rank}</TableCell>
+                    <TableCell>{d.land}</TableCell>
+                    <TableCell>{( dataLinks[i]?.anzahlstimmen * 100 ).toFixed(2) || 0}</TableCell>
+                    <TableCell>{( dataRechts[i]?.anzahlstimmen * 100 ).toFixed(2) || 0}</TableCell>
 
                   </TableRow>
                 )
@@ -88,7 +94,7 @@ export function JoblessnessBarChart(): JSX.Element {
         </Grid>
 
         <Grid item xs={7}>
-          <JoblessnessAnalysis dataLinks={dataLinks} dataRechts={dataRechts} districts={districts} />
+          <JoblessnessAnalysis dataLinks={dataLinks} dataRechts={dataRechts} districts={districts}/>
         </Grid>
       </Grid>
 
@@ -142,7 +148,7 @@ export function JoblessnessAnalysis({ dataLinks, dataRechts, districts }: jobles
   };
 
   return (
-    <Bar data={barData} options={options} />
+    <Bar data={barData} options={options}/>
   )
 
 }

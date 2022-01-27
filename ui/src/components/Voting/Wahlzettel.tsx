@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Direktkandidat, Landesliste } from '../models'
-import {
-  getbundesland,
-  getStimmzettel_Erststimme,
-  getStimmzettel_Zweitstimme,
-} from '../api'
+import { Direktkandidat, Landesliste } from '../../models'
+import { getbundesland, getStimmzettel_Erststimme, getStimmzettel_Zweitstimme, submitVote, } from '../../api'
 import { Alert, Container, Form } from 'react-bootstrap'
 import jwt_decode from 'jwt-decode'
-import { submitVote } from '../api'
 
 export interface ErststimmeZettelProps {
   wahlkreis: number
@@ -30,6 +25,7 @@ interface ZweitstimmeErgebnisse {
   landesliste: Landesliste
   checked: boolean
 }
+
 interface WahlzettelProps {
   token: string | null
   setToken: (token: string | undefined) => void
@@ -124,7 +120,7 @@ export default function Wahlzettel({
               </div>
             </div>
             <div className='row'>
-              <div className='col-6 d-flex justify-content-end' />
+              <div className='col-6 d-flex justify-content-end'/>
 
               <div className='col-6 d-flex justify-content-lg-start text-primary'>
                 - maßgebende Stimme für die Verteilung der Sitze insgesamt auf
@@ -212,29 +208,28 @@ function Erststimme({
   return (
     <table className='table table-bordered table-hover'>
       <tbody className='text-secondary'>
-        {direktkandidaten.map(d => (
-          <tr key={d.direktkandidat.rank}>
-            <th scope='row'>{d.direktkandidat.rank}</th>
-            <td className='d-block'>
-              <div className='d-flex justify-content-start '>
-                <div className='d-block '>
-                  <h5 className='d-flex'>
-                    {d.direktkandidat.kandidat_vorname +
-                      ' ' +
-                      d.direktkandidat.kandidat_nachname}
-                  </h5>
-                  <p className='d-flex '> {d.direktkandidat.kandidat_beruf}</p>
-                </div>
+      {direktkandidaten.map(d => (
+        <tr key={d.direktkandidat.rank}>
+          <th scope='row'>{d.direktkandidat.rank}</th>
+          <td className='d-block'>
+            <div className='d-flex justify-content-start '>
+              <div className='d-block '>
+                <h5 className='d-flex'>
+                  {d.direktkandidat.kandidat_vorname +
+                  ' ' +
+                  d.direktkandidat.kandidat_nachname}
+                </h5>
+                <p className='d-flex '> {d.direktkandidat.kandidat_beruf}</p>
               </div>
-              <div className='d-flex justify-content-end'>
-                <div className='d-block'>
-                  <h5 className='d-flex justify-content-start '>
-                    {d.direktkandidat.partei_abk}
-                  </h5>
-                  <p className='d-flex justify-content-start'>
-                    {d.direktkandidat.partei_name}
-                  </p>
-                </div>
+            </div>
+            <div className='d-flex justify-content-end'>
+              <div className='d-block'>
+                <h5 className='d-flex justify-content-start '>
+                  {d.direktkandidat.partei_abk}
+                </h5>
+                <p className='d-flex justify-content-start'>
+                  {d.direktkandidat.partei_name}
+                </p>
               </div>
             </td>
             <td>
@@ -295,20 +290,21 @@ function Zweitstimme({
                   </h5>
                 </div>
               </div>
-              <div className='d-flex justify-content-end'>
-                <div className='d-block'>
-                  <h5 className='d-flex justify-content-start '>
-                    {d.landesliste.partei_name}
-                  </h5>
-                  <p className='d-flex justify-content-start'>
-                    {d.landesliste.kandidaten}
-                  </p>
-                </div>
+            </div>
+            <div className='d-flex justify-content-end'>
+              <div className='d-block'>
+                <h5 className='d-flex justify-content-start '>
+                  {d.landesliste.partei_name}
+                </h5>
+                <p className='d-flex justify-content-start'>
+                  {d.landesliste.kandidaten}
+                </p>
               </div>
-            </td>
-            <th scope='row'>{d.landesliste.rank}</th>
-          </tr>
-        ))}
+            </div>
+          </td>
+          <th scope='row'>{d.landesliste.rank}</th>
+        </tr>
+      ))}
       </tbody>
     </table>
   )

@@ -1,8 +1,8 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-import { getSitzVerteilung } from '../api'
+import { getSitzVerteilung } from '../../api'
 import { useEffect, useState } from 'react';
-import { ElectionResult } from '../models'
+import { ElectionResult } from '../../models'
 
 import {
   FormControl,

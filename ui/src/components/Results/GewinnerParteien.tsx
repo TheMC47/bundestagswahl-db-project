@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ParteiGewinner, State } from '../models'
-import { getGewinner } from '../api'
+import { ParteiGewinner, State } from '../../models'
+import { getGewinner } from '../../api'
 import { Table } from 'react-bootstrap';
 
 

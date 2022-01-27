@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ElectionResult, Koalition, } from '../models'
-import { getKoalitionen, getSitzVerteilung } from '../api'
+import { ElectionResult, Koalition, } from '../../models'
+import { getKoalitionen, getSitzVerteilung } from '../../api'
 import { Bar } from "react-chartjs-2";
 import { Grid, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 

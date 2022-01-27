@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Party, TightestWinner } from '../models'
-import { getParties, getTightestWinner } from '../api'
+import { Party, TightestWinner } from '../../models'
+import { getParties, getTightestWinner } from '../../api'
 import {
   FormControl,
   InputLabel,

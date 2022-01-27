@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ElectionRegionResult, Region, RegionSummary, State } from '../models'
-import { getRegionSummary, getResults, getStateResults, getStatesAndRegions } from '../api'
+import { ElectionRegionResult, Region, RegionSummary, State } from '../../models'
+import { getRegionSummary, getResults, getStateResults, getStatesAndRegions } from '../../api'
 import { Col, Row, Table } from 'react-bootstrap';
 import {
   Box,

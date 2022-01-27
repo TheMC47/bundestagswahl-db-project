@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Ueberhangsmandate } from '../models'
-import { getUeberhangsmandate } from '../api';
+import { Ueberhangsmandate } from '../../models'
+import { getUeberhangsmandate } from '../../api';
 import {
   FormControl,
   InputLabel,

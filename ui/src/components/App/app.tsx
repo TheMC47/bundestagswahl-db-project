@@ -4,15 +4,15 @@ import './style.css'
 import theme from './theme'
 import React from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
-import Header from "../Header/header";
-import LandingPage from "../Header/home";
-import SeatDistribution from '../SeatDistribution'
-import RegionView from "../RegionView";
-import TightestWinnerView from "../TightestWinner";
-import KoalitionenView from "../Koalitionen";
-import { JoblessnessBarChart } from "../JoblessnessAnalysis";
-import UeberhangsmandateView from "../Ueberhangsmandate";
-import Abgeordnete from "../abgeordnete";
+import Header from "../Header/Header";
+import LandingPage from "../Header/Home";
+import SeatDistribution from '../Results/SeatDistribution'
+import RegionView from "../Results/RegionView";
+import TightestWinnerView from "../Analysis/TightestWinner";
+import KoalitionenView from "../Analysis/Coalitions";
+import { JoblessnessBarChart } from "../Analysis/JoblessnessAnalysis";
+import UeberhangsmandateView from "../Analysis/Ueberhangsmandate";
+import Abgeordnete from "../Results/abgeordnete";
 
 
 class App extends React.Component<unknown> {

@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Container, Button, Form, Alert } from 'react-bootstrap'
+import { Alert, Button, Container, Form } from 'react-bootstrap'
 import validate from 'uuid-validate'
-import { login } from '../api'
+import { login } from '../../api'
 
 type ErrorState = { [index in 'helfer' | 'key']: boolean }
 type FormValues = { [index in 'helfer' | 'key']?: string }
-
 
 
 export function HelperLogin(props: {
@@ -50,7 +49,7 @@ export function HelperLogin(props: {
         setMessage('Aktivierung erfolgreich. Sie werden in Kürze umgeleitet.')
         setResult('success')
         props.setToken(resp.token)
-        setTimeout(() => (window.location.href = '/stimmabgabe'), 3000)
+        setTimeout(() => ( window.location.href = '/stimmabgabe' ), 3000)
       })
       .catch(([err, _status]) => {
         setMessage(err.message)
