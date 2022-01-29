@@ -281,6 +281,8 @@ export function Voting() {
         variant='text'
         id="composition-button"
         aria-haspopup="true"
+        component={Link}
+        to="/stimmabgabe"
       >
         Stimmabgabe
       </Button>

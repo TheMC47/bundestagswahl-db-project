@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Direktkandidat, Landesliste } from '../../models'
 import { getbundesland, getStimmzettel_Erststimme, getStimmzettel_Zweitstimme, submitVote, } from '../../api'
-import { Alert, Container, Form } from 'react-bootstrap'
+import { Container, Form } from 'react-bootstrap'
 import jwt_decode from 'jwt-decode'
+import { Alert, AlertTitle } from "@mui/material";
 
 export interface ErststimmeZettelProps {
   wahlkreis: number
@@ -43,9 +44,19 @@ export default function Wahlzettel({
 }: WahlzettelProps): JSX.Element {
   if (!token)
     return (
-      <Alert variant='danger'>
-        Die Machine ist nicht <a href='/login'>aktiviert </a>.
-      </Alert>
+      <div style={{
+        alignContent: 'center',
+        justifyContent: 'center',
+        padding: "50px",
+
+      }}>
+        <Alert severity="error"
+        >
+          <AlertTitle>Achtung</AlertTitle>
+
+          Diese Machine wurde noch nicht <a href='/login'>aktiviert. </a>.
+        </Alert>
+      </div>
     )
 
   const [bundesland, setBundesland] = useState<number | undefined>(undefined)
@@ -56,7 +67,7 @@ export default function Wahlzettel({
   const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([])
   const [key, setkey] = useState<string>('')
   const [message, setMessage] = useState<string | undefined>(undefined)
-  const [result, setResult] = useState<'success' | 'danger'>('success')
+  const [result, setResult] = useState<'success' | 'error'>('success')
 
   useEffect(() => {
     getbundesland(wahlkreis).then(d => {
@@ -177,16 +188,14 @@ export default function Wahlzettel({
                   })
                   .catch(([err, status]) => {
                     if (status == 401) {
-                      setMessage(
-                        'Die Sitzung ist abgelaufen. Sie werden umgeleitet.'
-                      )
-                      setResult('danger')
+                      setMessage('Die Sitzung ist abgelaufen. Sie werden umgeleitet.')
+                      setResult('error')
                       setToken(undefined)
                       setTimeout(() => (window.location.href = '/login'), 3000)
                       return
                     }
                     setMessage(err.message)
-                    setResult('danger')
+                    setResult('error')
                   })
               }}
             >
@@ -196,7 +205,7 @@ export default function Wahlzettel({
         </div>
       )}
 
-      {message && <Alert variant={result}> {message} </Alert>}
+      {message && <Alert severity={result}> {message} </Alert>}
     </Container>
   )
 }

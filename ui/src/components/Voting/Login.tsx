@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Alert, Button, Container, Form } from 'react-bootstrap'
 import validate from 'uuid-validate'
 import { login } from '../../api'
+import { Alert, Box, Button, Grid, TextField } from "@mui/material";
 
 type ErrorState = { [index in 'helfer' | 'key']: boolean }
 type FormValues = { [index in 'helfer' | 'key']?: string }
@@ -16,7 +16,7 @@ export function HelperLogin(props: {
     key: false,
   })
   const [message, setMessage] = useState<string | undefined>(undefined)
-  const [result, setResult] = useState<'success' | 'danger'>('success')
+  const [result, setResult] = useState<'success' | 'error'>('success')
   const [disabled, setDisabled] = useState<boolean>(false)
 
   const updateField = (field: string, value: string) => {
@@ -53,43 +53,72 @@ export function HelperLogin(props: {
       })
       .catch(([err, _status]) => {
         setMessage(err.message)
-        setResult('danger')
+        setResult('error')
         setDisabled(false)
       })
   }
 
   return (
-    <Container className='w-50'>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className='mb-3'>
-          <Form.Label>Helferkennung</Form.Label>
-          <Form.Control
-            isInvalid={errors.helfer}
-            placeholder='Kennung'
-            onChange={e => updateField('helfer', e.target.value)}
-          />
-        </Form.Group>
-        <Form.Group className='mb-3'>
-          <Form.Label>Aktivierungsschlüssel</Form.Label>
-          <Form.Control
-            placeholder='Schlüssel'
-            isInvalid={errors.key}
-            onChange={e => updateField('key', e.target.value)}
-          />
-          <Form.Text className='text-muted'>
-            Sitzung wird für zwei Stunden aktiviert
-          </Form.Text>
-        </Form.Group>
-        <Button
-          disabled={isDisabled()}
-          variant='primary'
-          type='submit'
-          className='mb-3'
+
+    <Grid
+      container
+      spacing={0}
+      direction="column"
+      alignItems="center"
+      justifyContent="center"
+      style={{ minHeight: '50vh' }}
+    >
+      <Alert severity="info">
+        Geben Sie Ihre 36-stellige Kennung sowie Ihre Aktivierungsschlüssel ein.
+        Ihre Sitzung wird für <strong> zwei Stunden </strong> aktiviert.
+      </Alert>
+      <Grid item xs={3}>
+
+
+        <Box
+          component="form"
+          sx={{
+            '& .MuiTextField-root': { m: 2, width: '30ch' },
+          }}
+          autoComplete="off"
+
+
         >
-          Aktivieren
-        </Button>
-      </Form>
-      {message && <Alert variant={result}> {message} </Alert>}
-    </Container>
+          <div>
+            <TextField
+              error={errors.helfer}
+              label='Helferkennung'
+              onChange={e => updateField('helfer', e.target.value)}
+              variant="filled"
+            />
+          </div>
+          <div>
+            <TextField
+              label='Aktivierungsschlüssel'
+              error={errors.key}
+              onChange={e => updateField('key', e.target.value)}
+              variant="filled"
+
+            />
+          </div>
+          <div style={{ paddingTop: 50 }}>
+            <Button
+              disabled={isDisabled()}
+              type='submit'
+              className='mb-3'
+              onClick={handleSubmit}
+              variant="contained"
+              fullWidth={true}
+            >
+              Aktivieren
+            </Button>
+          </div>
+          {
+            message && <Alert severity={result}> {message} </Alert>
+          }
+        </Box>
+      </Grid>
+
+    </Grid>
   )
 }
