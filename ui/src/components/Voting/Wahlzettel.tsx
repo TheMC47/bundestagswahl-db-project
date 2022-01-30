@@ -104,8 +104,11 @@ export default function Wahlzettel({
             />
           </Form.Group>
           <div>
-            <h1 className='mb-5'>
-              Sie haben <strong> 2 </strong> Stimmen
+            <h1 className='col-12 d-flex justify-content-center'>
+              <p>
+                Sie haben
+                <span><strong> 2 </strong> </span>
+                Stimmen </p>
             </h1>
             <div className='row'>
               <div className='col-6 d-flex justify-content-end text-secondary'>

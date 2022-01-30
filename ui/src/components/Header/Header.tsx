@@ -30,30 +30,29 @@ export default function Header(): JSX.Element {
       }}
     >
       <Toolbar variant={'dense'}>
-        <div style={{ alignContent: "center", display: "flex" }}>
-          <Box
-            component="img"
-            sx={{
-              height: 64,
-            }}
-            alt="Your logo."
-            src={logo}
-          />
-          <Typography
-            variant='h6'
-            noWrap
-            component='div'
-            color='primary'
-            onClick={() => ( document.location = '/' )}
-            sx={{
-              cursor: 'pointer',
-              position: 'absolute',
-            }}
-          >
+        <Box
+          component="img"
+          sx={{
+            height: 64,
+          }}
+          alt="Your logo."
+          src={logo}
+        />
+        <Typography
+          variant='h6'
+          noWrap
+          component='div'
+          color='primary'
+          onClick={() => ( document.location = '/' )}
+          sx={{
+            cursor: 'pointer',
+            position: 'absolute',
+            paddingLeft: '68px'
+          }}
+        >
 
-            Bundestagswahl
-          </Typography>
-        </div>
+          Bundestagswahl
+        </Typography>
         <HeaderLarge/>
       </Toolbar>
 
@@ -283,6 +282,11 @@ export function Voting() {
         aria-haspopup="true"
         component={Link}
         to="/stimmabgabe"
+        sx={{
+          ':hover': {
+            color: 'white',
+          },
+        }}
       >
         Stimmabgabe
       </Button>
