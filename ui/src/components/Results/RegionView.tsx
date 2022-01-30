@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ElectionRegionResult, Region, RegionSummary, State } from '../../models'
 import { getRegionSummary, getResults, getStateResults, getStatesAndRegions } from '../../api'
-import { Col, Row, Table } from 'react-bootstrap';
+import { Table } from 'react-bootstrap';
 import {
   Box,
   FormControl,
@@ -12,6 +12,7 @@ import {
   Tab,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Tabs,
@@ -31,7 +32,7 @@ export default function RegionView(): JSX.Element {
   const [state, setState] = useState<State | undefined>();
   const [region, setRegion] = useState<Region | undefined>();
 
-  const [value, setValue] = useState('1');
+  const [value, setValue] = useState('0');
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -45,6 +46,7 @@ export default function RegionView(): JSX.Element {
   const handleStateChange = (e: SelectChangeEvent<number>) => {
     const newState = statesAndRegions.find((s) => s.id == e.target.value)
     setState(newState)
+    setRegion(undefined)
 
   }
 
@@ -89,7 +91,6 @@ export default function RegionView(): JSX.Element {
             onChange={handleStateChange}
             type='number'
           >
-
             {statesAndRegions.map((s) =>
               <MenuItem value={s.id} key={s.id}>{s.name}</MenuItem>
             )}
@@ -123,8 +124,14 @@ export default function RegionView(): JSX.Element {
           </Tabs>
         </Box>
         <TabPanel value="0">
-
-          <div style={{ justifyContent: 'center', alignContent: "center", paddingBottom: "40px", display: "flex" }}>
+          <div style={{
+            width: "1000px",
+            alignItems: "center",
+            justifyContent: 'center',
+            marginLeft: "auto",
+            marginRight: "auto",
+            display: "flex"
+          }}>
             {state && !region && <GewinnerTable bundesland={state}/>}
             {region && <RegionSummaryView region={region}/>}
           </div>
@@ -132,7 +139,15 @@ export default function RegionView(): JSX.Element {
         </TabPanel>
 
         <TabPanel value="1">
-          <div style={{ width: "1000px", height: "600px", justifyContent: 'center', display: "flex" }}>
+          <div style={{
+            width: "1000px",
+            height: "550px",
+            alignItems: "center",
+            justifyContent: 'center',
+            marginLeft: "auto",
+            marginRight: "auto",
+            display: "flex"
+          }}>
             {region &&
             <ErststimmeProWkr region={region}/>}
             {state && !region && <ErststimmeProBundesland state={state}/>
@@ -141,16 +156,30 @@ export default function RegionView(): JSX.Element {
 
         </TabPanel>
         <TabPanel value="2">
-          <div style={{ width: "1000px", height: "600px", justifyContent: 'center', display: "flex" }}>
+          <div style={{
+            width: "1000px",
+            height: "550px",
+            alignItems: "center",
+            justifyContent: 'center',
+            marginLeft: "auto",
+            marginRight: "auto",
+            display: "flex"
+          }}>
             {state && !region && <ZweitstimmeProBundesland state={state}/>}
 
             {region && <ZweitstimmeProWkr region={region}/>}
-
-
           </div>
+
         </TabPanel>
         <TabPanel value="3">
-          <div style={{ justifyContent: 'center', alignContent: "center", display: "flex" }}>
+          <div style={{
+            width: "1000px",
+            alignItems: "center",
+            justifyContent: 'center',
+            marginLeft: "auto",
+            marginRight: "auto",
+            display: "flex"
+          }}>
             {region && <PerPartyResults region={region}/>}
           </div>
         </TabPanel>
@@ -366,15 +395,27 @@ export function RegionSummaryView({ region }: RegionProps): JSX.Element {
   }, [region])
 
   return (
-    <Row>
-      <Col>
-        <strong>Wahlbeteiligung:</strong> {regionSummary?.wahlbeteiligung}%
-      </Col>
-      <Col>
-        <strong>Gewinner:</strong> {regionSummary?.gewinner} ({regionSummary?.sieger_partei})
-      </Col>
+    <TableContainer sx={{ width: "500px" }}>
+      <TableRow>
 
-    </Row>
+        <TableCell><strong> Gewählt im Wahlkreis </strong> </TableCell>
+        <TableCell> {regionSummary?.gewinner} </TableCell>
+      </ TableRow>
+      <TableRow>
+        <TableCell><strong> Partei</strong> </TableCell>
+        <TableCell> {regionSummary?.sieger_partei} </TableCell>
+      </ TableRow>
+      <TableRow>
+        <TableCell><strong> Anteil</strong> </TableCell>
+        <TableCell> %</TableCell>
+      </ TableRow>
+      <TableRow>
+        <TableCell><strong>Wahlbeteiligung:</strong> </TableCell>
+        <TableCell> {regionSummary?.wahlbeteiligung}% </TableCell>
+      </ TableRow>
+
+
+    </TableContainer>
   );
 }
 
