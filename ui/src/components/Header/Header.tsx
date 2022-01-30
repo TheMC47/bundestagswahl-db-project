@@ -42,7 +42,7 @@ export default function Header(): JSX.Element {
           variant='h6'
           noWrap
           component='div'
-          color='primary'
+          color='#e0e0e0'
           onClick={() => ( document.location = '/' )}
           sx={{
             cursor: 'pointer',
@@ -133,6 +133,7 @@ export function MenuAnalysis() {
         aria-expanded={open ? 'true' : undefined}
         aria-haspopup="true"
         onClick={handleToggle}
+        sx={{ color: '#e0e0e0' }}
       >
         Anaylse
       </Button>
@@ -162,7 +163,6 @@ export function MenuAnalysis() {
                 >
                   <MenuItem component={Link} to="/knappste-sieger">Knappste Sieger</MenuItem>
                   <MenuItem component={Link} to="/ueberhangsmandate">Überhangsmandate</MenuItem>
-                  <MenuItem component={Link} to="/wahlkreissieger">Wahlkreissieger</MenuItem>
                   <Divider sx={{ my: 0.5 }}/>
                   <MenuItem component={Link} to="/koalitionen">Koalitionen</MenuItem>
                   <MenuItem component={Link} to="/arbeitslosigkeit"> Arbeitslosigkeit und ideologische
@@ -229,6 +229,7 @@ export function MenuResults() {
         aria-expanded={open ? 'true' : undefined}
         aria-haspopup="true"
         onClick={handleToggle}
+        sx={{ color: '#e0e0e0' }}
       >
         Ergebnisse
       </Button>
@@ -283,8 +284,9 @@ export function Voting() {
         component={Link}
         to="/stimmabgabe"
         sx={{
+          color: '#e0e0e0',
           ':hover': {
-            color: 'white',
+            color: '#e0e0e0',
           },
         }}
       >

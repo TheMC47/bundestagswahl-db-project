@@ -78,10 +78,10 @@ const defaultTheme = responsiveFontSizes(
     palette: {
       mode: 'light',
       primary: {
-        main: '#e0e0e0',
+        main: '#999999',
       },
       secondary: {
-        main: '#C7D2FE',
+        main: '#000000',
       },
       success: {
         main: '#2DD881',

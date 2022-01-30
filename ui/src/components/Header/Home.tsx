@@ -1,4 +1,4 @@
-import { Paper, Stack, Typography, } from '@mui/material'
+import { Paper, Stack, } from '@mui/material'
 import re from './assets/f2.svg'
 
 
@@ -16,19 +16,6 @@ export default function LandingPage(): JSX.Element {
       >
         <div style={{ alignContent: 'center', justifyContent: 'center', display: "flex", height: 520 }}>
 
-          <Typography
-            fontWeight='600'
-            color='#D3D3D3'
-            align='center'
-            justifySelf='center'
-            variant='h2'
-            component='h2'
-            sx={{ paddingTop: 20 }}
-          >
-            Yecine Megdiche
-            &
-            Maisa Ben Salah
-          </Typography>
 
         </div>
 
