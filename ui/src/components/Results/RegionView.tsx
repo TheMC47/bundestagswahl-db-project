@@ -120,7 +120,7 @@ export default function RegionView(): JSX.Element {
             <Tab label="Sieger" value="0"/>
             <Tab label="Erststimmenanteile" value="1"/>
             <Tab label="Zweitstimmenanteile" value="2"/>
-            <Tab label="Ergebnistabelle" value="3"/>
+            {region && <Tab label="Ergebnistabelle" value="3"/>}
           </Tabs>
         </Box>
         <TabPanel value="0">
@@ -171,18 +171,20 @@ export default function RegionView(): JSX.Element {
           </div>
 
         </TabPanel>
+        {region &&
         <TabPanel value="3">
-          <div style={{
-            width: "1000px",
-            alignItems: "center",
-            justifyContent: 'center',
-            marginLeft: "auto",
-            marginRight: "auto",
-            display: "flex"
-          }}>
-            {region && <PerPartyResults region={region}/>}
-          </div>
+            <div style={{
+              width: "1000px",
+              alignItems: "center",
+              justifyContent: 'center',
+              marginLeft: "auto",
+              marginRight: "auto",
+              display: "flex"
+            }}>
+                <PerPartyResults region={region}/>
+            </div>
         </TabPanel>
+        }
       </TabContext>
 
     </>
