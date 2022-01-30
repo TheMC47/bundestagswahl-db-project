@@ -1,3 +1,4 @@
+import 'bootstrap/dist/css/bootstrap.min.css'
 import { useEffect, useState } from 'react'
 import { Direktkandidat, Landesliste } from '../../models'
 import { getbundesland, getStimmzettel_Erststimme, getStimmzettel_Zweitstimme, submitVote, } from '../../api'
