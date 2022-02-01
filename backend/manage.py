@@ -52,7 +52,6 @@ def with_logging(generating):
 
 @with_logging("voters")
 def generate_voters(db: Transaction, wkdaten: Wahlkreisdaten):
-    # 2. Generate voters
 
     voted = f"""
         INSERT INTO waehler(wahl, wahlkreis,hat_abgestimmt) (
@@ -83,22 +82,19 @@ def generate_first_votes(db: Transaction, wkdaten: Wahlkreisdaten):
     first_vote_res = db.run_query(query)
 
     for tup in first_vote_res:
-        first_votesq = f"""
-        INSERT INTO erststimmen(direktkandidat, wahlkreis) (
-            SELECT {tup[1]}, {wkdaten.pk}
-            FROM generate_series(1, {tup[2]})
+        db.insert_bulk(
+            "erststimmen",
+            ["direktkandidat", "wahlkreis"],
+            (tup[1], wkdaten.pk),
+            tup[2],
         )
-        """
 
-        db.run_query(first_votesq, fetch=False)
-
-    invalid_first_votesq = f"""
-    INSERT INTO erststimmen(direktkandidat, wahlkreis) (
-        SELECT NULL, {wkdaten.pk}
-        FROM generate_series(1, {wkdaten.ungueltig_erste_stimme})
+    db.insert_bulk(
+        "erststimmen",
+        ["direktkandidat", "wahlkreis"],
+        (None, wkdaten.pk),
+        wkdaten.ungueltig_erste_stimme,
     )
-    """
-    db.run_query(invalid_first_votesq, fetch=False)
 
 
 @with_logging("second votes")
@@ -112,21 +108,19 @@ def generate_second_votes(db: Transaction, wkdaten: Wahlkreisdaten):
     second_vote_res = db.run_query(query)
 
     for tup in second_vote_res:
-        second_votesq = f"""
-        INSERT INTO zweitstimmen(landesliste, wahlkreis) (
-            SELECT {tup[1]}, {tup[3]}
-            FROM generate_series(1, {tup[2]})
+        db.insert_bulk(
+            "zweitstimmen",
+            ["landesliste", "wahlkreis"],
+            (tup[1], tup[3]),
+            tup[2],
         )
-        """
-        db.run_query(second_votesq, fetch=False)
 
-    invalid_second_votesq = f"""
-    INSERT INTO zweitstimmen(landesliste, wahlkreis) (
-        SELECT NULL, {wkdaten.pk}
-        FROM generate_series(1, {wkdaten.ungueltig_zweite_stimme})
+    db.insert_bulk(
+        "zweitstimmen",
+        ["landesliste", "wahlkreis"],
+        (None, wkdaten.pk),
+        wkdaten.ungueltig_zweite_stimme,
     )
-    """
-    db.run_query(invalid_second_votesq, fetch=False)
 
 
 def error(msg: str, panic: bool = False):
@@ -142,6 +136,7 @@ def generate_wahlkreis(
     wk: int,
     year: int,
     panic: bool = False,
+    voters: bool = False,
 ):
     print(f"Processing: {wk}")
     wahlid = 1 if year == 2021 else 2
@@ -163,40 +158,125 @@ def generate_wahlkreis(
     wkdaten = Wahlkreisdaten(*data[0])
     generate_first_votes(db, wkdaten)
     generate_second_votes(db, wkdaten)
+    if voters:
+        generate_voters(db, wkdaten)
 
 
 @manage.command()
-@click.option("-w", "--wahlkreis", type=int)
+@click.option("-w", "--wahlkreis", type=int, help="ID of the polling station")
 @click.option("-y", "--year", type=int, required=True)
 def generate_votes(wahlkreis, year):
+    """
+    Generate votes based on aggregated results
+    """
     # Get first vote results
     db = Transaction()
 
-    db.disable_constraints('erststimmen')
-    db.disable_constraints('zweitstimmen')
-    db.disable_constraints('wahlkreise')
+    db.disable_constraints("erststimmen")
+    db.disable_constraints("zweitstimmen")
+    db.disable_constraints("wahlkreise")
 
     if wahlkreis is not None:
         generate_wahlkreis(db, wahlkreis, year, True)
-        db.enable_constraints('erststimmen')
-        db.enable_constraints('zweitstimmen')
-        db.enable_constraints('wahlkreise')
+        db.enable_constraints("erststimmen")
+        db.enable_constraints("zweitstimmen")
+        db.enable_constraints("wahlkreise")
         db.commit()
         return
 
     for w in db.select_all("wahlkreise"):
         generate_wahlkreis(db, w[0], year)
 
-    db.enable_constraints('erststimmen')
-    db.enable_constraints('zweitstimmen')
-    db.enable_constraints('wahlkreise')
+    db.enable_constraints("erststimmen")
+    db.enable_constraints("zweitstimmen")
+    db.enable_constraints("wahlkreise")
 
     db.commit()
 
 
 @manage.command()
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+@click.option("-y", "--year", type=int, required=True)
+def deaggregate(year, wahlkreis):
+    """
+    Create votes and voter keys from aggregated data
+    """
+    db = Transaction()
+
+    db.disable_constraints("erststimmen")
+    db.disable_constraints("zweitstimmen")
+    db.disable_constraints("wahlkreise")
+    db.disable_constraints("waehler")
+
+    generate_wahlkreis(db, wahlkreis, year, panic=True, voters=True)
+
+    db.enable_constraints("erststimmen")
+    db.enable_constraints("zweitstimmen")
+    db.enable_constraints("wahlkreise")
+    db.enable_constraints("waehler")
+
+    db.commit()
+
+
+@manage.command()
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+def demo(wahlkreis: int):
+    deaggregate.callback(2021, wahlkreis)
+
+    print("Helper ", end="")
+    add_helper.callback(wahlkreis, "Max", "Mustermann")
+
+    print("Activation keys:")
+    create_activation_keys.callback(wahlkreis, 5)
+
+    print("Voter keys:")
+    create_voter_keys.callback(wahlkreis, 5)
+
+
+@manage.command()
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+def aggregate(wahlkreis):
+    """
+    Refresh polling-station aggregates
+    """
+    db = Transaction()
+
+    db.do(f"refresh_aggregates({wahlkreis})")
+
+    db.commit()
+
+
+@manage.command()
+def calculate_results():
+    """
+    Calculates election results
+    """
+    run_script.callback("scripts/calculate-seats.sql")
+
+
+@manage.command()
 def seed():
-    """Load data from csv files into the database"""
+    """
+    Load data from csv files into the database
+    """
     db = Transaction()
     seed_parties_res = seed_parties(db)
     seed_wahldaten(2021, db=db)
@@ -224,6 +304,9 @@ def seed():
 @manage.command()
 @click.argument("script")
 def run_script(script):
+    """
+    Run an SQL script
+    """
     db = Transaction()
     db.run_script(script)
     db.commit()
@@ -231,6 +314,10 @@ def run_script(script):
 
 @manage.command()
 def migrate():
+    """
+    Load the database schema
+    """
+
     MIGRATIONS_DIR = "migrations"
     migrations = sorted(
         [
@@ -247,10 +334,25 @@ def migrate():
 
 
 @manage.command()
-@click.option("-w", "--wahlkreis", type=int, required=True)
-@click.option("-n", "--number", type=int, required=True)
-def create_voters(wahlkreis, number):
-    # Get first vote results
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+@click.option(
+    "-n",
+    "--number",
+    type=int,
+    required=True,
+    help="Number of keys to be created",
+)
+def create_voter_keys(wahlkreis, number):
+    """
+    Create voter keys
+    """
+
     db = Transaction()
 
     query = f"""
@@ -260,15 +362,30 @@ def create_voters(wahlkreis, number):
         ) RETURNING id;
     """
     data = db.run_query(query)
-    print('\n'.join([d[0] for d in data]))
+    print("\n".join([d[0] for d in data]))
     db.commit()
 
 
 @manage.command()
-@click.option("-w", "--wahlkreis", type=int, required=True)
-@click.option("-n", "--number", type=int, required=True)
-def create_keys(wahlkreis, number):
-    # Get first vote results
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+@click.option(
+    "-n",
+    "--number",
+    type=int,
+    required=True,
+    help="Number of keys to be created",
+)
+def create_activation_keys(wahlkreis, number):
+    """
+    Create activation keys
+    """
+
     db = Transaction()
 
     query = f"""
@@ -278,16 +395,32 @@ def create_keys(wahlkreis, number):
         ) RETURNING *;
     """
     data = db.run_query(query)
-    print('\n'.join([d[0] for d in data]))
+    print("\n".join([d[0] for d in data]))
     db.commit()
 
 
 @manage.command()
-@click.option("-w", "--wahlkreis", type=int, required=True)
-@click.option("-f", "--first-name", type=str, required=True)
-@click.option("-l", "--last-name", type=str, required=True)
+@click.option(
+    "-w",
+    "--wahlkreis",
+    type=int,
+    required=True,
+    help="ID of the polling station",
+)
+@click.option(
+    "-f",
+    "--first-name",
+    type=str,
+    required=True,
+    help="Firstname of the helper",
+)
+@click.option(
+    "-l", "--last-name", type=str, required=True, help="Lastname of the helper"
+)
 def add_helper(wahlkreis, first_name, last_name):
-    # Get first vote results
+    """
+    Add helpers for a polling station
+    """
     db = Transaction()
 
     query = f"""
@@ -304,6 +437,9 @@ def add_helper(wahlkreis, first_name, last_name):
 
 @manage.command()
 def setup():
+    """
+    Prepare and populate the database
+    """
     print("Migrating...")
     migrate.callback()
     print("Done!")
@@ -311,7 +447,7 @@ def setup():
     seed.callback()
     print("Done!")
     print("Calculating seats...")
-    run_script.callback("scripts/calculate-seats.sql")
+    calculate_results.callback()
     print("Done!")
     print("Refreshing schema...")
     os.system("docker-compose kill -s SIGUSR1 server > /dev/null 2>&1")
@@ -321,7 +457,7 @@ def setup():
 @manage.command()
 def count_votes():
     """
-    Computes the election results based on the loaded votes in the database.
+    Aggregate votes and compute results
     """
     print("Aggregating votes...")
     run_script.callback("scripts/aggregate-votes.sql")
