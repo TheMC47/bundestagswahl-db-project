@@ -24,6 +24,9 @@ class Transaction:
         with open(script_path, "r") as f:
             self.run_query(f.read(), fetch=False)
 
+    def refresh(self, view: str):
+        self.run_query(f"REFRESH MATERIALIZED VIEW {view}", fetch=False)
+
     def run_query(self, query: str, dataklass=None, fetch=True):
         self.__cursor.execute(query)
         if not fetch:

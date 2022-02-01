@@ -298,6 +298,7 @@ def seed():
         landeslisten_2021,
     )
     seed_minority_parties(db)
+    db.refresh("stimmzettel_zweitstimme")
     db.commit()
 
 
