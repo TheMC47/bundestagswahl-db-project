@@ -1,20 +1,20 @@
 import { Bar } from 'react-chartjs-2';
-import { JoblessnessDistricts, JoblessnessSummary } from '../models';
+import { JoblessnessDistricts, JoblessnessSummary } from '../../models';
 import { useEffect, useState } from 'react';
-import { getDistricts, getJoblessnessAnalysis } from '../api';
+import { getDistricts, getJoblessnessAnalysis } from '../../api';
 
 import {
+  BarController,
+  BarElement,
+  CategoryScale,
   Chart,
+  LinearScale,
   LineController,
   LineElement,
   PointElement,
-  LinearScale,
-  Title,
-  CategoryScale,
-  BarController,
-  BarElement
+  Title
 } from 'chart.js';
-import { Container } from 'react-bootstrap';
+import { Grid, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, Title, CategoryScale, BarController, BarElement);
 
@@ -47,13 +47,61 @@ export function JoblessnessBarChart(): JSX.Element {
 
 
   return (
-    <Container>
-      <h2 className="mb-5">Arbeitslosigkeit und ideologische Tendenzen</h2>
-      <p> Bundesländer von links nach rechts in abnehmender Arbeitslosigkeitsquote dargestellt.
-      </p>
-      <JoblessnessAnalysis dataLinks={dataLinks} dataRechts={dataRechts} districts={districts} />
-    </Container>
-  )
+    <>
+      <div style={{
+        alignContent: 'center',
+        justifyContent: 'center',
+        paddingTop: "50px",
+        paddingBottom: "50px",
+        display: "flex"
+      }}>
+        <Typography
+          fontWeight='600'
+          color='#343a40'
+          variant='h3'
+          component='h3'
+        >
+          Mögliche Koalitionen
+        </Typography>
+
+      </div>
+
+
+      <Grid container spacing={30} direction='row' justifyContent="center">
+        <Grid item xs={4}>
+          <Table>
+            <TableHead>
+              <TableCell> Rank nack Arbeitslosigkeitquote </TableCell>
+              <TableCell> Bundesland </TableCell>
+              <TableCell> Linke </TableCell>
+              <TableCell> Rechte </TableCell>
+
+            </TableHead>
+            <TableBody>
+              {
+                districts.map((d, i) =>
+                  <TableRow key={i}>
+                    <TableCell>{d.rank}</TableCell>
+                    <TableCell>{d.land}</TableCell>
+                    <TableCell>{( dataLinks[i]?.anzahlstimmen * 100 ).toFixed(2) || 0}</TableCell>
+                    <TableCell>{( dataRechts[i]?.anzahlstimmen * 100 ).toFixed(2) || 0}</TableCell>
+
+                  </TableRow>
+                )
+              }
+            </TableBody>
+          </Table>
+        </Grid>
+
+        <Grid item xs={7}>
+          <JoblessnessAnalysis dataLinks={dataLinks} dataRechts={dataRechts} districts={districts}/>
+        </Grid>
+      </Grid>
+
+    </>
+  );
+
+
 }
 
 export function JoblessnessAnalysis({ dataLinks, dataRechts, districts }: joblessnessAnalysisProps): JSX.Element {
@@ -100,7 +148,7 @@ export function JoblessnessAnalysis({ dataLinks, dataRechts, districts }: jobles
   };
 
   return (
-    <Bar data={barData} options={options} />
+    <Bar data={barData} options={options}/>
   )
 
 }

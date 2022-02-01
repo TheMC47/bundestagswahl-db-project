@@ -1,17 +1,21 @@
 import {
-  ElectionResult,
   Deputy,
+  Direktkandidat,
   ElectionRegionResult,
+  ElectionResult,
+  ElectionStateResult,
+  JoblessnessDistricts,
+  JoblessnessSummary,
+  Koalition,
+  Landesliste,
+  ParteiGewinner,
+  Party,
   Region,
   RegionSummary,
-  TightestWinner,
-  Party,
-  Ueberhangsmandate,
   State,
-  ParteiGewinner,
-  Koalition,
-  JoblessnessSummary,
-  JoblessnessDistricts, Direktkandidat, Landesliste, Wahlkreis
+  TightestWinner,
+  Ueberhangsmandate,
+  Wahlkreis
 } from './models'
 
 export const URI = process.env.REACT_APP_URI
@@ -37,6 +41,10 @@ export async function getResults(id: number): Promise<ElectionRegionResult[]> {
   return api(`/alle_ergebnisse?wahlkreis=eq.${id}`);
 }
 
+export async function getStateResults(bundesland: string): Promise<ElectionStateResult[]> {
+  return api(`/alle_ergebnisse_pro_bundesland?bundesland=eq.${bundesland}`);
+}
+
 export async function getResultsSingleVotes(id: number): Promise<ElectionRegionResult[]> {
   return api(`/alle_ergebnisse_einzelstimmen?wahlkreis=eq.${id}`);
 }
@@ -56,12 +64,14 @@ export async function getRegionSummary(id: number): Promise<RegionSummary> {
     })
   });
 }
+
 export async function getDistricts(): Promise<JoblessnessDistricts[]> {
   return api('/rank_arbeitslosigkeit');
 }
 
 export async function getJoblessnessAnalysis(ideologie: string): Promise<JoblessnessSummary[]> {
-  return api(`/arbeitslosigkeit_uebersicht?ideologie=eq.${ideologie}`);}
+  return api(`/arbeitslosigkeit_uebersicht?ideologie=eq.${ideologie}`);
+}
 
 
 export async function getParties(): Promise<Party[]> {
@@ -125,7 +135,7 @@ export async function submitVote(
     waehlerschlussel: string
   },
   token: string
-) : Promise<void> {
+): Promise<void> {
   return api('/rpc/vote', {
     method: 'POST',
     body: JSON.stringify(content),
@@ -146,7 +156,7 @@ export async function getbundesland(wahlkreis: number): Promise<Wahlkreis> {
 
 export async function ping(
   token: string
-) : Promise<void> {
+): Promise<void> {
   return api('/rpc/ping', {
     method: 'GET',
     headers: new Headers({

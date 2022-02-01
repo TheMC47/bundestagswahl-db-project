@@ -1,13 +1,10 @@
+import 'bootstrap/dist/css/bootstrap.min.css'
 import { useEffect, useState } from 'react'
-import { Direktkandidat, Landesliste } from '../models'
-import {
-  getbundesland,
-  getStimmzettel_Erststimme,
-  getStimmzettel_Zweitstimme,
-} from '../api'
-import { Alert, Container, Form } from 'react-bootstrap'
+import { Direktkandidat, Landesliste } from '../../models'
+import { getbundesland, getStimmzettel_Erststimme, getStimmzettel_Zweitstimme, submitVote, } from '../../api'
+import { Container, Form } from 'react-bootstrap'
 import jwt_decode from 'jwt-decode'
-import { submitVote } from '../api'
+import { Alert, AlertTitle } from "@mui/material";
 
 export interface ErststimmeZettelProps {
   wahlkreis: number
@@ -30,6 +27,7 @@ interface ZweitstimmeErgebnisse {
   landesliste: Landesliste
   checked: boolean
 }
+
 interface WahlzettelProps {
   token: string | null
   setToken: (token: string | undefined) => void
@@ -47,9 +45,19 @@ export default function Wahlzettel({
 }: WahlzettelProps): JSX.Element {
   if (!token)
     return (
-      <Alert variant='danger'>
-        Die Machine ist nicht <a href='/login'>aktiviert </a>.
-      </Alert>
+      <div style={{
+        alignContent: 'center',
+        justifyContent: 'center',
+        padding: "50px",
+
+      }}>
+        <Alert severity="error"
+        >
+          <AlertTitle>Achtung</AlertTitle>
+
+          Diese Machine wurde noch nicht <a href='/login'>aktiviert. </a>.
+        </Alert>
+      </div>
     )
 
   const [bundesland, setBundesland] = useState<number | undefined>(undefined)
@@ -60,7 +68,7 @@ export default function Wahlzettel({
   const [landeslisten, setlandeslisten] = useState<ZweitstimmeErgebnisse[]>([])
   const [key, setkey] = useState<string>('')
   const [message, setMessage] = useState<string | undefined>(undefined)
-  const [result, setResult] = useState<'success' | 'danger'>('success')
+  const [result, setResult] = useState<'success' | 'error'>('success')
 
   useEffect(() => {
     getbundesland(wahlkreis).then(d => {
@@ -96,8 +104,11 @@ export default function Wahlzettel({
             />
           </Form.Group>
           <div>
-            <h1 className='mb-5'>
-              Sie haben <strong> 2 </strong> Stimmen
+            <h1 className='col-12 d-flex justify-content-center'>
+              <p>
+                Sie haben
+                <span><strong> 2 </strong> </span>
+                Stimmen </p>
             </h1>
             <div className='row'>
               <div className='col-6 d-flex justify-content-end text-secondary'>
@@ -124,7 +135,7 @@ export default function Wahlzettel({
               </div>
             </div>
             <div className='row'>
-              <div className='col-6 d-flex justify-content-end' />
+              <div className='col-6 d-flex justify-content-end'/>
 
               <div className='col-6 d-flex justify-content-lg-start text-primary'>
                 - maßgebende Stimme für die Verteilung der Sitze insgesamt auf
@@ -181,16 +192,14 @@ export default function Wahlzettel({
                   })
                   .catch(([err, status]) => {
                     if (status == 401) {
-                      setMessage(
-                        'Die Sitzung ist abgelaufen. Sie werden umgeleitet.'
-                      )
-                      setResult('danger')
+                      setMessage('Die Sitzung ist abgelaufen. Sie werden umgeleitet.')
+                      setResult('error')
                       setToken(undefined)
                       setTimeout(() => (window.location.href = '/login'), 3000)
                       return
                     }
                     setMessage(err.message)
-                    setResult('danger')
+                    setResult('error')
                   })
               }}
             >
@@ -200,7 +209,7 @@ export default function Wahlzettel({
         </div>
       )}
 
-      {message && <Alert variant={result}> {message} </Alert>}
+      {message && <Alert severity={result}> {message} </Alert>}
     </Container>
   )
 }
@@ -212,49 +221,49 @@ function Erststimme({
   return (
     <table className='table table-bordered table-hover'>
       <tbody className='text-secondary'>
-        {direktkandidaten.map(d => (
-          <tr key={d.direktkandidat.rank}>
-            <th scope='row'>{d.direktkandidat.rank}</th>
-            <td className='d-block'>
-              <div className='d-flex justify-content-start '>
-                <div className='d-block '>
-                  <h5 className='d-flex'>
-                    {d.direktkandidat.kandidat_vorname +
-                      ' ' +
-                      d.direktkandidat.kandidat_nachname}
-                  </h5>
-                  <p className='d-flex '> {d.direktkandidat.kandidat_beruf}</p>
-                </div>
+      {direktkandidaten.map(d => (
+        <tr key={d.direktkandidat.rank}>
+          <th scope='row'>{d.direktkandidat.rank}</th>
+          <td className='d-block'>
+            <div className='d-flex justify-content-start '>
+              <div className='d-block '>
+                <h5 className='d-flex'>
+                  {d.direktkandidat.kandidat_vorname +
+                  ' ' +
+                  d.direktkandidat.kandidat_nachname}
+                </h5>
+                <p className='d-flex '> {d.direktkandidat.kandidat_beruf}</p>
               </div>
-              <div className='d-flex justify-content-end'>
-                <div className='d-block'>
-                  <h5 className='d-flex justify-content-start '>
-                    {d.direktkandidat.partei_abk}
-                  </h5>
-                  <p className='d-flex justify-content-start'>
-                    {d.direktkandidat.partei_name}
-                  </p>
-                </div>
+            </div>
+            <div className='d-flex justify-content-end'>
+              <div className='d-block'>
+                <h5 className='d-flex justify-content-start '>
+                  {d.direktkandidat.partei_abk}
+                </h5>
+                <p className='d-flex justify-content-start'>
+                  {d.direktkandidat.partei_name}
+                </p>
               </div>
-            </td>
-            <td>
-              <input
-                name='direktkandidat'
-                type='radio'
-                className='form-check-input'
-                id='id'
-                checked={d.checked}
-                onClick={() => {
+            </div>
+          </td>
+          <td>
+            <input
+              name='direktkandidat'
+              type='radio'
+              className='form-check-input'
+              id='id'
+              checked={d.checked}
+              onClick={() => {
                   setdirektkandidaten(
                     direktkandidaten.map(object => ({
                       ...object,
                       checked: object.direktkandidat === d.direktkandidat,
                     }))
                   )
-                }}
-              />
-            </td>
-          </tr>
+              }}
+            />
+          </td>
+        </tr>
         ))}
       </tbody>
     </table>
@@ -308,7 +317,7 @@ function Zweitstimme({
             </td>
             <th scope='row'>{d.landesliste.rank}</th>
           </tr>
-        ))}
+      ))}
       </tbody>
     </table>
   )

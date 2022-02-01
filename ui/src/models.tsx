@@ -15,6 +15,7 @@ export interface TightestWinner {
   wahlkreis: string;
   rank: number;
   siege: boolean;
+  vorsprung: number;
 }
 
 export interface ElectionRegionResult {
@@ -31,6 +32,22 @@ export interface ElectionRegionResult {
   zweitstimmen_prozent_2017?: number;
   unterschied_zweitstimmen?: number;
 }
+
+export interface ElectionStateResult {
+  bundesland: string;
+  kurzbezeichnung: string,
+  erststimmen_anzahl_2021?: number;
+  erststimmen_prozent_2021?: number;
+  erststimmen_anzahl_2017?: number;
+  erststimmen_prozent_2017?: number;
+  unterschied_erststimmen?: number;
+  zweitstimmen_anzahl_2021?: number;
+  zweitstimmen_prozent_2021?: number;
+  zweitstimmen_anzahl_2017?: number;
+  zweitstimmen_prozent_2017?: number;
+  unterschied_zweitstimmen?: number;
+}
+
 
 export interface Region {
   id: number;
@@ -56,6 +73,7 @@ export interface JoblessnessDistricts {
   rank: number;
 
 }
+
 export interface JoblessnessSummary {
   ideologie: string;
   bundesland: string;
@@ -126,10 +144,10 @@ export interface Landesliste {
 }
 
 
-export interface  Wahlkreis {
-  id         : number;
-  name       : string;
-  bundesland : number;
+export interface Wahlkreis {
+  id: number;
+  name: string;
+  bundesland: number;
   arbeitslosenquote: number;
 }
 
