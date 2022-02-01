@@ -1,4 +1,3 @@
-
 import { CssBaseline } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import React from 'react'
@@ -18,9 +17,8 @@ class App extends React.Component<unknown, AppState> {
   render(): JSX.Element {
     return (
       <Router>
-          <CssBaseline />
-          <Routes>
-          </Routes>
+        <CssBaseline />
+        <Routes></Routes>
       </Router>
     )
   }

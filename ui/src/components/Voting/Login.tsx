@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import validate from 'uuid-validate'
 import { login } from '../../api'
-import { Alert, Box, Button, Grid, TextField } from "@mui/material";
+import { Alert, Box, Button, Grid, TextField } from '@mui/material'
 
 type ErrorState = { [index in 'helfer' | 'key']: boolean }
 type FormValues = { [index in 'helfer' | 'key']?: string }
-
 
 export function HelperLogin(props: {
   setToken: (token: string | undefined) => void
@@ -49,7 +48,7 @@ export function HelperLogin(props: {
         setMessage('Aktivierung erfolgreich. Sie werden in Kürze umgeleitet.')
         setResult('success')
         props.setToken(resp.token)
-        setTimeout(() => ( window.location.href = '/stimmabgabe' ), 3000)
+        setTimeout(() => (window.location.href = '/stimmabgabe'), 3000)
       })
       .catch(([err, _status]) => {
         setMessage(err.message)
@@ -59,37 +58,32 @@ export function HelperLogin(props: {
   }
 
   return (
-
     <Grid
       container
       spacing={0}
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
+      direction='column'
+      alignItems='center'
+      justifyContent='center'
       style={{ minHeight: '50vh' }}
     >
-      <Alert severity="info">
+      <Alert severity='info'>
         Geben Sie Ihre 36-stellige Kennung sowie Ihre Aktivierungsschlüssel ein.
         Ihre Sitzung wird für <strong> zwei Stunden </strong> aktiviert.
       </Alert>
       <Grid item xs={3}>
-
-
         <Box
-          component="form"
+          component='form'
           sx={{
             '& .MuiTextField-root': { m: 2, width: '30ch' },
           }}
-          autoComplete="off"
-
-
+          autoComplete='off'
         >
           <div>
             <TextField
               error={errors.helfer}
               label='Helferkennung'
               onChange={e => updateField('helfer', e.target.value)}
-              variant="filled"
+              variant='filled'
             />
           </div>
           <div>
@@ -97,8 +91,7 @@ export function HelperLogin(props: {
               label='Aktivierungsschlüssel'
               error={errors.key}
               onChange={e => updateField('key', e.target.value)}
-              variant="filled"
-
+              variant='filled'
             />
           </div>
           <div style={{ paddingTop: 50 }}>
@@ -107,18 +100,15 @@ export function HelperLogin(props: {
               type='submit'
               className='mb-3'
               onClick={handleSubmit}
-              variant="contained"
+              variant='contained'
               fullWidth={true}
             >
               Aktivieren
             </Button>
           </div>
-          {
-            message && <Alert severity={result}> {message} </Alert>
-          }
+          {message && <Alert severity={result}> {message} </Alert>}
         </Box>
       </Grid>
-
     </Grid>
   )
 }

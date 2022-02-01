@@ -9,7 +9,6 @@
 .App-logo {
   height: 40vmin;
   pointer-events: none;
-
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -43,6 +42,6 @@
 }
 
 .navbar-brand {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }

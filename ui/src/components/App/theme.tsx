@@ -28,7 +28,7 @@ const defaultTheme = responsiveFontSizes(
           root: {
             padding: '1rem 1rem',
             borderRadius: '.375rem',
-            margin: '0rem'
+            margin: '0rem',
           },
         },
       },
