@@ -244,25 +244,26 @@ function Erststimme({
                   {d.direktkandidat.partei_name}
                 </p>
               </div>
-            </td>
-            <td>
-              <input
-                name='direktkandidat'
-                type='radio'
-                className='form-check-input'
-                id='id'
-                checked={d.checked}
-                onClick={() => {
+            </div>
+          </td>
+          <td>
+            <input
+              name='direktkandidat'
+              type='radio'
+              className='form-check-input'
+              id='id'
+              checked={d.checked}
+              onClick={() => {
                   setdirektkandidaten(
                     direktkandidaten.map(object => ({
                       ...object,
                       checked: object.direktkandidat === d.direktkandidat,
                     }))
                   )
-                }}
-              />
-            </td>
-          </tr>
+              }}
+            />
+          </td>
+        </tr>
         ))}
       </tbody>
     </table>
@@ -303,20 +304,19 @@ function Zweitstimme({
                   </h5>
                 </div>
               </div>
-            </div>
-            <div className='d-flex justify-content-end'>
-              <div className='d-block'>
-                <h5 className='d-flex justify-content-start '>
-                  {d.landesliste.partei_name}
-                </h5>
-                <p className='d-flex justify-content-start'>
-                  {d.landesliste.kandidaten}
-                </p>
+              <div className='d-flex justify-content-end'>
+                <div className='d-block'>
+                  <h5 className='d-flex justify-content-start '>
+                    {d.landesliste.partei_name}
+                  </h5>
+                  <p className='d-flex justify-content-start'>
+                    {d.landesliste.kandidaten}
+                  </p>
+                </div>
               </div>
-            </div>
-          </td>
-          <th scope='row'>{d.landesliste.rank}</th>
-        </tr>
+            </td>
+            <th scope='row'>{d.landesliste.rank}</th>
+          </tr>
       ))}
       </tbody>
     </table>
