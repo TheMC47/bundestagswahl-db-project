@@ -13,15 +13,6 @@ export default function LandingPage(): JSX.Element {
           height: '110vh',
         }}
       >
-        <div
-          style={{
-            alignContent: 'center',
-            justifyContent: 'center',
-            display: 'flex',
-            height: 520,
-          }}
-        ></div>
-
         <div style={{ height: 200 }}>
           <Paper
             elevation={0}
