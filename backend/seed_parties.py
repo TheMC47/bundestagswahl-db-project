@@ -33,7 +33,7 @@ class PartyCSV2021:
 
 
 def seed_parties_2017(db: Transaction):
-    with open("parteien2017.csv", newline="") as f:  # 2017
+    with open("data/parteien2017.csv", newline="") as f:  # 2017
         parties_csv = csv.reader(f, delimiter=",")
 
         data = [PartyCSV2017(*x) for x in list(parties_csv)]
@@ -82,7 +82,7 @@ def seed_parties_2021(
     party_name_to_candidacy_pk: dict[(str, int), int],
     pk_to_name: dict[int, str],
 ):
-    with open("btw21_parteien.csv", newline="") as f:  # 2017
+    with open("data/btw21_parteien.csv", newline="") as f:  # 2017
         parties_csv = csv.reader(f, delimiter=";")
 
         data = [PartyCSV2021(*x) for x in list(parties_csv)]

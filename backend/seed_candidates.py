@@ -10,7 +10,7 @@ def year_to_wahlid(year: int) -> int:
 
 def seed_wahldaten(year: int, kerg_df=None, db: Transaction = None):
     if kerg_df is None:
-        kerg_df = pd.read_csv("kerg1.csv", sep=",")
+        kerg_df = pd.read_csv("data/kerg1.csv", sep=",")
 
     only_wahlkreise = kerg_df[
         (kerg_df["GehoertZu"] != 99) & (~kerg_df["GehoertZu"].isna())
@@ -44,7 +44,7 @@ def seed_landeslisten_2021(
     db: Transaction,
     party_name_to_candidacy_pk: dict[(str, int), int],
 ) -> dict[(int, int), int]:
-    df_candidates = pd.read_csv("kandidaturen.csv", sep=";")
+    df_candidates = pd.read_csv("data/kandidaturen.csv", sep=";")
     wahl_2021_nr = 1
 
     # Landeslisten
@@ -82,7 +82,7 @@ def seed_landeslisten_2021(
 def seed_landeslisten_2017(
     db: Transaction, parties_candidates: dict[(str, int), int]
 ) -> dict[(str, str), int]:
-    df_kerg = pd.read_csv("kerg.csv", sep=";")
+    df_kerg = pd.read_csv("data/kerg.csv", sep=";")
 
     df_lists = df_kerg.dropna(subset=["VorpAnzahl"])
     df_lists = df_lists[
@@ -122,7 +122,7 @@ def seed_candidates_2021(
     parties: dict[str, int],
     landeslisten_dict: dict[(int, int), int],
 ) -> dict[(str, str), int]:
-    df_candidates = pd.read_csv("kandidaturen.csv", sep=";").fillna("")
+    df_candidates = pd.read_csv("data/kandidaturen.csv", sep=";").fillna("")
 
     # Candidates
     candidates_attr = [
@@ -214,7 +214,7 @@ def seed_candidates_2021(
 def seed_candidates_2017(
     db: Transaction, candidate_parties: dict[(str, int), int]
 ):
-    df_candidates = pd.read_csv("kerg.csv", sep=";")
+    df_candidates = pd.read_csv("data/kerg.csv", sep=";")
 
     df_direct_candidates = df_candidates.dropna(subset=["VorpAnzahl"])
     df_direct_candidates = df_direct_candidates[
@@ -335,7 +335,7 @@ def seed_ergebnisse(
     landeslisten_2017: dict[(int, int):int],
     landeslisten_2021: dict[(int, int):int],
 ):
-    df_results = pd.read_csv("kerg.csv", sep=";")
+    df_results = pd.read_csv("data/kerg.csv", sep=";")
 
     df_results_wahlkreise = df_results[
         (

@@ -9,7 +9,7 @@ pd.options.mode.chained_assignment = None  # false positive in this file
 def seed_unemployment(
         db: Transaction,
 ):
-    df_structure = pd.read_csv("btw21_strukturdaten.csv", sep=";")
+    df_structure = pd.read_csv("data/btw21_strukturdaten.csv", sep=";")
 
     only_wahlkreise = df_structure[
         (df_structure["Wahlkreis-Nr."] <= 299)
