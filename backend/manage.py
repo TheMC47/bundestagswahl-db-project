@@ -233,6 +233,9 @@ def deaggregate(year, wahlkreis):
     help="ID of the polling station",
 )
 def demo(wahlkreis: int):
+    """
+    Prepare a region for the demo
+    """
     deaggregate.callback(2021, wahlkreis)
 
     print("Helper ", end="")
