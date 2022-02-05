@@ -1,7 +1,9 @@
 # Loadtesting
 Load-testing was performed on the API-layer (i.e. no UI-rendering)[^1]. To
 faciliatate writing and running the tests, the [locust](https://locust.io/)
-load-testing tool is used. The definition of the tests are to be found [here](load-tester.py).
+load-testing tool is used. The definition of the tests are to be found
+[here](load-tester.py). The requirements need to be installed by `pip install -
+r requirements.txt`
 
 To generate the benchmark, change the `N` (number of users) and `T` (average
 wait-time) parameters in the command bellow:
