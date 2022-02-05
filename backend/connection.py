@@ -3,10 +3,10 @@ from typing import Iterable, Union
 import psycopg2
 from decouple import config
 
-HOST = config("HOST")
-POSTGRES_DB = config("POSTGRES_DB")
-POSTGRES_PASSWORD = config("POSTGRES_PASSWORD")
-POSTGRES_USER = config("POSTGRES_USER")
+HOST = config("HOST", "localhost")
+POSTGRES_DB = config("POSTGRES_DB", "app_db")
+POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", "app_user")
+POSTGRES_USER = config("POSTGRES_USER", "password")
 
 
 class Transaction:
