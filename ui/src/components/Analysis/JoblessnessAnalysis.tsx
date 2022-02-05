@@ -126,7 +126,6 @@ export function JoblessnessAnalysis({
 }: joblessnessAnalysisProps): JSX.Element {
   const title = 'Arbeitslosigkeit Analyse'
 
-  console.log(dataLinks.map(d => d.anzahlstimmen))
   const options = {
     rotation: -90,
     circumference: 180,

@@ -13,8 +13,6 @@ import Popper from '@mui/material/Popper'
 import MenuList from '@mui/material/MenuList'
 import Divider from '@mui/material/Divider'
 
-const navigation = ['Ergebnisse', 'Analyse', 'Stimmabgabe']
-
 export default function Header(): JSX.Element {
   return (
     <AppBar
@@ -248,14 +246,14 @@ export function MenuResults() {
                   aria-labelledby='composition-button'
                   onKeyDown={handleListKeyDown}
                 >
-                  <MenuItem component={Link} to='/Sitzverteilung'>
+                  <MenuItem component={Link} to='/sitzverteilung'>
                     Sitzverteilung
                   </MenuItem>
                   <MenuItem component={Link} to='/abgeordnete'>
                     Abgeordnete
                   </MenuItem>
-                  <MenuItem component={Link} to='/wahlkreisuebersicht'>
-                    Wahlkreisübersicht
+                  <MenuItem component={Link} to='/ergebnisse'>
+                    Ergebnisse
                   </MenuItem>
                 </MenuList>
               </ClickAwayListener>
