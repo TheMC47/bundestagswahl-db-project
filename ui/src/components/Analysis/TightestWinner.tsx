@@ -104,7 +104,7 @@ export function PerPartyResults({ party, year }: PartyProps): JSX.Element {
     getTightestWinner(year, party.id).then(ds => {
       setResults(ds)
     })
-  }, [party])
+  }, [party, year])
 
   return (
     <div

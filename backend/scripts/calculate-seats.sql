@@ -61,7 +61,7 @@ END
 $FUNCTION$ LANGUAGE plpgsql;
 
 -- Oberverteilung; Sitze auf parteien
-CREATE OR REPLACE FUNCTION distribute_sitze(wahl_id INT) -- ✅
+CREATE OR REPLACE FUNCTION distribute_sitze(wahl_id INT)
     RETURNS VOID
 AS
 $FUNCTION$

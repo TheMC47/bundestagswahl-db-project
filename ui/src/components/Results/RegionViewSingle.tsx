@@ -6,8 +6,8 @@ import {
   State,
 } from '../../models'
 import {
-  getRegionSummary,
-  getResults,
+  getRegionSummarySingleVotes,
+  getResultsSingleVotes,
   getStateResults,
   getStatesAndRegions,
 } from '../../api'
@@ -34,7 +34,7 @@ import { Bar } from 'react-chartjs-2'
 import { TabPanel } from '@mui/lab'
 import GewinnerTable from './GewinnerParteien'
 
-export default function RegionView(): JSX.Element {
+export default function RegionViewSingle(): JSX.Element {
   const [statesAndRegions, setStates] = useState<State[]>([])
   const [state, setState] = useState<State | undefined>()
   const [region, setRegion] = useState<Region | undefined>()
@@ -260,7 +260,7 @@ export function PerPartyResults({ region }: RegionProps): JSX.Element {
   const [results, setResults] = useState<ElectionRegionResult[]>([])
 
   useEffect(() => {
-    getResults(region.id).then(ds => {
+    getResultsSingleVotes(region.id).then(ds => {
       setResults(ds)
     })
   }, [region])
@@ -312,7 +312,7 @@ interface stimmeanteil {
 export function ZweitstimmeProWkr({ region }: RegionProps): JSX.Element {
   const [results, setResults] = useState<stimmeanteil[]>([])
   useEffect(() => {
-    getResults(region.id).then(ds => {
+    getResultsSingleVotes(region.id).then(ds => {
       const sonstiges_2021 = ds
         .filter(d => parteien.indexOf(d.kurzbezeichnung) == -1)
         .reduce(
@@ -364,7 +364,7 @@ export function ZweitstimmeProWkr({ region }: RegionProps): JSX.Element {
 export function ErststimmeProWkr({ region }: RegionProps): JSX.Element {
   const [results, setResults] = useState<stimmeanteil[]>([])
   useEffect(() => {
-    getResults(region.id).then(ds => {
+    getResultsSingleVotes(region.id).then(ds => {
       const sonstiges_2021 = ds
         .filter(d => parteien.indexOf(d.kurzbezeichnung) == -1)
         .reduce(
@@ -418,7 +418,7 @@ export function RegionSummaryView({ region }: RegionProps): JSX.Element {
   )
 
   useEffect(() => {
-    getRegionSummary(region.id).then(data => {
+    getRegionSummarySingleVotes(region.id).then(data => {
       setRegionSummary(data)
     })
   }, [region])
@@ -436,6 +436,12 @@ export function RegionSummaryView({ region }: RegionProps): JSX.Element {
           <strong> Partei</strong>{' '}
         </TableCell>
         <TableCell> {regionSummary?.sieger_partei} </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell>
+          <strong> Anteil</strong>{' '}
+        </TableCell>
+        <TableCell> %</TableCell>
       </TableRow>
       <TableRow>
         <TableCell>

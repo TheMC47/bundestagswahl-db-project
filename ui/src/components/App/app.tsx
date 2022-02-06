@@ -8,6 +8,7 @@ import Header from '../Header/Header'
 import LandingPage from '../Header/Home'
 import SeatDistribution from '../Results/SeatDistribution'
 import RegionView from '../Results/RegionView'
+import RegionViewSingle from '../Results/RegionViewSingle'
 import TightestWinnerView from '../Analysis/TightestWinner'
 import KoalitionenView from '../Analysis/Coalitions'
 import { JoblessnessBarChart } from '../Analysis/JoblessnessAnalysis'
@@ -16,6 +17,7 @@ import Abgeordnete from '../Results/abgeordnete'
 import { ping } from '../../api'
 import Wahlzettel from '../Voting/Wahlzettel'
 import { HelperLogin } from '../Voting/Login'
+import { Helmet } from 'react-helmet'
 
 export default function App(): JSX.Element {
   const setToken = (token: string | undefined) => {
@@ -31,6 +33,9 @@ export default function App(): JSX.Element {
 
   return (
     <Router>
+      <Helmet>
+        <title>Bundestagswahlen</title>
+      </Helmet>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Header />
@@ -38,7 +43,8 @@ export default function App(): JSX.Element {
           <Route path='/' element={<LandingPage />} />
           <Route path='/sitzverteilung' element={<SeatDistribution />} />
           <Route path='/knappste-sieger' element={<TightestWinnerView />} />
-          <Route path='/wahlkreisuebersicht' element={<RegionView />} />
+          <Route path='/ergebnisse' element={<RegionView />} />
+          <Route path='/ergebnisse-einzelstimmen' element={<RegionViewSingle />} />
           <Route path='/abgeordnete' element={<Abgeordnete />} />
           <Route
             path='/ueberhangsmandate'

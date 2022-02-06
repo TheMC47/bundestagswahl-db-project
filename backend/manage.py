@@ -164,7 +164,7 @@ def generate_wahlkreis(
 
 @manage.command()
 @click.option("-w", "--wahlkreis", type=int, help="ID of the polling station")
-@click.option("-y", "--year", type=int, required=True)
+@click.option("-y", "--year", type=int)
 def generate_votes(wahlkreis, year):
     """
     Generate votes based on aggregated results
@@ -177,6 +177,9 @@ def generate_votes(wahlkreis, year):
     db.disable_constraints("wahlkreise")
 
     if wahlkreis is not None:
+        if year is None:
+            print("--year must be set")
+            return
         generate_wahlkreis(db, wahlkreis, year, True)
         db.enable_constraints("erststimmen")
         db.enable_constraints("zweitstimmen")
@@ -185,7 +188,11 @@ def generate_votes(wahlkreis, year):
         return
 
     for w in db.select_all("wahlkreise"):
-        generate_wahlkreis(db, w[0], year)
+        if year is None:
+            for y in [2021, 2017]:
+                generate_wahlkreis(db, w[0], y)
+        else:
+            generate_wahlkreis(db, w[0], year)
 
     db.enable_constraints("erststimmen")
     db.enable_constraints("zweitstimmen")

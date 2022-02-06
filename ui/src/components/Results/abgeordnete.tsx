@@ -38,7 +38,6 @@ export default function Abgeordnete(): JSX.Element {
   }, [])
 
   const handlePartyChange = (e: SelectChangeEvent) => {
-    console.log(e.target.value as string)
     setParty(e.target.value as string)
   }
 

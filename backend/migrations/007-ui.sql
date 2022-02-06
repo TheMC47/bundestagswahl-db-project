@@ -526,7 +526,7 @@ CREATE VIEW zweitstimmenergebnisse_einzelstimmen
              wahlkreis
                 )
 AS
-SELECT landesliste, wahlkreis, COUNT(*)
+SELECT landesliste, COUNT(*), wahlkreis
 FROM zweitstimmen
 WHERE landesliste IS NOT NULL
 GROUP BY landesliste, wahlkreis;
@@ -670,8 +670,10 @@ SELECT COALESCE(e.wahlkreis, z.wahlkreis) AS wahlkreis,
 FROM zweitstimmen_vgl z
          FULL OUTER JOIN erststimmen_vgl e
                          ON e.partei_kandidatur = z.partei_kandidatur AND z.wahlkreis = e.wahlkreis
-         JOIN parteien p ON p.id = COALESCE(COALESCE(e.partei_kandidatur, z.partei_kandidatur));
-
+         JOIN parteien p ON p.id = COALESCE(COALESCE(e.partei_kandidatur, z.partei_kandidatur))
+         LEFT OUTER JOIN reihenfolge_parteien_wahlkreis rw
+              ON rw.wahlkreis = COALESCE(e.wahlkreis, z.wahlkreis) AND p.id = rw.partei
+ORDER BY rw.rank;
 
 GRANT SELECT ON alle_ergebnisse_einzelstimmen TO web_anon;
 
