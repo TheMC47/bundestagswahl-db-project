@@ -77,7 +77,7 @@ export function JoblessnessBarChart(): JSX.Element {
           variant='h3'
           component='h3'
         >
-          Mögliche Koalitionen
+          Arbeitslosigkeit und ideologische Tendenzen
         </Typography>
       </div>
 
@@ -85,7 +85,7 @@ export function JoblessnessBarChart(): JSX.Element {
         <Grid item xs={4}>
           <Table>
             <TableHead>
-              <TableCell> Rank nack Arbeitslosigkeitquote </TableCell>
+              <TableCell> Rank nach Arbeitslosigkeitquote </TableCell>
               <TableCell> Bundesland </TableCell>
               <TableCell> Linke </TableCell>
               <TableCell> Rechte </TableCell>

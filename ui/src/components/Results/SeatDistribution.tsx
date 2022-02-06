@@ -62,11 +62,10 @@ export default function SeatDistribution(): JSX.Element {
       </div>
       <div
         style={{
-          alignContent: 'end',
-          justifyContent: 'end',
-          paddingRight: '50px',
-          paddingTop: '5px',
-          paddingBottom: '40px',
+          alignContent: 'center',
+          justifyContent: 'center',
+          paddingTop: '50px',
+          paddingBottom: '50px',
           display: 'flex',
         }}
       >

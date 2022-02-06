@@ -59,7 +59,7 @@ export default function Wahlzettel({
       >
         <Alert severity='error'>
           <AlertTitle>Achtung</AlertTitle>
-          Diese Machine wurde noch nicht <a href='/login'>aktiviert. </a>.
+          Diese Machine wurde noch nicht <a href='/login'>aktiviert. </a>
         </Alert>
       </div>
     )
@@ -94,7 +94,7 @@ export default function Wahlzettel({
   }, [bundesland])
 
   return (
-    <Container className='mb-4'>
+    <Container className='mb-4 pt-5'>
       {bundesland && (
         <div>
           <Form.Group className='mb-3'>
@@ -107,6 +107,58 @@ export default function Wahlzettel({
               }}
             />
           </Form.Group>
+
+          {message && <Alert severity={result}> {message} </Alert>}
+
+          <div
+            style={{
+              alignContent: 'center',
+              justifyContent: 'center',
+              paddingRight: '50px',
+              paddingTop: '10px',
+              paddingBottom: '40px',
+              display: 'flex',
+            }}
+          >
+            <button
+              type='button'
+              className='btn btn-dark mb-3'
+              onClick={() => {
+                const gewahlt_direkt = direktkandidaten.find(d => d.checked)
+                  ?.direktkandidat.kandidat_id
+                const gewahlt_liste = landeslisten.find(d => d.checked)
+                  ?.landesliste.liste_id
+                submitVote(
+                  {
+                    direktkandidat: gewahlt_direkt || null,
+                    landesliste: gewahlt_liste || null,
+                    waehlerschlussel: key,
+                  },
+                  token
+                )
+                  .then(() => {
+                    setMessage('Ihre Stimme wurde erfolgreich geschickt.')
+                    setResult('success')
+                    setTimeout(() => window.location.reload(), 3000)
+                  })
+                  .catch(([err, status]) => {
+                    if (status == 401) {
+                      setMessage(
+                        'Die Sitzung ist abgelaufen. Sie werden umgeleitet.'
+                      )
+                      setResult('error')
+                      setToken(undefined)
+                      setTimeout(() => (window.location.href = '/login'), 3000)
+                      return
+                    }
+                    setMessage(err.message)
+                    setResult('error')
+                  })
+              }}
+            >
+              Stimme abgeben
+            </button>
+          </div>
           <div>
             <h1 className='col-12 d-flex justify-content-center'>
               <p>
@@ -173,52 +225,9 @@ export default function Wahlzettel({
                 />
               </div>
             </div>
-
-            <button
-              type='button'
-              className='btn btn-dark mb-3'
-              onClick={() => {
-                const gewahlt_direkt = direktkandidaten.find(d => d.checked)
-                  ?.direktkandidat.kandidat_id
-                const gewahlt_liste = landeslisten.find(d => d.checked)
-                  ?.landesliste.liste_id
-                submitVote(
-                  {
-                    direktkandidat: gewahlt_direkt || null,
-                    landesliste: gewahlt_liste || null,
-                    waehlerschlussel: key,
-                  },
-                  token
-                )
-                  .then(() => {
-                    setMessage('Ihre Stimme wurde erfolgreich geschickt.')
-                    setResult('success')
-                    {
-                      /* setTimeout(() => window.location.reload(), 3000) */
-                    }
-                  })
-                  .catch(([err, status]) => {
-                    if (status == 401) {
-                      setMessage(
-                        'Die Sitzung ist abgelaufen. Sie werden umgeleitet.'
-                      )
-                      setResult('error')
-                      setToken(undefined)
-                      setTimeout(() => (window.location.href = '/login'), 3000)
-                      return
-                    }
-                    setMessage(err.message)
-                    setResult('error')
-                  })
-              }}
-            >
-              Stimme abgeben
-            </button>
           </div>
         </div>
       )}
-
-      {message && <Alert severity={result}> {message} </Alert>}
     </Container>
   )
 }

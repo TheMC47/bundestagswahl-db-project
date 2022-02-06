@@ -59,10 +59,9 @@ export default function TightestWinnerView(): JSX.Element {
 
       <div
         style={{
-          justifyContent: 'start',
-          paddingRight: ' 25px',
-          paddingTop: '5px',
-          paddingBottom: '40px',
+          alignContent: 'center',
+          justifyContent: 'center',
+          paddingBottom: '50px',
           display: 'flex',
         }}
       >

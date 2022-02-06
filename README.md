@@ -14,13 +14,14 @@ created by Maisa Ben Salah and Yecine Megdiche
 After cloning the project, the system can be started with:
 
 ```sh
-docker-compose up
+docker-compose up ui server db
 ```
 
 Once the setup is complete, the database can be loaded with:
 
 ```sh
-python backend/manage.py setup
+cd backend
+python manage.py setup
 ```
 
 Note that the requirements of the [backend](backend) component need to be fulfilled.

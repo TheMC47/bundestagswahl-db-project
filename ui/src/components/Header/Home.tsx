@@ -1,9 +1,21 @@
-import { Paper, Stack } from '@mui/material'
+import { Paper, Stack, Typography } from '@mui/material'
 import re from './assets/f2.svg'
 
 export default function LandingPage(): JSX.Element {
   return (
     <>
+      <div
+        style={{
+          alignContent: 'center',
+          justifyContent: 'center',
+          display: 'flex',
+          height: '400px',
+          backgroundColor: '#EDEDED',
+          paddingTop: 150
+        }}
+      >
+        <Typography variant='h3'>Bundestagswahlen Informationsystem </Typography>
+      </div>
       <div
         style={{
           width: '100%',

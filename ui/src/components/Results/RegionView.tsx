@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   ElectionRegionResult,
+  ElectionStateResult,
   Region,
   RegionSummary,
   State,
@@ -83,10 +84,9 @@ export default function RegionView(): JSX.Element {
       </div>
       <div
         style={{
-          justifyContent: 'start',
-          paddingRight: ' 25px',
-          paddingTop: '5px',
-          paddingBottom: '40px',
+          alignContent: 'center',
+          justifyContent: 'center',
+          paddingBottom: '50px',
           display: 'flex',
         }}
       >
@@ -445,6 +445,73 @@ export function RegionSummaryView({ region }: RegionProps): JSX.Element {
       </TableRow>
     </TableContainer>
   )
+}
+
+type ResultType = 'First' | 'Second'
+
+interface ResultPlotProps {
+  state: State
+  resultType: ResultType
+}
+
+function PlutResults({ state, resultType }: ResultPlotProps): JSX.Element {
+  const [results, setResults] = useState<stimmeanteil[]>([])
+
+    /* const extractResult = (r: ElectionStateResult): number => {
+  *   return resultType == 'First'? r.erst;
+  * }
+   */
+  useEffect(() => {
+    getStateResults(state.name).then(ds => {
+      const sonstiges_2021 = ds
+        .filter(d => parteien.indexOf(d.kurzbezeichnung) == -1)
+        .reduce(
+          (sum, current) => sum + (current.zweitstimmen_prozent_2021 || 0),
+          0
+        )
+      const sonstiges_2017 = ds
+        .filter(d => parteien.indexOf(d.kurzbezeichnung) == -1)
+        .reduce(
+          (sum, current) => sum + (current.zweitstimmen_prozent_2017 || 0),
+          0
+        )
+      const newResults = ds
+        .filter(d => parteien.indexOf(d.kurzbezeichnung) > -1)
+        .map(d => {
+          return {
+            partei: d.kurzbezeichnung,
+            anteil_2021: d.zweitstimmen_prozent_2021 || 0,
+            anteil_2017: d.zweitstimmen_prozent_2017 || 0,
+          }
+        })
+      newResults.push({
+        partei: 'sonstiges',
+        anteil_2021: sonstiges_2021,
+        anteil_2017: sonstiges_2017,
+      })
+      setResults(newResults)
+    })
+  }, [state])
+
+  const barData = {
+    labels: results.map(d => d.partei),
+    datasets: [
+      {
+        label: 'Bundestagswahl 2021',
+        data: results.map(d => d.anteil_2021),
+        backgroundColor: results.map(d => colorMap_2021[d.partei]),
+      },
+      {
+        label: 'Bundestagswahl 2017',
+        data: results.map(d => d.anteil_2017),
+        backgroundColor: results.map(d => colorMap_2017[d.partei]),
+      },
+    ],
+  }
+  return <Bar data={barData} options={getOptions('Zweitstimmenanteile')} />
+
+
+  return <> </>;
 }
 
 export function ZweitstimmeProBundesland({ state }: StateProps): JSX.Element {

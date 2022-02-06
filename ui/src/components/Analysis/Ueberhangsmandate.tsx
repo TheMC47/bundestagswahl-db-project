@@ -49,8 +49,8 @@ export default function UeberhangsmandateView(): JSX.Element {
       </div>
       <div
         style={{
-          alignContent: 'end',
-          justifyContent: 'end',
+          alignContent: 'center',
+          justifyContent: 'center',
           paddingRight: '50px',
           paddingTop: '5px',
           paddingBottom: '40px',
